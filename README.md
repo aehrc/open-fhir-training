@@ -63,12 +63,6 @@ open-fhir-training/
     - Configure cluster settings for optimal FHIR data processing
     - Verify installation by running the provided test commands
 
-3. **Access training datasets:**
-   The notebooks reference datasets pre-configured in the training environment:
-    - `s3://open-fhir-training-data/synthea/md/fhir`
-    -
-    `s3://open-fhir-training-data/mimic-iv-clinical-database-demo-on-fhir-2.1.0/fhir`
-
 ### Recommended Learning Path
 
 1. **Start with CSV to FHIR** - Learn basic FHIR concepts
