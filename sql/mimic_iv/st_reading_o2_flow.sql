@@ -2,7 +2,7 @@
 -- Converted from original study to use FHIR-derived views
 -- Extracts nasal cannula oxygen flow readings within patient index periods
 
-CREATE OR REPLACE TEMP VIEW st_reading_o2_flow AS
+CREATE OR REPLACE VIEW mimic_iv_views.st_reading_o2_flow AS
 WITH nc_o2 AS (
     -- Select nasal cannula oxygen flows from delivery device data
     SELECT
@@ -43,7 +43,7 @@ SELECT
     ncf.charttime AS chart_time,
     ncf.o2_flow
 FROM filtered_nc_o2_flow AS ncf
-JOIN st_subject sb
+JOIN mimic_iv_views.st_subject sb
     ON ncf.subject_id = sb.subject_id
     AND ncf.stay_id = sb.stay_id
 WHERE ncf.charttime BETWEEN sb.ip_starttime AND sb.ip_endtime

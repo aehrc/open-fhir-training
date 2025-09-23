@@ -2,13 +2,13 @@
 -- Converted from original study to use FHIR-derived views
 -- Identifies subjects with ventilation interventions and defines index periods
 
-CREATE OR REPLACE TEMP VIEW st_subject AS
+CREATE OR REPLACE VIEW mimic_iv_views.st_subject AS
 WITH vent_intervention AS (
     SELECT stay_id,
         charttime AS inttime,
         ventilation_status AS int_type,
         ROW_NUMBER() OVER (PARTITION BY stay_id ORDER BY charttime) AS int_sequence
-    FROM st_ventilation
+    FROM mimic_iv_views.st_ventilation
     WHERE ventilation_status NOT IN ('None', 'SupplementalOxygen')
         AND ventilation_status IS NOT NULL
 ),

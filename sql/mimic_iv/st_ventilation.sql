@@ -2,7 +2,7 @@
 -- Converted from original study to use FHIR-derived views
 -- Based on mimic-code/mimic-iv/concepts_postgres/treatment/ventilation.sql
 
-CREATE OR REPLACE TEMP VIEW st_ventilation AS
+CREATE OR REPLACE VIEW mimic_iv_views.st_ventilation AS
 WITH combined_o2_data AS (
     -- Combine oxygen flow and delivery device data
     SELECT
