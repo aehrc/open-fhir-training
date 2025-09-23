@@ -45,8 +45,7 @@ open-fhir-training/
 
 ### Prerequisites
 
-- Access to a Databricks workspace with the Open FHIR Training environment
-- Pathling library installed in the Databricks cluster
+- Access to a Databricks workspace with the Pathling library installed
 - Access to the training datasets (Synthea and MIMIC-IV demo)
 
 ### Setting Up in Databricks
