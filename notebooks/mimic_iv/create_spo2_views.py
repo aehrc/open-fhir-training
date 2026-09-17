@@ -91,7 +91,7 @@ rv_patient = datasource.view(
     ]
 )
 
-rv_patient.write.saveAsTable("mimic_iv_views.rv_patient")
+rv_patient.write.mode("overwrite").saveAsTable("mimic_iv_views.rv_patient")
 
 # COMMAND ----------
 
