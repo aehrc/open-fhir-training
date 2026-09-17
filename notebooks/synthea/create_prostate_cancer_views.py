@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Create prostate cancer views from Synthea data
+# MAGIC # Create prostate cancer views from Synthea AU data
 # MAGIC
 # MAGIC This notebook provides a demonstration of the [SQL on FHIR](https://sql-on-fhir.org/) view runner implementation currently in development within [Pathling](https://pathling.csiro.au/docs).
 # MAGIC
@@ -29,6 +29,7 @@ from pyspark.sql.window import Window
 
 pc = PathlingContext.create()
 pc.spark.sql("CREATE SCHEMA IF NOT EXISTS synthea")
+pc.spark.sql("CREATE SCHEMA IF NOT EXISTS synthea_prostate_cancer_views")
 pc.spark.catalog.setCurrentDatabase("synthea")
 
 # COMMAND ----------
@@ -36,7 +37,7 @@ pc.spark.catalog.setCurrentDatabase("synthea")
 # MAGIC %md
 # MAGIC # Read data from tables
 # MAGIC
-# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is a [Synthea](https://synthetichealth.github.io/synthea/) dataset containing approximately 10,000 patients.
+# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is an Australian [Synthea](https://synthetichealth.github.io/synthea/) dataset containing approximately 8,000 patients from Queensland, generated with [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles. It was imported by the `import_synthea` notebook.
 # MAGIC
 # MAGIC The object returned is a "data source", which contains each of the data frames that have been encoded, as well as methods to run queries over them.
 

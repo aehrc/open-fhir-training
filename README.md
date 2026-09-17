@@ -25,7 +25,7 @@ open-fhir-training/
 ├── notebooks/                    # Databricks/Jupyter notebooks
 │   ├── csv_to_fhir/              # Basic FHIR transformation tutorial
 │   │   └── transform_csv_to_fhir.py
-│   ├── synthea/                  # Synthea synthetic patient data
+│   ├── synthea/                  # Synthea AU synthetic patient data
 │   │   ├── import_synthea.py     # Data import from S3
 │   │   └── create_prostate_cancer_views.py
 │   └── mimic_iv/                 # MIMIC-IV clinical database
@@ -72,13 +72,15 @@ open-fhir-training/
 
 ## Datasets and Examples
 
-### Synthea Synthetic Patient Data
+### Synthea AU synthetic patient data
 
 [Synthea](https://synthetichealth.github.io/synthea/) generates realistic
-synthetic patient data in FHIR format. Our examples include approximately 10,000
-patients with:
+synthetic patient data in FHIR format. Our examples use an Australian dataset
+of approximately 8,000 Queensland patients, generated with
+[synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to
+[AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles, with:
 
-- Patient demographics
+- Patient demographics, including Australian addresses and identifiers
 - Medical encounters
 - Observations and vital signs
 - Conditions and diagnoses
@@ -118,7 +120,7 @@ into proper FHIR resources:
 
 ## Clinical Studies
 
-### 1. Prostate Cancer Risk Factors Analysis (Synthea)
+### 1. Prostate Cancer Risk Factors Analysis (Synthea AU)
 
 This study demonstrates extraction of cancer risk factor data using SQL on FHIR:
 
