@@ -76,7 +76,7 @@ open-fhir-training/
 
 [Synthea](https://synthetichealth.github.io/synthea/) generates realistic
 synthetic patient data in FHIR format. Our examples use an Australian dataset
-of approximately 8,000 Queensland patients, generated with
+of 800 Queensland patients, generated with
 [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to
 [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles, with:
 
@@ -117,6 +117,10 @@ into proper FHIR resources:
 - **Patient resources** - Demographics and identifiers
 - **Encounter resources** - Healthcare visits and encounters
 - **Immunisation resources** - Vaccination records
+
+The notebook reads the `synthea_csv.patients`, `synthea_csv.encounters` and
+`synthea_csv.immunizations` tables. No notebook in this repository creates
+them; they are pre-loaded into the training workspace from Synthea CSV output.
 
 ## Clinical Studies
 
@@ -160,6 +164,17 @@ measurements (SaO₂) to identify potential measurement disparities.
 
 ## Usage Instructions in Databricks
 
+### Using a Shared Training Workspace
+
+In a shared training workspace, the datasets and views are already built, so
+you do not need to run the import or view creation steps.
+
+- Run the notebooks in place to explore the data and the queries
+- To change a notebook, clone it to your home folder first
+- Write any tables or views to a personal schema (for example,
+  `CREATE SCHEMA IF NOT EXISTS <your_name>`), not to the shared schemas
+- Do not upload sensitive or identifiable data
+
 ### Running the Notebooks
 
 1. **Navigate to the imported repository:**
@@ -194,10 +209,12 @@ measurements (SaO₂) to identify potential measurement disparities.
     - Copy and execute the SQL script contents in SQL cells
     - This allows mixing SQL queries with Python analysis code
 
-3. **Running directly from files:**
-    - In a notebook cell, use:
-      `%run ./sql/synthea/combine_prostate_cancer_views.sql`
-    - This executes the SQL script in the current Spark context
+3. **Opening the files directly:**
+    - `%run` only runs notebooks, so it cannot execute a `.sql` file
+    - In a Databricks Git folder, open a file such as
+      `sql/synthea/combine_prostate_cancer_views.sql` from the workspace browser
+      to view and run it in the SQL editor, or paste its contents into a `%sql`
+      notebook cell
 
 ## Key Concepts
 

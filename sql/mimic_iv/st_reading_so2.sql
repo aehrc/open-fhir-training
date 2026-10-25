@@ -10,7 +10,11 @@ SELECT
 FROM mimic_iv_views.st_subject AS sbj
 JOIN mimic_iv_views.rv_obs_bg AS bg
     ON sbj.subject_id = bg.subject_id
+-- The specimen type is recorded as a separate observation on the same specimen
+JOIN mimic_iv_views.rv_obs_bg AS spec
+    ON bg.specimen_id = spec.specimen_id
+    AND spec.itemid = '52033'  -- Specimen type
+    AND spec.value = 'ART.'  -- Arterial specimens only
 WHERE bg.charttime BETWEEN sbj.ip_starttime AND sbj.ip_endtime
     AND bg.itemid = '50817'  -- SO2 from blood gas
     AND bg.valuenum IS NOT NULL
-    AND bg.value = 'ART.'  -- Arterial specimens only

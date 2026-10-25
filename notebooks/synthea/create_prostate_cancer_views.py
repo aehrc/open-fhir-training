@@ -37,7 +37,7 @@ pc.spark.catalog.setCurrentDatabase("synthea")
 # MAGIC %md
 # MAGIC # Read data from tables
 # MAGIC
-# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is an Australian [Synthea](https://synthetichealth.github.io/synthea/) dataset containing approximately 8,000 patients from Queensland, generated with [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles. It was imported by the `import_synthea` notebook.
+# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is an Australian [Synthea](https://synthetichealth.github.io/synthea/) dataset containing 800 patients from Queensland, generated with [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles. It was imported by the `import_synthea` notebook.
 # MAGIC
 # MAGIC The object returned is a "data source", which contains each of the data frames that have been encoded, as well as methods to run queries over them.
 
@@ -178,7 +178,7 @@ patients.write.saveAsTable("synthea_prostate_cancer_views.patient_demographics_v
 # MAGIC - Total cholesterol unit
 # MAGIC - Total cholesterol value
 # MAGIC
-# MAGIC The view will be filtered to only total cholesterol observations that exceed 240 mg/dL.
+# MAGIC The view will be filtered to only total cholesterol observations recorded in mg/dL that exceed 240 mg/dL. The filter matches the UCUM unit code `mg/dL` literally, so observations recorded in other units (such as mmol/L) are excluded rather than converted.
 
 # COMMAND ----------
 
@@ -269,9 +269,7 @@ cholesterol.write.saveAsTable("synthea_prostate_cancer_views.hyperlipidemia_view
 # MAGIC - BMI unit
 # MAGIC - BMI value
 # MAGIC
-# MAGIC The view will be filtered to only BMI observations that exceed 30 kg/m2.
-# MAGIC
-# MAGIC One of the nice things about the Pathling implementation is that the encoding process includes canonicalisation of UCUM units. This means that the comparison of total cholesterol values in this query will also pick up observations that were made with different but comparable units, such as mg/dL.
+# MAGIC The view will be filtered to only BMI observations recorded in kg/m2 that exceed 30 kg/m2. As with the cholesterol view, the filter matches the UCUM unit code `kg/m2` literally, so no unit conversion is applied.
 
 # COMMAND ----------
 

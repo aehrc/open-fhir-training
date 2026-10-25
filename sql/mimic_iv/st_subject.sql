@@ -28,9 +28,13 @@ icustay_detail AS (
         p.race_code AS race,
         e.admittime,
         e.dischtime,
-        -- Mark first ICU and hospital stays (simplified logic)
-        TRUE AS first_icu_stay,
-        TRUE AS first_hosp_stay
+        -- Mark each subject's earliest ICU stay. The ICU encounter view does not
+        -- carry the hospital admission, so the first hospital stay criterion of
+        -- the original study is not applied.
+        ROW_NUMBER() OVER (
+            PARTITION BY e.subject_id
+            ORDER BY e.admittime, e.stay_id
+        ) = 1 AS first_icu_stay
     FROM mimic_iv_views.rv_icu_encounter e
     JOIN mimic_iv_views.rv_patient p ON e.subject_id = p.subject_id
 ),
@@ -41,7 +45,7 @@ first_icu_stay_with_intervention AS (
         fvi.inttime
     FROM icustay_detail AS isd
     LEFT OUTER JOIN first_vent_intervention AS fvi ON isd.stay_id = fvi.stay_id
-    WHERE first_icu_stay AND first_hosp_stay
+    WHERE first_icu_stay
 ),
 
 stay_with_index_period AS (

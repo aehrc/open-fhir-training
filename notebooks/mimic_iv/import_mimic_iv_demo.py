@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Import MIMIC-IV demo data to tables
 # MAGIC
-# MAGIC This notebook imports Synthea data from NDJSON files, and persists it to tables within the Databricks catalog.
+# MAGIC This notebook imports MIMIC-IV demo data from NDJSON files, and persists it to tables within the Databricks catalog.
 
 # COMMAND ----------
 

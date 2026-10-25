@@ -36,9 +36,7 @@
 # MAGIC %md
 # MAGIC ## Setup and Configuration
 # MAGIC
-# MAGIC In this section, we'll:
-# MAGIC 1. Import the necessary Python libraries for data transformation
-# MAGIC 2. Set up helper functions to clean and format data
+# MAGIC In this section, we'll import the necessary Python libraries for data transformation.
 # MAGIC
 # MAGIC **What is Spark?** Apache Spark is a data processing engine that can handle large amounts of data efficiently. In Databricks, it's already set up and ready to use through the `spark` variable.
 
@@ -59,42 +57,6 @@ from pyspark.sql.functions import (
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Helper Functions
-# MAGIC
-# MAGIC These are small utility functions that help us clean and format data:
-# MAGIC
-# MAGIC - **clean_uuid**: Cleans UUID strings for use as resource IDs
-# MAGIC - **format_datetime**: Ensures date/time formats match FHIR standards
-
-# COMMAND ----------
-
-
-def clean_uuid(uuid_str):
-    """Clean UUID string for use as FHIR resource ID."""
-    if uuid_str:
-        # Return the UUID as-is - FHIR allows hyphens in IDs
-        return uuid_str.strip()
-    return None
-
-
-def format_datetime(dt_str):
-    """Format datetime string to FHIR format."""
-    if dt_str and dt_str.strip():
-        # Synthea uses format: 2012-09-11T23:57:37Z
-        # This is already FHIR compliant.
-        return dt_str
-    return None
-
-
-# Register UDFs.
-spark.udf.register("clean_uuid", clean_uuid)
-spark.udf.register("format_datetime", format_datetime)
-
-print("Helper functions defined")
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Transform Patient Resources
 # MAGIC
 # MAGIC Now we'll transform the patient CSV data into FHIR Patient resources. This involves:
@@ -108,7 +70,7 @@ print("Helper functions defined")
 # MAGIC - **Into FHIR structure with**: resourceType, identifier, name, gender, birthDate, address
 # MAGIC
 # MAGIC ### Key transformations:
-# MAGIC - Remove hyphens from IDs (FHIR doesn't allow them)
+# MAGIC - Use the CSV UUID as-is for the resource ID (FHIR IDs may contain hyphens)
 # MAGIC - Map gender codes (M → male, F → female)
 # MAGIC - Structure addresses with proper fields (line, city, state, postalCode)
 # MAGIC - Create identifier objects for SSN, driver's license, and passport
@@ -508,7 +470,6 @@ encounter_json_df.show(2, truncate=False)
 # MAGIC - **Vaccine Code**: Uses CVX codes (standardised vaccine codes used in the US)
 # MAGIC - **Status**: All marked as "completed" since these are historical records
 # MAGIC - **References**: Links to the Patient who received it and the Encounter when it was given
-# MAGIC - **Route/Site**: Default values for typical vaccine administration (intramuscular injection in left arm)
 
 # COMMAND ----------
 
