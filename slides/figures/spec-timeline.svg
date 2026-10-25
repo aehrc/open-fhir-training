@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "SQL on FHIR, then and next": the SQL on FHIR version timeline, from
+  2.0.0 (ViewDefinition, which the exercises use) to 3.0.0-ballot (SQLView,
+  SQLQuery, $sql-run and $sql-export), and the runners that implement it.
+  The figure is split into layers (v2, v3, runners) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>A timeline of SQL on FHIR versions: 2.0.0 brought the ViewDefinition, one resource type to one table, which the exercises use; 3.0.0-ballot, HL7 STU 3 in September 2026, adds SQLView and SQLQuery, SQL shared as FHIR Library resources, and the $sql-run and $sql-export operations. Runners include Pathling, Aidbox, FlatQuack, MS SQL Server and others.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .muted { fill: #757579; }
+    .dteal { fill: #007377; }
+    .white { fill: #ffffff; }
+    .version { font-size: 18.6px; }
+    .note { font-size: 15.03px; }
+    .label { font-size: 16px; }
+    .box { font-size: 21.48px; }
+    .pill { font-size: 17.19px; }
+  </style>
+
+  <!-- Timeline, 2.0.0 milestone and the ViewDefinition box -->
+  <g data-layer="v2">
+    <path d="M45 172 H915" stroke="#dadbdc" stroke-width="4.5"/>
+    <circle cx="197" cy="172" r="10.02" fill="#00a9ce"/>
+    <text x="197" y="208.1" class="b mid version">2.0.0</text>
+    <text x="197" y="227.7" class="muted mid note">ViewDefinition</text>
+    <rect x="27" y="258" width="340" height="82" rx="7.16" fill="#00a9ce"/>
+    <text x="197" y="293" class="b white mid box">ViewDefinition</text>
+    <text x="197" y="317" class="white mid label">one resource type → one table</text>
+    <text x="197" y="368" class="b dteal mid label">what the exercises use</text>
+  </g>
+
+  <!-- 3.0.0-ballot milestone, the SQLView/SQLQuery box and the operations pill -->
+  <g data-layer="v3">
+    <circle cx="690" cy="172" r="10.02" fill="#1e22aa"/>
+    <text x="690" y="208.1" class="b mid version">3.0.0-ballot · HL7 STU 3, Sept 2026</text>
+    <text x="690" y="227.7" class="muted mid note">+ SQLView · SQLQuery · $sql-run · $sql-export</text>
+    <rect x="470" y="258" width="440" height="82" rx="7.16" fill="#1e22aa"/>
+    <text x="690" y="293" class="b white mid box">SQLView and SQLQuery</text>
+    <text x="690" y="317" class="white mid label">SQL shared as FHIR Library resources</text>
+    <rect x="470" y="352" width="440" height="37.22" rx="18.61" fill="#e87722"/>
+    <text x="690" y="377.06" class="white mid pill" xml:space="preserve"><tspan class="b">$sql-run · $sql-export</tspan> - run views and queries on a server</text>
+  </g>
+
+  <!-- Implementations -->
+  <g data-layer="runners">
+    <path d="M27 434 H933" stroke="#dadbdc" stroke-width="0.75"/>
+    <text x="480" y="467" class="muted mid label" xml:space="preserve"><tspan class="b">Runners:</tspan> Pathling (Apache Spark) · Aidbox · FlatQuack (DuckDB) · MS SQL Server · …</text>
+  </g>
+</svg>

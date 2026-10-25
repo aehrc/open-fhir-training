@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "Getting started": two columns. Left, the five steps to run the
+  exercises in Databricks (add the repo, install Pathling as the Pathling
+  Databricks installation guide describes, run the import and view notebooks,
+  then the SQL in order). Right, running Pathling on a laptop: pip install
+  and three lines of Python to read NDJSON. Not layered.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Getting started. In Databricks: add the repo github.com/aehrc/open-fhir-training, install Pathling on the cluster (Maven au.csiro.pathling:library-runtime, JNAME=zulu21-ca-amd64 for Java 21), run the import notebooks, run the view notebooks, then run the SQL in order. On your laptop: pip install pathling (needs Java 21), create a PathlingContext and read NDJSON; the views and SQL run unchanged on Spark.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .head { font-size: 20px; font-weight: 700; }
+    .desc { font-size: 16.5px; }
+    .sub { font-size: 14.27px; fill: #757579; }
+    .term { font-size: 12.55px; }
+    .code { font-size: 12.55px; fill: #3a3a3d; }
+    .num { font-size: 14.27px; font-weight: 700; fill: #ffffff; }
+    .k { fill: #004b87; }
+    .s { fill: #a31515; }
+  </style>
+
+  <!-- In Databricks -->
+  <g>
+    <text x="27" y="166" class="head">In Databricks</text>
+    <line x1="27" y1="176" x2="530" y2="176" stroke="#dadbdc" stroke-width="1.5"/>
+    <circle cx="40" cy="198.5" r="11.5" fill="#00a9ce"/>
+    <text x="40" y="203.5" text-anchor="middle" class="num">1</text>
+    <text x="62" y="204" class="desc">Add the repo: Repos → Add Repo →</text>
+    <text x="62" y="223" class="mono code">github.com/aehrc/open-fhir-training</text>
+    <circle cx="40" cy="250.5" r="11.5" fill="#00a9ce"/>
+    <text x="40" y="255.5" text-anchor="middle" class="num">2</text>
+    <text x="62" y="256" class="desc">Install Pathling on the cluster (pathling.csiro.au</text>
+    <text x="62" y="276" class="desc">installation guide for Databricks)</text>
+    <text x="62" y="296" class="sub">Maven <tspan class="mono term">au.csiro.pathling:library-runtime</tspan>, optionally PyPI <tspan class="mono term">pathling</tspan></text>
+    <text x="62" y="315" class="sub">Java 21: environment variable <tspan class="mono term">JNAME=zulu21-ca-amd64</tspan></text>
+    <text x="62" y="334" class="sub">tested on Databricks Runtime 17.3 LTS</text>
+    <circle cx="40" cy="358.5" r="11.5" fill="#00a9ce"/>
+    <text x="40" y="363.5" text-anchor="middle" class="num">3</text>
+    <text x="62" y="364" class="desc">Run the import notebooks:</text>
+    <text x="62" y="383" class="mono code">import_synthea, import_mimic_iv_demo</text>
+    <circle cx="40" cy="407.5" r="11.5" fill="#00a9ce"/>
+    <text x="40" y="412.5" text-anchor="middle" class="num">4</text>
+    <text x="62" y="413" class="desc">Run the view notebooks:</text>
+    <text x="62" y="432" class="mono code">create_prostate_cancer_views, create_spo2_views</text>
+    <circle cx="40" cy="456.5" r="11.5" fill="#00a9ce"/>
+    <text x="40" y="461.5" text-anchor="middle" class="num">5</text>
+    <text x="62" y="462" class="desc">Run the SQL: <tspan class="mono term">sql/synthea</tspan>, then <tspan class="mono term">sql/mimic_iv</tspan> in order</text>
+    <text x="62" y="481" class="mono code">st_ventilation → st_subject → st_reading_* → coh_*</text>
+  </g>
+
+  <!-- On your laptop -->
+  <g>
+    <text x="566" y="166" class="head">On your laptop</text>
+    <line x1="566" y1="176" x2="933" y2="176" stroke="#dadbdc" stroke-width="1.5"/>
+    <text x="566" y="204" class="sub">Shell · needs Java 21</text>
+    <rect x="566" y="212" width="367" height="38" rx="2.85" fill="#dadbdc"/>
+    <path d="M570.28 212 H930.14 A2.86 2.86 0 0 1 933 214.86 V247.14 A2.86 2.86 0 0 1 930.14 250 H570.28 Z" fill="#f6f7f8"/>
+    <text x="584" y="235.5" class="mono code" xml:space="preserve">pip install pathling</text>
+    <text x="566" y="282" class="sub">Python</text>
+    <rect x="566" y="290" width="367" height="76" rx="2.85" fill="#dadbdc"/>
+    <path d="M570.28 290 H930.14 A2.86 2.86 0 0 1 933 292.86 V363.14 A2.86 2.86 0 0 1 930.14 366 H570.28 Z" fill="#f6f7f8"/>
+    <g class="mono code">
+      <text x="584" y="313" xml:space="preserve"><tspan class="k">from</tspan> pathling <tspan class="k">import</tspan> PathlingContext</text>
+      <text x="584" y="332" xml:space="preserve">pc = PathlingContext.create()</text>
+      <text x="584" y="351" xml:space="preserve">data = pc.read.ndjson(<tspan class="s">"path/to/ndjson"</tspan>)</text>
+    </g>
+    <text x="566" y="394" class="sub">the views and SQL run unchanged on Spark</text>
+  </g>
+</svg>

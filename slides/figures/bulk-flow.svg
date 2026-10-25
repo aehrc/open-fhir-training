@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "FHIR Bulk Data Access": the asynchronous request pattern between a
+  client and a server (kick-off, poll, download), then the three export levels,
+  the main parameters and a note on SMART Backend Services.
+  Split into layers that build up over clicks: kick-off, poll, download, then
+  the levels.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>FHIR Bulk Data Access: the client kicks off an export with GET [base]/Patient/$export and receives 202 Accepted with a status URL, polls the status URL until it returns 200 with a manifest, then downloads NDJSON files listed in the manifest; exports run at system, all-patient or group level, with parameters _type, _since, _typeFilter and _elements, and secured servers use SMART Backend Services.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .muted { fill: #757579; }
+    .orange { fill: #e87722; }
+    .white { fill: #ffffff; }
+    .party { font-size: 20px; }
+    .step { font-size: 17px; }
+    .msg { font-size: 14.27px; }
+    .resp { font-size: 16.41px; }
+    .term { font-size: 14.27px; }
+    .desc { font-size: 16.41px; }
+    .foot { font-size: 17px; }
+    .note { font-size: 14.27px; }
+  </style>
+
+  <!-- Kick-off: client, server, request and 202 response -->
+  <g data-layer="kickoff">
+    <rect x="27" y="148" width="110" height="236" rx="7.13" fill="#001d34"/>
+    <text x="82" y="272.5" class="b white mid party">Client</text>
+    <rect x="823" y="148" width="110" height="236" rx="7.13" fill="#001d34"/>
+    <text x="878" y="272.5" class="b white mid party">Server</text>
+
+    <text x="153" y="167" class="b orange step">Kick-off</text>
+    <text x="250" y="167" class="mono msg">GET [base]/Patient/$export?_type=Patient,Observation</text>
+    <path d="M141 177 H806" stroke="#001d34" stroke-width="3"/>
+    <path d="M819 177 L805 170 L805 184 Z" fill="#001d34"/>
+    <text x="250" y="196" class="muted msg">Accept: application/fhir+json · Prefer: respond-async</text>
+    <path d="M819 206 H154" stroke="#e87722" stroke-width="3"/>
+    <path d="M141 206 L155 199 L155 213 Z" fill="#e87722"/>
+    <text x="250" y="226" class="orange resp">202 Accepted · Content-Location: status URL</text>
+  </g>
+
+  <!-- Poll: status requests until the manifest is ready -->
+  <g data-layer="poll">
+    <path d="M141 239.5 H819" stroke="#dadbdc" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <text x="153" y="259" class="b orange step">Poll</text>
+    <text x="250" y="259" class="mono msg">GET status URL</text>
+    <path d="M141 269 H806" stroke="#001d34" stroke-width="3"/>
+    <path d="M819 269 L805 262 L805 276 Z" fill="#001d34"/>
+    <path d="M819 283 H154" stroke="#e87722" stroke-width="3"/>
+    <path d="M141 283 L155 276 L155 290 Z" fill="#e87722"/>
+    <text x="250" y="303" class="orange resp">202 + X-Progress, Retry-After … then 200 + manifest</text>
+  </g>
+
+  <!-- Download: fetch each file in the manifest -->
+  <g data-layer="download">
+    <path d="M141 316.5 H819" stroke="#dadbdc" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <text x="153" y="336" class="b orange step">Download</text>
+    <text x="250" y="336" class="mono msg">GET file URL from the manifest</text>
+    <path d="M141 346 H806" stroke="#001d34" stroke-width="3"/>
+    <path d="M819 346 L805 339 L805 353 Z" fill="#001d34"/>
+    <path d="M819 360 H154" stroke="#e87722" stroke-width="3"/>
+    <path d="M141 360 L155 353 L155 367 Z" fill="#e87722"/>
+    <text x="250" y="380" class="orange resp">NDJSON</text>
+  </g>
+
+  <!-- Levels: three export levels, parameters and auth footnote -->
+  <g data-layer="levels">
+    <g fill="#e6e9ec">
+      <rect x="27" y="398" width="292" height="52" rx="7.13"/>
+      <rect x="334" y="398" width="292" height="52" rx="7.13"/>
+      <rect x="641" y="398" width="292" height="52" rx="7.13"/>
+    </g>
+    <text x="43" y="418" class="mono b orange term">[base]/$export</text>
+    <text x="43" y="440" class="desc">everything on the server</text>
+    <text x="350" y="418" class="mono b orange term">[base]/Patient/$export</text>
+    <text x="350" y="440" class="desc">data for all patients</text>
+    <text x="657" y="418" class="mono b orange term">[base]/Group/[id]/$export</text>
+    <text x="657" y="440" class="desc">data for a cohort</text>
+
+    <text x="27" y="472" class="foot" xml:space="preserve"><tspan class="b">Parameters:</tspan> <tspan class="mono msg">_type</tspan> · <tspan class="mono msg">_since</tspan> · <tspan class="mono msg">_typeFilter</tspan> · <tspan class="mono msg">_elements</tspan></text>
+    <text x="27" y="494" class="muted note">Secured servers use SMART Backend Services: a signed JWT is exchanged for an access token</text>
+  </g>
+</svg>

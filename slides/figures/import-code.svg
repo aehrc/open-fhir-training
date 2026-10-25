@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "2 · Importing the datasets": the key lines of
+  notebooks/synthea/import_synthea.py and notebooks/mimic_iv/import_mimic_iv_demo.py,
+  with highlight bands keyed to a legend: reading NDJSON, mapping MIMIC file
+  names to resource types, keeping extensions and writing one table per type.
+  The figure is split into layers that build up over clicks; each band is in
+  the same layer as its legend entry.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 150 918 316" width="918" height="316">
+  <title>Code from import_synthea.py and import_mimic_iv_demo.py: both create a PathlingContext, read NDJSON from S3 with pc.read.ndjson and write one Delta table per resource type with write.tables; the MIMIC import also passes enable_extensions=True to keep extensions and a file_name_mapper that maps file names such as MimicObservationChartevents to Observation.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .code, .code text { font-size: 11.4px; fill: #3a3a3d; }
+    .k { fill: #004b87; font-weight: 700; }
+    .s { fill: #a31515; }
+    .file { font-size: 15px; }
+    .term { font-size: 15px; }
+    .desc { font-size: 18.5px; }
+    .sub { font-size: 14.3px; fill: #757579; }
+  </style>
+
+  <!-- Code panels and their file names -->
+  <g data-layer="panel">
+    <text x="27" y="172" class="mono b file">import_synthea.py</text>
+    <rect x="27" y="182" width="637" height="104" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 182 H661.14 A2.86 2.86 0 0 1 664 184.86 V283.14 A2.86 2.86 0 0 1 661.14 286 H31.28 Z" fill="#f6f7f8"/>
+    <text x="27" y="324" class="mono b file">import_mimic_iv_demo.py</text>
+    <rect x="27" y="334" width="637" height="126" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 334 H661.14 A2.86 2.86 0 0 1 664 336.86 V457.14 A2.86 2.86 0 0 1 661.14 460 H31.28 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- Code -->
+  <g data-layer="code" class="mono code">
+    <text x="47" y="206" xml:space="preserve">pc = PathlingContext.create()</text>
+    <text x="47" y="228" xml:space="preserve">source = pc.read.ndjson(<tspan class="s">"s3://open-fhir-training-data/synthea/au/fhir"</tspan>)</text>
+    <text x="47" y="250" xml:space="preserve">source.resource_types()</text>
+    <text x="47" y="272" xml:space="preserve">source.write.tables()</text>
+    <text x="47" y="358" xml:space="preserve">pc = PathlingContext.create(enable_extensions=<tspan class="k">True</tspan>)</text>
+    <text x="47" y="380" xml:space="preserve">source = pc.read.ndjson(</text>
+    <text x="47" y="402" xml:space="preserve">    <tspan class="s">"s3://open-fhir-training-data/mimic-iv-clinical-database-demo-on-fhir-2.1.0/fhir"</tspan>,</text>
+    <text x="47" y="424" xml:space="preserve">    file_name_mapper=<tspan class="k">lambda</tspan> file_name: re.findall(<tspan class="s">r"Mimic(\w+?)(?:ED|ICU|"</tspan>…, file_name))</text>
+    <text x="47" y="446" xml:space="preserve">source.write.tables()</text>
+  </g>
+
+  <!-- Reading NDJSON -->
+  <g data-layer="key-read">
+    <rect x="41" y="213" width="613" height="21" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+    <rect x="41" y="365" width="613" height="43" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+    <rect x="682" y="182" width="10" height="56" rx="2.14" fill="#00a9ce"/>
+    <text x="702" y="197" class="desc"><tspan class="mono term">read.ndjson</tspan></text>
+    <text x="702" y="217" class="sub">files named like Patient.00000.ndjson,</text>
+    <text x="702" y="235" class="sub">as a bulk export writes them</text>
+  </g>
+
+  <!-- Mapping file names to resource types -->
+  <g data-layer="key-mapper">
+    <rect x="41" y="409" width="613" height="21" rx="2.77" fill="#ffb81c" fill-opacity="0.3"/>
+    <rect x="682" y="268" width="10" height="56" rx="2.14" fill="#ffb81c"/>
+    <text x="702" y="283" class="desc"><tspan class="mono term">file_name_mapper</tspan></text>
+    <text x="702" y="303" class="sub">maps MimicObservationChartevents</text>
+    <text x="702" y="321" class="sub">→ Observation</text>
+  </g>
+
+  <!-- Keeping extensions -->
+  <g data-layer="key-extensions">
+    <rect x="237.7" y="343" width="154" height="21" rx="2.77" fill="#6d2077" fill-opacity="0.15"/>
+    <rect x="682" y="354" width="10" height="38" rx="2.14" fill="#6d2077"/>
+    <text x="702" y="369" class="desc"><tspan class="mono term">enable_extensions</tspan></text>
+    <text x="702" y="389" class="sub">keeps extensions, e.g. US Core race</text>
+  </g>
+
+  <!-- Writing tables -->
+  <g data-layer="key-write">
+    <rect x="41" y="257" width="613" height="21" rx="2.77" fill="#1e22aa" fill-opacity="0.15"/>
+    <rect x="41" y="431" width="613" height="21" rx="2.77" fill="#1e22aa" fill-opacity="0.15"/>
+    <rect x="682" y="422" width="10" height="38" rx="2.14" fill="#1e22aa"/>
+    <text x="702" y="437" class="desc"><tspan class="mono term">write.tables</tspan></text>
+    <text x="702" y="457" class="sub">one Delta table per resource type</text>
+  </g>
+
+</svg>

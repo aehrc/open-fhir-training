@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "A real export": a terminal session against the public SMART Bulk Data
+  reference server (bulk-data.smarthealthit.org), captured 25 October 2026:
+  the kick-off request and its 202 response, the completed status response with
+  an abridged manifest, and the first line of the Patient NDJSON file, with a
+  legend keyed by highlight bands.
+  Split into layers that build up over clicks: the panel, kick-off code and key
+  first, then the manifest code and key, then the NDJSON code and key.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>A real bulk export with curl against the SMART Bulk Data reference server: the kick-off returns HTTP 202 with a content-location status URL, polling the status URL returns HTTP 200 with a manifest listing two Observation files (10000 and 6315 resources) and one Patient file (100 resources), and the first line of 6.Patient.ndjson is a single Patient resource.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .code, .code text { font-size: 11.41px; fill: #3a3a3d; }
+    .code .p { fill: #004b87; font-weight: 700; }
+    .code .st { fill: #e87722; font-weight: 700; }
+    .k { fill: #004b87; }
+    .s { fill: #a31515; }
+    .term { font-size: 16.41px; font-weight: 700; }
+    .desc { font-size: 16.41px; }
+  </style>
+
+  <!-- Code panel: grey border showing on the left, background with rounded right corners -->
+  <g data-layer="panel">
+    <rect x="27" y="148" width="653" height="336" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 148 H677.14 A2.86 2.86 0 0 1 680 150.86 V481.14 A2.86 2.86 0 0 1 677.14 484 H31.28 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- Kick-off: request, 202 and the status URL -->
+  <g data-layer="code-kickoff" class="mono code">
+    <text x="47" y="173" class="p" xml:space="preserve">$ curl -i -H 'Accept: application/fhir+json' -H 'Prefer: respond-async' \</text>
+    <text x="47" y="189" class="p" xml:space="preserve">    'https://bulk-data.smarthealthit.org/fhir/Patient/$export?_type=Patient,Observation'</text>
+    <text x="47" y="205" class="st" xml:space="preserve">HTTP/2 202</text>
+    <text x="47" y="221" xml:space="preserve"><tspan class="k">content-location:</tspan> https://bulk-data.smarthealthit.org/fhir/bulkstatus/62c77…</text>
+  </g>
+
+  <g data-layer="key-kickoff">
+    <rect x="39" y="160.5" width="631" height="66" rx="2.77" fill="#e87722" fill-opacity="0.15"/>
+    <rect x="700" y="171.5" width="9.99" height="43" rx="2.14" fill="#e87722"/>
+    <text x="720" y="189" class="mono term">kick-off</text>
+    <text x="720" y="210" class="desc">202 and a status URL</text>
+  </g>
+
+  <!-- Status: the completed status response and its manifest, abridged -->
+  <g data-layer="code-manifest" class="mono code">
+    <text x="47" y="249" class="p" xml:space="preserve">$ curl -i https://bulk-data.smarthealthit.org/fhir/bulkstatus/62c77…</text>
+    <text x="47" y="265" class="st" xml:space="preserve">HTTP/2 200</text>
+    <text x="47" y="281" xml:space="preserve">{</text>
+    <text x="47" y="297" xml:space="preserve">  <tspan class="k">"transactionTime"</tspan>: <tspan class="s">"2026-10-25T09:58:37+00:00"</tspan>,</text>
+    <text x="47" y="313" xml:space="preserve">  <tspan class="k">"request"</tspan>: <tspan class="s">"https://bulk-data.smarthealthit.org/fhir/Patient/$export?…"</tspan>,</text>
+    <text x="47" y="329" xml:space="preserve">  <tspan class="k">"requiresAccessToken"</tspan>: false, …</text>
+    <text x="47" y="345" xml:space="preserve">  <tspan class="k">"output"</tspan>: [</text>
+    <text x="47" y="361" xml:space="preserve">    { <tspan class="k">"url"</tspan>: <tspan class="s">"…/2.Observation.ndjson"</tspan>, <tspan class="k">"count"</tspan>: 10000, <tspan class="k">"type"</tspan>: <tspan class="s">"Observation"</tspan>, … },</text>
+    <text x="47" y="377" xml:space="preserve">    { <tspan class="k">"url"</tspan>: <tspan class="s">"…/4.Observation.ndjson"</tspan>, <tspan class="k">"count"</tspan>: 6315,  <tspan class="k">"type"</tspan>: <tspan class="s">"Observation"</tspan> },</text>
+    <text x="47" y="393" xml:space="preserve">    { <tspan class="k">"url"</tspan>: <tspan class="s">"…/6.Patient.ndjson"</tspan>,     <tspan class="k">"count"</tspan>: 100,   <tspan class="k">"type"</tspan>: <tspan class="s">"Patient"</tspan> }</text>
+    <text x="47" y="409" xml:space="preserve">  ], …</text>
+    <text x="47" y="425" xml:space="preserve">}</text>
+  </g>
+
+  <g data-layer="key-manifest">
+    <rect x="39" y="236.5" width="631" height="194" rx="2.77" fill="#1e22aa" fill-opacity="0.1"/>
+    <rect x="700" y="312" width="9.99" height="43" rx="2.14" fill="#1e22aa"/>
+    <text x="720" y="329.5" class="mono term">manifest</text>
+    <text x="720" y="350.5" class="desc">one entry per file</text>
+  </g>
+
+  <!-- Download: the first line of the Patient file -->
+  <g data-layer="code-ndjson" class="mono code">
+    <text x="47" y="453" class="p" xml:space="preserve">$ curl …/6.Patient.ndjson | head -1</text>
+    <text x="47" y="469" xml:space="preserve">{<tspan class="k">"resourceType"</tspan>:<tspan class="s">"Patient"</tspan>,<tspan class="k">"id"</tspan>:<tspan class="s">"58c297c4-d684-4677-8024-01131d93835e"</tspan>,<tspan class="k">"text"</tspan>:{<tspan class="k">"status"</tspan>:…</text>
+  </g>
+
+  <g data-layer="key-ndjson">
+    <rect x="39" y="440.5" width="631" height="34" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+    <rect x="700" y="436" width="9.99" height="43" rx="2.14" fill="#00a9ce"/>
+    <text x="720" y="453.5" class="mono term">NDJSON</text>
+    <text x="720" y="474.5" class="desc">one resource per line</text>
+  </g>
+</svg>

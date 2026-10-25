@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "FHIRPath in the exercises": the FHIRPath expressions the exercise
+  views use, what each one does, and which views use it.
+  The figure has no layers.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>A table of FHIRPath expressions used in the exercise views: getResourceKey(), subject.getReferenceKey(), effective.ofType(dateTime), code.coding.exists(...), value.ofType(Quantity).value &gt; 30, an extension lookup for US Core race, and address.postalCode with collection true, with what each does and where it is used.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .b { font-weight: 700; }
+    .white { fill: #ffffff; }
+    .head { font-size: 18.5px; }
+    .expr { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 13px; fill: #007377; }
+    .expr .k { fill: #004b87; }
+    .expr .v { fill: #3a3a3d; }
+    .does { font-size: 17px; }
+    .where { font-size: 16px; fill: #757579; }
+  </style>
+
+  <!-- Header row -->
+  <rect x="27" y="146" width="906" height="34" fill="#00a9ce"/>
+  <text x="41" y="169.2" class="b white head">Expression</text>
+  <text x="477" y="169.2" class="b white head">What it does</text>
+  <text x="737" y="169.2" class="b white head">Where</text>
+
+  <!-- Body rows, alternately shaded -->
+  <!-- row 1 -->
+  <text x="41" y="202.6" class="expr" xml:space="preserve">getResourceKey()</text>
+  <text x="477" y="204" class="does">the row's own key</text>
+  <text x="737" y="203.5" class="where">every view</text>
+  <!-- row 2 -->
+  <rect x="27" y="216" width="906" height="52" fill="#e0f5fa"/>
+  <text x="41" y="246.6" class="expr" xml:space="preserve">subject.getReferenceKey()</text>
+  <text x="477" y="248" class="does">key of the resource it points to</text>
+  <text x="737" y="238.5" class="where">Observation, Condition,</text>
+  <text x="737" y="256.5" class="where">Encounter views</text>
+  <!-- row 3 -->
+  <text x="41" y="290.6" class="expr" xml:space="preserve">effective.ofType(dateTime)</text>
+  <text x="477" y="292" class="does">pick one type of a choice element</text>
+  <text x="737" y="291.5" class="where">BMI, cholesterol, vital signs</text>
+  <!-- row 4 -->
+  <rect x="27" y="304" width="906" height="52" fill="#e0f5fa"/>
+  <text x="41" y="326.1" class="expr" xml:space="preserve">code.coding.exists(system = 'http://loinc.org'</text>
+  <text x="41" y="343.1" class="expr" xml:space="preserve">  and code = '39156-5')</text>
+  <text x="477" y="336" class="does">test for a code</text>
+  <text x="737" y="326.5" class="where">BMI, cholesterol,</text>
+  <text x="737" y="344.5" class="where">prostate cancer</text>
+  <!-- row 5 -->
+  <text x="41" y="378.6" class="expr" xml:space="preserve">value.ofType(Quantity).value &gt; 30</text>
+  <text x="477" y="380" class="does">compare a quantity</text>
+  <text x="737" y="379.5" class="where">BMI</text>
+  <!-- row 6 -->
+  <rect x="27" y="392" width="906" height="52" fill="#e0f5fa"/>
+  <text x="41" y="414.1" class="expr" xml:space="preserve">extension('…/us-core-race').extension('ombCategory')</text>
+  <text x="41" y="431.1" class="expr" xml:space="preserve">  .value.ofType(Coding).code</text>
+  <text x="477" y="424" class="does">read a value from an extension</text>
+  <text x="737" y="423.5" class="where">MIMIC-IV patients</text>
+  <!-- row 7 -->
+  <text x="41" y="466.1" class="expr" xml:space="preserve">address.postalCode</text>
+  <text x="41" y="483.1" class="expr" xml:space="preserve"><tspan class="k">"collection"</tspan>: <tspan class="v">true</tspan></text>
+  <text x="477" y="476" class="does">keep several values as an array</text>
+  <text x="737" y="475.5" class="where">patient demographics</text>
+  <path d="M27 496 H933" stroke="#dadbdc" stroke-width="0.75"/>
+</svg>

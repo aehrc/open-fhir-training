@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "Your turn: pick your own adventure": five cards, three above two,
+  each with a coloured header carrying the title and a tinted body with a
+  short description and a line icon: export with Bulk Data, extend the prostate cancer study,
+  replace hard-coded codes with terminology, bring your own CSV, and run it
+  without Databricks. Not layered.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Five optional exercises: export with Bulk Data using pc.read.bulk() against the SMART reference server; extend the prostate cancer study with a risk factor such as smoking status (LOINC 72166-2); replace hard-coded codes with terminology using member_of or subsumes; bring your own CSV and map it to FHIR; and run it without Databricks using pip install pathling or the pathling command line.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .title { font-size: 20.5px; font-weight: 700; fill: #ffffff; }
+    .desc { font-size: 16.5px; }
+    .term { font-size: 13.3px; }
+  </style>
+
+  <!-- Export with Bulk Data -->
+  <rect x="27" y="148" width="288" height="160" rx="7.12" fill="#e0f5fa"/>
+  <path d="M27 206 V155.12 A7.12 7.12 0 0 1 34.12 148 H307.88 A7.12 7.12 0 0 1 315 155.12 V206 Z" fill="#00a9ce"/>
+  <text x="45" y="184" class="title">Export with Bulk Data</text>
+  <text x="45" y="234" class="desc"><tspan class="mono term">pc.read.bulk()</tspan> against the SMART</text>
+  <text x="45" y="255" class="desc">reference server, then write views</text>
+  <text x="45" y="276" class="desc">over what comes back</text>
+  <path d="M257 282 V296 H297 V282 M277 264 V286 M267 276 L277 286 L287 276" fill="none" stroke="#00a9ce" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Extend the prostate cancer study -->
+  <rect x="336" y="148" width="288" height="160" rx="7.12" fill="#e3f0f0"/>
+  <path d="M336 206 V155.12 A7.12 7.12 0 0 1 343.12 148 H616.88 A7.12 7.12 0 0 1 624 155.12 V206 Z" fill="#007377"/>
+  <text x="354" y="173.5" class="title">Extend the prostate</text>
+  <text x="354" y="195.5" class="title">cancer study</text>
+  <text x="354" y="234" class="desc">add a risk factor such as smoking</text>
+  <text x="354" y="255" class="desc">status (LOINC <tspan class="mono term">72166-2</tspan>)</text>
+  <circle cx="586" cy="280" r="18" fill="none" stroke="#007377" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M577 280 H595 M586 271 V289" fill="none" stroke="#007377" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Replace hard-coded codes with terminology -->
+  <rect x="645" y="148" width="288" height="160" rx="7.12" fill="#e8e9f7"/>
+  <path d="M645 206 V155.12 A7.12 7.12 0 0 1 652.12 148 H925.88 A7.12 7.12 0 0 1 933 155.12 V206 Z" fill="#1e22aa"/>
+  <text x="663" y="173.5" class="title">Replace hard-coded codes</text>
+  <text x="663" y="195.5" class="title">with terminology</text>
+  <text x="663" y="234" class="desc"><tspan class="mono term">member_of</tspan> with a SNOMED CT ECL</text>
+  <text x="663" y="255" class="desc">value set, or <tspan class="mono term">subsumes</tspan></text>
+  <rect x="888" y="261" width="14" height="11" rx="2" fill="none" stroke="#1e22aa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="872" y="288" width="14" height="11" rx="2" fill="none" stroke="#1e22aa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="904" y="288" width="14" height="11" rx="2" fill="none" stroke="#1e22aa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M895 272 V280 M879 288 V280 H911 V288" fill="none" stroke="#1e22aa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Bring your own CSV -->
+  <rect x="181.5" y="326" width="288" height="160" rx="7.12" fill="#f0e8f1"/>
+  <path d="M181.5 384 V333.12 A7.12 7.12 0 0 1 188.62 326 H462.38 A7.12 7.12 0 0 1 469.5 333.12 V384 Z" fill="#6d2077"/>
+  <text x="199.5" y="362" class="title">Bring your own CSV</text>
+  <text x="199.5" y="412" class="desc">map it to FHIR as in exercise 1,</text>
+  <text x="199.5" y="433" class="desc">then analyse it with views</text>
+  <path d="M417.5 438 H437.5 L447.5 448 V478 H417.5 Z M437.5 438 V448 H447.5 M424.5 457 H440.5 M424.5 465 H440.5 M424.5 473 H434.5" fill="none" stroke="#6d2077" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Run it without Databricks -->
+  <rect x="490.5" y="326" width="288" height="160" rx="7.12" fill="#fcf1e8"/>
+  <path d="M490.5 384 V333.12 A7.12 7.12 0 0 1 497.62 326 H771.38 A7.12 7.12 0 0 1 778.5 333.12 V384 Z" fill="#e87722"/>
+  <text x="508.5" y="362" class="title">Run it without Databricks</text>
+  <text x="508.5" y="412" class="desc"><tspan class="mono term">pip install pathling</tspan> (Java 21),</text>
+  <text x="508.5" y="433" class="desc">or the <tspan class="mono term">pathling</tspan> command line</text>
+  <rect x="724.5" y="441" width="32" height="23" rx="2" fill="none" stroke="#e87722" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M717.5 471 H763.5 L758.5 464 H722.5 Z" fill="none" stroke="#e87722" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

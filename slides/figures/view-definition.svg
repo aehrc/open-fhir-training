@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "A ViewDefinition": the bmi view from the prostate cancer exercise
+  (notebooks/synthea/create_prostate_cancer_views.py) as ViewDefinition JSON,
+  with highlight bands keyed to a legend of its main elements.
+  The figure is split into layers that build up over clicks: the panel, the
+  bands (below the code), the code, then one legend entry per click.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>The BMI ViewDefinition from the exercises as JSON, with bands highlighting resource (one resource type), the id, patient_id and date columns (FHIRPath to value), the forEach elements (one row per item) and the where clause (filter rows), each keyed to a legend on the right.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .code, .code text { font-size: 12px; fill: #3a3a3d; }
+    .k { fill: #004b87; }
+    .s { fill: #a31515; }
+    .term { font-size: 14.97px; }
+    .desc { font-size: 18.53px; }
+    .sub { font-size: 14.27px; fill: #757579; }
+  </style>
+
+  <!-- Code panel: grey border showing on the left, background with rounded right corners -->
+  <g data-layer="panel">
+    <rect x="27" y="143" width="531.27" height="356" rx="2.86" fill="#dadbdc"/>
+    <path d="M31.29 143 H555.41 A2.86 2.86 0 0 1 558.27 145.86 V496.14 A2.86 2.86 0 0 1 555.41 499 H31.29 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- Highlight bands: resource, column, forEach, where -->
+  <g data-layer="band-resource">
+    <rect x="41" y="178.8" width="503.27" height="14.9" rx="2.77" fill="#001d34" fill-opacity="0.12"/>
+  </g>
+  <g data-layer="band-column">
+    <rect x="41" y="223.5" width="503.27" height="44.7" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+  </g>
+  <g data-layer="band-foreach">
+    <rect x="41" y="298" width="503.27" height="14.9" rx="2.77" fill="#007377" fill-opacity="0.18"/>
+    <rect x="41" y="342.7" width="503.27" height="14.9" rx="2.77" fill="#007377" fill-opacity="0.18"/>
+  </g>
+  <g data-layer="band-where">
+    <rect x="41" y="417.2" width="503.27" height="59.6" rx="2.77" fill="#6d2077" fill-opacity="0.15"/>
+  </g>
+
+  <!-- Code -->
+  <g data-layer="code" class="mono code">
+    <text x="47" y="160" xml:space="preserve">{</text>
+    <text x="47" y="174.9" xml:space="preserve">  <tspan class="k">"resourceType"</tspan>: <tspan class="s">"ViewDefinition"</tspan>,</text>
+    <text x="47" y="189.8" xml:space="preserve">  <tspan class="k">"resource"</tspan>: <tspan class="s">"Observation"</tspan>,</text>
+    <text x="47" y="204.7" xml:space="preserve">  <tspan class="k">"select"</tspan>: [{</text>
+    <text x="47" y="219.6" xml:space="preserve">    <tspan class="k">"column"</tspan>: [</text>
+    <text x="47" y="234.5" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"id"</tspan>,         <tspan class="k">"path"</tspan>: <tspan class="s">"getResourceKey()"</tspan> },</text>
+    <text x="47" y="249.4" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"patient_id"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"subject.getReferenceKey()"</tspan> },</text>
+    <text x="47" y="264.3" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"date"</tspan>,       <tspan class="k">"path"</tspan>: <tspan class="s">"effective.ofType(dateTime)"</tspan> }</text>
+    <text x="47" y="279.2" xml:space="preserve">    ],</text>
+    <text x="47" y="294.1" xml:space="preserve">    <tspan class="k">"select"</tspan>: [{</text>
+    <text x="47" y="309" xml:space="preserve">      <tspan class="k">"forEach"</tspan>: <tspan class="s">"code.coding"</tspan>,</text>
+    <text x="47" y="323.9" xml:space="preserve">      <tspan class="k">"column"</tspan>: [{ <tspan class="k">"name"</tspan>: <tspan class="s">"code"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"code"</tspan> }]</text>
+    <text x="47" y="338.8" xml:space="preserve">    }, {</text>
+    <text x="47" y="353.7" xml:space="preserve">      <tspan class="k">"forEach"</tspan>: <tspan class="s">"value.ofType(Quantity)"</tspan>,</text>
+    <text x="47" y="368.6" xml:space="preserve">      <tspan class="k">"column"</tspan>: [{ <tspan class="k">"name"</tspan>: <tspan class="s">"unit"</tspan>,  <tspan class="k">"path"</tspan>: <tspan class="s">"unit"</tspan> },</text>
+    <text x="47" y="383.5" xml:space="preserve">                 { <tspan class="k">"name"</tspan>: <tspan class="s">"value"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"value"</tspan> }]</text>
+    <text x="47" y="398.4" xml:space="preserve">    }]</text>
+    <text x="47" y="413.3" xml:space="preserve">  }],</text>
+    <text x="47" y="428.2" xml:space="preserve">  <tspan class="k">"where"</tspan>: [{ <tspan class="k">"path"</tspan>:</text>
+    <text x="47" y="443.1" xml:space="preserve">      <tspan class="s">"where(code.coding.exists(system = 'http://loinc.org'</tspan></text>
+    <text x="47" y="458" xml:space="preserve">       <tspan class="s">and code = '39156-5')).value.ofType(Quantity)</tspan></text>
+    <text x="47" y="472.9" xml:space="preserve">       <tspan class="s">.where(code = 'kg/m2').value &gt; 30"</tspan> }]</text>
+    <text x="47" y="487.8" xml:space="preserve">}</text>
+  </g>
+
+  <!-- Legend: colour bar and label per element, level with its band -->
+  <g data-layer="key-resource">
+    <rect x="582.27" y="171.98" width="9.99" height="28.53" rx="2.14" fill="#001d34"/>
+    <text x="602.24" y="191.5" class="desc" xml:space="preserve"><tspan class="mono term">resource</tspan> one resource type</text>
+  </g>
+  <g data-layer="key-column">
+    <rect x="582.27" y="231.58" width="9.99" height="28.53" rx="2.14" fill="#00a9ce"/>
+    <text x="602.24" y="251.1" class="desc" xml:space="preserve"><tspan class="mono term">column</tspan> FHIRPath → value</text>
+  </g>
+  <g data-layer="key-foreach">
+    <rect x="582.27" y="313.53" width="9.99" height="28.53" rx="2.14" fill="#007377"/>
+    <text x="602.24" y="322.9" class="desc" xml:space="preserve"><tspan class="mono term">forEach</tspan> one row per item</text>
+    <text x="602.24" y="342.6" class="sub">also forEachOrNull, repeat, unionAll</text>
+  </g>
+  <g data-layer="key-where">
+    <rect x="582.27" y="432.73" width="9.99" height="28.53" rx="2.14" fill="#6d2077"/>
+    <text x="602.24" y="452.25" class="desc" xml:space="preserve"><tspan class="mono term">where</tspan> filter rows</text>
+  </g>
+</svg>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "4 · Pulse oximetry bias (MIMIC-IV)": the study question, then the three
+  layers of views the exercise builds: raw views (ViewDefinitions run from Python),
+  study views and cohort views (Spark SQL), with the role of each layer.
+  Split into layers (top-level data-layer groups) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>The pulse oximetry bias question, answered by three layers of views: six raw ViewDefinitions over MIMIC-IV FHIR data, five study views in Spark SQL, and four cohort views of subjects with all three readings.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .white { fill: #ffffff; }
+    .muted { fill: #757579; }
+    .question { font-size: 18.5px; }
+    .layer { font-size: 20px; }
+    .sub { font-size: 14.3px; }
+    .chip { font-size: 13px; }
+  </style>
+
+  <!-- The study question -->
+  <g data-layer="question">
+    <text x="27" y="166" class="b question">Do pulse oximeters (SpO2) read differently from arterial blood gas (SaO2) across patient groups?</text>
+  </g>
+
+  <!-- Raw views: heading, panel, one chip per view, role -->
+  <g data-layer="raw">
+    <text x="27" y="203" class="b layer" style="fill: #00a9ce">Raw views</text>
+    <text x="27" y="223" class="muted sub">6 ViewDefinitions · Python</text>
+    <rect x="27" y="236" width="262" height="210" rx="10" fill="#e0f5fa"/>
+    <rect x="43" y="249.25" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="266.85" class="mono white chip">rv_patient</text>
+    <rect x="43" y="280.75" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="298.35" class="mono white chip">rv_icu_encounter</text>
+    <rect x="43" y="312.25" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="329.85" class="mono white chip">rv_obs_vitalsigns</text>
+    <rect x="43" y="343.75" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="361.35" class="mono white chip">rv_obs_o2_flow</text>
+    <rect x="43" y="375.25" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="392.85" class="mono white chip">rv_o2_delivery_device</text>
+    <rect x="43" y="406.75" width="230" height="26" rx="5.73" fill="#00a9ce"/>
+    <text x="55" y="424.35" class="mono white chip">rv_obs_bg</text>
+    <text x="27" y="468" class="muted sub">one resource type each,</text>
+    <text x="27" y="486.5" class="muted sub">filtered by MIMIC item IDs</text>
+  </g>
+
+  <!-- Study views: arrow from the previous layer, heading, panel, one chip per view, role -->
+  <g data-layer="study">
+    <path d="M297 341 H313" stroke="#757579" stroke-width="6"/>
+    <path d="M341 341 L311 326 L311 356 Z" fill="#757579"/>
+    <text x="349" y="203" class="b layer" style="fill: #1e22aa">Study views</text>
+    <text x="349" y="223" class="muted sub">Spark SQL</text>
+    <rect x="349" y="236" width="262" height="210" rx="10" fill="#e8e9f7"/>
+    <rect x="365" y="249.25" width="230" height="26" rx="5.73" fill="#1e22aa"/>
+    <text x="377" y="266.85" class="mono white chip">st_ventilation</text>
+    <rect x="365" y="280.75" width="230" height="26" rx="5.73" fill="#1e22aa"/>
+    <text x="377" y="298.35" class="mono white chip">st_subject</text>
+    <rect x="365" y="312.25" width="230" height="26" rx="5.73" fill="#1e22aa"/>
+    <text x="377" y="329.85" class="mono white chip">st_reading_spo2</text>
+    <rect x="365" y="343.75" width="230" height="26" rx="5.73" fill="#1e22aa"/>
+    <text x="377" y="361.35" class="mono white chip">st_reading_so2</text>
+    <rect x="365" y="375.25" width="230" height="26" rx="5.73" fill="#1e22aa"/>
+    <text x="377" y="392.85" class="mono white chip">st_reading_o2_flow</text>
+    <text x="349" y="468" class="muted sub">ventilation status, index period,</text>
+    <text x="349" y="486.5" class="muted sub">readings in the period</text>
+  </g>
+
+  <!-- Cohort views: arrow from the previous layer, heading, panel, one chip per view, role -->
+  <g data-layer="cohort">
+    <path d="M619 341 H635" stroke="#757579" stroke-width="6"/>
+    <path d="M663 341 L633 326 L633 356 Z" fill="#757579"/>
+    <text x="671" y="203" class="b layer" style="fill: #001d34">Cohort views</text>
+    <text x="671" y="223" class="muted sub">Spark SQL</text>
+    <rect x="671" y="236" width="262" height="210" rx="10" fill="#e6e9ec"/>
+    <rect x="687" y="249.25" width="230" height="26" rx="5.73" fill="#001d34"/>
+    <text x="699" y="266.85" class="mono white chip">coh_subject</text>
+    <rect x="687" y="280.75" width="230" height="26" rx="5.73" fill="#001d34"/>
+    <text x="699" y="298.35" class="mono white chip">coh_reading_spo2</text>
+    <rect x="687" y="312.25" width="230" height="26" rx="5.73" fill="#001d34"/>
+    <text x="699" y="329.85" class="mono white chip">coh_reading_so2</text>
+    <rect x="687" y="343.75" width="230" height="26" rx="5.73" fill="#001d34"/>
+    <text x="699" y="361.35" class="mono white chip">coh_reading_o2_flow</text>
+    <text x="671" y="468" class="muted sub">subjects with all three readings</text>
+  </g>
+</svg>

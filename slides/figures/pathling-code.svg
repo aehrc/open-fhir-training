@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "Pathling in a few lines": a short Python example that creates a
+  PathlingContext, reads a bulk export, runs a ViewDefinition and saves the
+  result as a table, with highlight bands keyed to a legend of each step.
+  The figure is split into layers that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 150 840 334" width="840" height="334">
+  <title>Python code using Pathling: create a PathlingContext, read Patient and Observation resources with a bulk export, run a ViewDefinition with data.view, and save the result with saveAsTable, with a legend explaining each step.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .code, .code text { font-size: 13px; fill: #3a3a3d; }
+    .k { fill: #004b87; font-weight: 700; }
+    .s { fill: #a31515; }
+    .c { fill: #757579; }
+    .term { font-size: 15px; }
+    .desc { font-size: 18.5px; }
+    .sub { font-size: 14.3px; fill: #757579; }
+  </style>
+
+  <!-- Code panel: grey border showing on the left, background with rounded right corners -->
+  <g data-layer="panel">
+    <rect x="27" y="156" width="548" height="322" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 156 H572.14 A2.86 2.86 0 0 1 575 158.86 V475.14 A2.86 2.86 0 0 1 572.14 478 H31.28 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- Highlight bands: create, read, view, write -->
+  <g data-layer="band-create">
+    <rect x="41" y="208" width="524" height="20" rx="2.77" fill="#001d34" fill-opacity="0.12"/>
+  </g>
+  <g data-layer="band-read">
+    <rect x="41" y="268" width="524" height="80" rx="2.77" fill="#ffb81c" fill-opacity="0.3"/>
+  </g>
+  <g data-layer="band-view">
+    <rect x="41" y="388" width="524" height="20" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+  </g>
+  <g data-layer="band-write">
+    <rect x="41" y="448" width="524" height="20" rx="2.77" fill="#1e22aa" fill-opacity="0.15"/>
+  </g>
+
+  <!-- Code -->
+  <g data-layer="code" class="mono code">
+    <text x="47" y="182" xml:space="preserve"><tspan class="k">from</tspan> pathling <tspan class="k">import</tspan> PathlingContext</text>
+    <text x="47" y="222" xml:space="preserve">pc = PathlingContext.create()</text>
+    <text x="47" y="262" xml:space="preserve" class="c"># Read: NDJSON, Parquet, Delta, catalog tables, or a bulk export</text>
+    <text x="47" y="282" xml:space="preserve">data = pc.read.bulk(</text>
+    <text x="47" y="302" xml:space="preserve">    fhir_endpoint_url=<tspan class="s">"https://bulk-data.smarthealthit.org/fhir"</tspan>,</text>
+    <text x="47" y="322" xml:space="preserve">    types=[<tspan class="s">"Patient"</tspan>, <tspan class="s">"Observation"</tspan>],</text>
+    <text x="47" y="342" xml:space="preserve">)</text>
+    <text x="47" y="382" xml:space="preserve" class="c"># Project: run a ViewDefinition</text>
+    <text x="47" y="402" xml:space="preserve">bmi = data.view(<tspan class="s">"Observation"</tspan>, select=[...], where=[...])</text>
+    <text x="47" y="442" xml:space="preserve" class="c"># Use: Spark SQL, pandas or the catalog</text>
+    <text x="47" y="462" xml:space="preserve">bmi.write.saveAsTable(<tspan class="s">"bmi_view"</tspan>)</text>
+  </g>
+
+  <!-- Legend: colour bar and label per step -->
+  <g data-layer="key-create">
+    <rect x="597" y="198" width="10" height="40" rx="2.14" fill="#001d34"/>
+    <text x="617" y="213" class="desc"><tspan class="mono term">PathlingContext.create()</tspan></text>
+    <text x="617" y="233" class="sub">starts or reuses Spark</text>
+  </g>
+  <g data-layer="key-read">
+    <rect x="597" y="288" width="10" height="40" rx="2.14" fill="#ffb81c"/>
+    <text x="617" y="303" class="desc"><tspan class="mono term">pc.read.ndjson · .tables</tspan></text>
+    <text x="617" y="323" class="mono sub">.parquet · .delta · .bulk</text>
+  </g>
+  <g data-layer="key-view">
+    <rect x="597" y="378" width="10" height="40" rx="2.14" fill="#00a9ce"/>
+    <text x="617" y="393" class="desc">SQL on FHIR runner</text>
+    <text x="617" y="413" class="sub">→ Spark DataFrame</text>
+  </g>
+  <g data-layer="key-write">
+    <rect x="597" y="438" width="10" height="40" rx="2.14" fill="#1e22aa"/>
+    <text x="617" y="453" class="desc"><tspan class="mono term">saveAsTable · toPandas()</tspan></text>
+    <text x="617" y="473" class="mono sub">createOrReplaceTempView</text>
+  </g>
+</svg>

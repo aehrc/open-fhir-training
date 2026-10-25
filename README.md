@@ -250,6 +250,27 @@ Contributions are welcome! Please consider:
 - [Synthea Documentation](https://synthetichealth.github.io/synthea/)
 - [MIMIC-IV Documentation](https://mimic.mit.edu/docs/iv/)
 
+## Slides
+
+`slides/` builds the PowerPoint deck that introduces these exercises in Track 3
+(Data and Analytics) of the FHIR in Queensland Health Connectathon, October
+2026: FHIR Bulk Data Access, SQL on FHIR and Pathling, then a walkthrough of
+each exercise. It needs [uv](https://docs.astral.sh/uv/) and `deckcraft-cli`
+from [DeckCraft](https://github.com/storytold/deckcraft/releases) on the
+`PATH` (or set `DECKCRAFT_CLI`).
+
+```bash
+uv run slides/build.py deck      # writes slides/track-3-analytics.pptx
+uv run slides/build.py preview   # renders each slide to slides/build/preview
+```
+
+Each diagram and code example is an SVG in `slides/figures`, drawn in slide
+units (960 x 540) and rendered to PNG with the bundled Carlito and DejaVu Sans
+Mono fonts. A figure that builds over clicks is split into top-level
+`<g data-layer>` groups, one picture per layer. `slides/deck.py` lists the
+slides, their click builds and speaker notes (`[*]` marks a click).
+`slides/template.pptx` carries the AEHRC slide master and layouts.
+
 ## License
 
 Copyright © 2025, Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230. Licensed under the [Apache License, version 2.0](LICENSE).

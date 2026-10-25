@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "The exercises": a matrix of the four exercises (CSV to FHIR, importing
+  the datasets, prostate cancer risk factors, pulse oximetry bias) against the
+  concepts each one uses (FHIR resources, NDJSON, Pathling encoders,
+  ViewDefinitions, SQL over views), with the two datasets beneath.
+  Not layered: the whole figure appears at once.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 144 918 356" width="918" height="356">
+  <title>Matrix of the four exercises against the concepts they use: 1 CSV to FHIR uses FHIR resources, NDJSON and Pathling encoders; 2 Import the datasets uses NDJSON and Pathling encoders; 3 Prostate cancer risk factors and 4 Pulse oximetry bias use ViewDefinitions and SQL over views and read FHIR resources. The datasets are Synthea AU, about 8,000 synthetic Queensland patients conforming to AU Core, and the MIMIC-IV demo on FHIR, de-identified ICU records.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .muted { fill: #757579; }
+    .col { font-size: 15px; }
+    .num { font-size: 16px; }
+    .title { font-size: 18.5px; }
+    .path { font-size: 12px; }
+    .note { font-size: 14.3px; }
+    .chip { font-size: 16px; }
+  </style>
+  <!-- Column backgrounds and headers -->
+  <g fill="#f6f7f8">
+    <rect x="452" y="150" width="92" height="304" rx="7.14"/>
+    <rect x="550" y="150" width="92" height="304" rx="7.14"/>
+    <rect x="648" y="150" width="92" height="304" rx="7.14"/>
+    <rect x="746" y="150" width="92" height="304" rx="7.14"/>
+    <rect x="844" y="150" width="92" height="304" rx="7.14"/>
+  </g>
+  <text x="498" y="170" class="b mid col">FHIR</text>
+  <text x="498" y="188" class="b mid col">resources</text>
+  <text x="596" y="188" class="b mid col">NDJSON</text>
+  <text x="694" y="170" class="b mid col">Pathling</text>
+  <text x="694" y="188" class="b mid col">encoders</text>
+  <text x="792" y="188" class="b mid col">ViewDefinitions</text>
+  <text x="890" y="170" class="b mid col">SQL over</text>
+  <text x="890" y="188" class="b mid col">views</text>
+
+  <!-- Key to the dots -->
+  <circle cx="35" cy="183" r="6.5" fill="#00a9ce"/>
+  <text x="48" y="188" class="muted note">focus of the exercise</text>
+  <circle cx="190" cy="183" r="5.75" fill="#ffffff" stroke="#00a9ce" stroke-width="2"/>
+  <text x="203" y="188" class="muted note">also used</text>
+
+  <!-- Row rules -->
+  <g stroke="#dadbdc" stroke-width="1.5">
+    <path d="M27 196 H939"/>
+    <path d="M27 260 H939"/>
+    <path d="M27 324 H939"/>
+    <path d="M27 388 H939"/>
+    <path d="M27 452 H939"/>
+  </g>
+
+  <!-- Exercise 1: CSV to FHIR -->
+  <circle cx="41" cy="215" r="13" fill="#00a9ce"/>
+  <text x="41" y="220.5" class="b white mid num">1</text>
+  <text x="64" y="221" class="b title">CSV to FHIR</text>
+  <text x="64" y="238" class="mono muted path">notebooks/csv_to_fhir/transform_csv_to_fhir.py</text>
+  <circle cx="498" cy="228.0" r="9.5" fill="#00a9ce"/>
+  <circle cx="596" cy="228.0" r="9.5" fill="#00a9ce"/>
+  <circle cx="694" cy="228.0" r="9.5" fill="#00a9ce"/>
+
+  <!-- Exercise 2: Import the datasets -->
+  <circle cx="41" cy="279" r="13" fill="#00a9ce"/>
+  <text x="41" y="284.5" class="b white mid num">2</text>
+  <text x="64" y="285" class="b title">Import the datasets</text>
+  <text x="64" y="302" class="mono muted path">notebooks/synthea/import_synthea.py ·</text>
+  <text x="64" y="317" class="mono muted path">notebooks/mimic_iv/import_mimic_iv_demo.py</text>
+  <circle cx="596" cy="292.0" r="9.5" fill="#00a9ce"/>
+  <circle cx="694" cy="292.0" r="9.5" fill="#00a9ce"/>
+
+  <!-- Exercise 3: Prostate cancer risk factors -->
+  <circle cx="41" cy="343" r="13" fill="#00a9ce"/>
+  <text x="41" y="348.5" class="b white mid num">3</text>
+  <text x="64" y="349" class="b title">Prostate cancer risk factors</text>
+  <text x="64" y="366" class="mono muted path">notebooks/synthea/create_prostate_cancer_views.py ·</text>
+  <text x="64" y="381" class="mono muted path">sql/synthea/</text>
+  <circle cx="498" cy="356.0" r="8.5" fill="#ffffff" stroke="#00a9ce" stroke-width="2.5"/>
+  <circle cx="792" cy="356.0" r="9.5" fill="#00a9ce"/>
+  <circle cx="890" cy="356.0" r="9.5" fill="#00a9ce"/>
+
+  <!-- Exercise 4: Pulse oximetry bias -->
+  <circle cx="41" cy="407" r="13" fill="#00a9ce"/>
+  <text x="41" y="412.5" class="b white mid num">4</text>
+  <text x="64" y="413" class="b title">Pulse oximetry bias</text>
+  <text x="64" y="430" class="mono muted path">notebooks/mimic_iv/create_spo2_views.py ·</text>
+  <text x="64" y="445" class="mono muted path">sql/mimic_iv/</text>
+  <circle cx="498" cy="420.0" r="8.5" fill="#ffffff" stroke="#00a9ce" stroke-width="2.5"/>
+  <circle cx="792" cy="420.0" r="9.5" fill="#00a9ce"/>
+  <circle cx="890" cy="420.0" r="9.5" fill="#00a9ce"/>
+
+  <!-- Datasets -->
+  <rect x="27" y="464" width="461" height="32" rx="16" fill="#e0f5fa"/>
+  <text x="41" y="485.5" class="chip"><tspan class="b">Synthea AU</tspan> · about 8,000 synthetic Queensland patients · AU Core</text>
+  <rect x="500" y="464" width="363" height="32" rx="16" fill="#e8e9f7"/>
+  <text x="514" y="485.5" class="chip"><tspan class="b">MIMIC-IV demo on FHIR</tspan> · de-identified ICU records</text>
+</svg>

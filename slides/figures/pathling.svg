@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "Pathling": the Pathling library (encoders, data in and out, bulk
+  export client, SQL on FHIR runner, FHIRPath, terminology functions) sits on
+  Apache Spark, with Python, R, Java · Scala and CLI interfaces above it and the
+  Pathling server alongside.
+  The figure is split into layers that build up over clicks: the library on
+  Spark, then the interfaces, then the server.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 144 918 356" width="918" height="356">
+  <title>Pathling architecture: a library of six components (encoders, data in and out, bulk export client, SQL on FHIR runner, FHIRPath and terminology functions) running on Apache Spark, used from Python, R, Java, Scala or the CLI, and a Pathling server offering $export, $import, $sql-run and $sql-export.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .light { fill: #dadbdc; }
+    .pale { fill: #e0f5fa; }
+    .muted { fill: #757579; }
+    .teal { fill: #00a9ce; }
+    .blue { fill: #1e22aa; }
+    .head { font-size: 20px; }
+    .name { font-size: 18.5px; }
+    .sub { font-size: 14.3px; }
+    .code { font-size: 13px; }
+    .op { font-size: 16px; }
+  </style>
+
+  <!-- Library: Spark foundation bar, library panel and its six component tiles -->
+  <g data-layer="library">
+    <rect x="27" y="446" width="906" height="50" rx="7.14" fill="#001d34"/>
+    <text x="480" y="467.5" class="b white mid head">Apache Spark</text>
+    <text x="480" y="487" class="light mid sub">laptop · Databricks · any Spark cluster</text>
+
+    <rect x="27" y="198" width="662" height="236" rx="10" fill="#e0f5fa"/>
+    <text x="43" y="225" class="b teal head">Pathling library</text>
+    <g fill="#00a9ce">
+      <rect x="43" y="238" width="202" height="82" rx="7.14"/>
+      <rect x="257" y="238" width="202" height="82" rx="7.14"/>
+      <rect x="471" y="238" width="202" height="82" rx="7.14"/>
+      <rect x="43" y="332" width="202" height="82" rx="7.14"/>
+      <rect x="257" y="332" width="202" height="82" rx="7.14"/>
+      <rect x="471" y="332" width="202" height="82" rx="7.14"/>
+    </g>
+    <text x="55" y="265" class="b white name">Encoders</text>
+    <text x="55" y="287" class="pale sub">FHIR JSON and XML</text>
+    <text x="55" y="305" class="pale sub">→ Spark DataFrames</text>
+
+    <text x="269" y="265" class="b white name">Data in and out</text>
+    <text x="269" y="287" class="pale sub">NDJSON · Bundles · Parquet</text>
+    <text x="269" y="305" class="pale sub">Delta · catalog tables</text>
+
+    <text x="483" y="265" class="b white name">Bulk export client</text>
+    <text x="483" y="288" class="mono pale code">pc.read.bulk</text>
+
+    <text x="55" y="359" class="b white name">SQL on FHIR runner</text>
+    <text x="55" y="381" class="pale sub">ViewDefinitions →</text>
+    <text x="55" y="399" class="pale sub">DataFrames</text>
+
+    <text x="269" y="359" class="b white name">FHIRPath</text>
+    <text x="269" y="381" class="pale sub">expressions as Spark columns</text>
+
+    <text x="483" y="359" class="b white name">Terminology functions</text>
+    <text x="483" y="382" class="mono pale code">member_of · subsumes</text>
+    <text x="483" y="400" class="mono pale code">translate · display</text>
+  </g>
+
+  <!-- Interfaces: language bindings and the command line -->
+  <g data-layer="interfaces">
+    <g fill="#001d34">
+      <rect x="27" y="150" width="156.5" height="36" rx="18"/>
+      <rect x="195.5" y="150" width="156.5" height="36" rx="18"/>
+      <rect x="364" y="150" width="156.5" height="36" rx="18"/>
+      <rect x="532.5" y="150" width="156.5" height="36" rx="18"/>
+    </g>
+    <text x="105.25" y="174.5" class="b white mid name">Python</text>
+    <text x="273.75" y="174.5" class="b white mid name">R</text>
+    <text x="442.25" y="174.5" class="b white mid name">Java · Scala</text>
+    <text x="610.75" y="174.5" class="b white mid name">CLI</text>
+  </g>
+
+  <!-- Server: deployable FHIR server with bulk and SQL on FHIR operations -->
+  <g data-layer="server">
+    <rect x="713" y="150" width="220" height="284" rx="10" fill="#e8e9f7"/>
+    <text x="729" y="180" class="b blue head">Pathling server</text>
+    <text x="729" y="201" class="muted sub">Docker · Kubernetes</text>
+    <g fill="#1e22aa">
+      <rect x="729" y="218" width="188" height="42" rx="7.14"/>
+      <rect x="729" y="270" width="188" height="42" rx="7.14"/>
+      <rect x="729" y="322" width="188" height="42" rx="7.14"/>
+      <rect x="729" y="374" width="188" height="42" rx="7.14"/>
+    </g>
+    <text x="823" y="244.5" class="mono b white mid op">$export</text>
+    <text x="823" y="296.5" class="mono b white mid op">$import</text>
+    <text x="823" y="348.5" class="mono b white mid op">$sql-run</text>
+    <text x="823" y="400.5" class="mono b white mid op">$sql-export</text>
+  </g>
+</svg>

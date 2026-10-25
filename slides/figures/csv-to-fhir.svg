@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "1 · CSV to FHIR": one illustrative row of the Synthea patients CSV,
+  the PySpark select that reshapes it (abridged from
+  notebooks/csv_to_fhir/transform_csv_to_fhir.py), and the Patient resource it
+  becomes in Patient.ndjson, with the steps of the exercise beneath.
+  The figure is split into layers that build up over clicks: the CSV, the code,
+  the JSON, then the steps.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 144 918 356" width="918" height="356">
+  <title>CSV to FHIR: a row of patients.csv (Id, BIRTHDATE, FIRST, LAST, GENDER, ADDRESS, CITY, STATE, ZIP) is reshaped by PySpark column expressions, mapping GENDER M to male and building an address struct, into a FHIR Patient resource in Patient.ndjson; the exercise steps are Patient, Encounter and Immunization, NDJSON files, a referential integrity check, pc.encode and Delta tables.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .muted { fill: #757579; }
+    .code, .code text { font-size: 11.4px; fill: #3a3a3d; }
+    .k { fill: #004b87; }
+    .s { fill: #a31515; }
+    .cell { font-size: 12px; }
+    .file { font-size: 15px; }
+    .head { font-size: 18.5px; }
+    .sub { font-size: 14.3px; }
+    .step { font-size: 15px; }
+    .stepcode { font-size: 13px; }
+  </style>
+
+  <!-- CSV: one row of patients.csv, shown transposed -->
+  <g data-layer="csv">
+    <text x="27" y="170" class="mono b file">patients.csv</text>
+    <rect x="27" y="182" width="220" height="234" rx="5.73" fill="#f6f7f8"/>
+    <path d="M32.73 182 H113 V416 H32.73 A5.73 5.73 0 0 1 27 410.27 V187.73 A5.73 5.73 0 0 1 32.73 182 Z" fill="#00a9ce"/>
+    <g stroke="#ffffff" stroke-width="1.5">
+      <path d="M27 208 H247"/>
+      <path d="M27 234 H247"/>
+      <path d="M27 260 H247"/>
+      <path d="M27 286 H247"/>
+      <path d="M27 312 H247"/>
+      <path d="M27 338 H247"/>
+      <path d="M27 364 H247"/>
+      <path d="M27 390 H247"/>
+    </g>
+    <text x="37" y="199.5" class="mono b white cell">Id</text>
+    <text x="123" y="199.5" class="mono cell">10abe016-…</text>
+    <text x="37" y="225.5" class="mono b white cell">BIRTHDATE</text>
+    <text x="123" y="225.5" class="mono cell">1994-07-01</text>
+    <text x="37" y="251.5" class="mono b white cell">FIRST</text>
+    <text x="123" y="251.5" class="mono cell">Jeramy610</text>
+    <text x="37" y="277.5" class="mono b white cell">LAST</text>
+    <text x="123" y="277.5" class="mono cell">Will178</text>
+    <text x="37" y="303.5" class="mono b white cell">GENDER</text>
+    <text x="123" y="303.5" class="mono cell">M</text>
+    <text x="37" y="329.5" class="mono b white cell">ADDRESS</text>
+    <text x="123" y="329.5" class="mono cell">782 Howell Port</text>
+    <text x="37" y="355.5" class="mono b white cell">CITY</text>
+    <text x="123" y="355.5" class="mono cell">Cannon Hill</text>
+    <text x="37" y="381.5" class="mono b white cell">STATE</text>
+    <text x="123" y="381.5" class="mono cell">Queensland</text>
+    <text x="37" y="407.5" class="mono b white cell">ZIP</text>
+    <text x="123" y="407.5" class="mono cell">4170</text>
+    <text x="27" y="434" class="muted sub">illustrative row</text>
+  </g>
+
+  <!-- Code: the PySpark select, abridged -->
+  <g data-layer="code">
+    <path d="M251 300 H267" stroke="#757579" stroke-width="6"/>
+    <path d="M287 300 L265 288 L265 312 Z" fill="#757579"/>
+    <text x="291" y="170" class="b head">PySpark</text>
+    <rect x="291" y="182" width="355" height="254" rx="2.85" fill="#dadbdc"/>
+    <path d="M295.28 182 H643.14 A2.86 2.86 0 0 1 646 184.86 V433.14 A2.86 2.86 0 0 1 643.14 436 H295.28 Z" fill="#f6f7f8"/>
+    <g class="mono code">
+      <text x="307" y="202" xml:space="preserve">patient_fhir_df = patients_df.select(</text>
+      <text x="307" y="216" xml:space="preserve">    col(<tspan class="s">"Id"</tspan>).alias(<tspan class="s">"id"</tspan>),</text>
+      <text x="307" y="230" xml:space="preserve">    lit(<tspan class="s">"Patient"</tspan>).alias(<tspan class="s">"resourceType"</tspan>),</text>
+      <text x="307" y="244" xml:space="preserve">    …</text>
+      <text x="307" y="258" xml:space="preserve">    when(col(<tspan class="s">"GENDER"</tspan>) == <tspan class="s">"M"</tspan>, lit(<tspan class="s">"male"</tspan>))</text>
+      <text x="307" y="272" xml:space="preserve">    .when(col(<tspan class="s">"GENDER"</tspan>) == <tspan class="s">"F"</tspan>, lit(<tspan class="s">"female"</tspan>))</text>
+      <text x="307" y="286" xml:space="preserve">    .otherwise(lit(<tspan class="s">"unknown"</tspan>))</text>
+      <text x="307" y="300" xml:space="preserve">    .alias(<tspan class="s">"gender"</tspan>),</text>
+      <text x="307" y="314" xml:space="preserve">    col(<tspan class="s">"BIRTHDATE"</tspan>).alias(<tspan class="s">"birthDate"</tspan>),</text>
+      <text x="307" y="328" xml:space="preserve">    …</text>
+      <text x="307" y="342" xml:space="preserve">            struct(</text>
+      <text x="307" y="356" xml:space="preserve">                …</text>
+      <text x="307" y="370" xml:space="preserve">                col(<tspan class="s">"CITY"</tspan>).alias(<tspan class="s">"city"</tspan>),</text>
+      <text x="307" y="384" xml:space="preserve">                col(<tspan class="s">"STATE"</tspan>).alias(<tspan class="s">"state"</tspan>),</text>
+      <text x="307" y="398" xml:space="preserve">                col(<tspan class="s">"ZIP"</tspan>).alias(<tspan class="s">"postalCode"</tspan>),</text>
+      <text x="307" y="412" xml:space="preserve">            …</text>
+      <text x="307" y="426" xml:space="preserve">    ).alias(<tspan class="s">"address"</tspan>),</text>
+    </g>
+  </g>
+
+  <!-- JSON: the resulting Patient resource -->
+  <g data-layer="json">
+    <path d="M650 300 H666" stroke="#757579" stroke-width="6"/>
+    <path d="M686 300 L664 288 L664 312 Z" fill="#757579"/>
+    <text x="690" y="170" class="mono b file">Patient.ndjson</text>
+    <rect x="690" y="182" width="249" height="254" rx="2.85" fill="#dadbdc"/>
+    <path d="M694.28 182 H936.14 A2.86 2.86 0 0 1 939 184.86 V433.14 A2.86 2.86 0 0 1 936.14 436 H694.28 Z" fill="#f6f7f8"/>
+    <g class="mono code">
+      <text x="706" y="202" xml:space="preserve">{</text>
+      <text x="706" y="216" xml:space="preserve">  <tspan class="k">"resourceType"</tspan>: <tspan class="s">"Patient"</tspan>,</text>
+      <text x="706" y="230" xml:space="preserve">  <tspan class="k">"id"</tspan>: <tspan class="s">"10abe016-…"</tspan>,</text>
+      <text x="706" y="244" xml:space="preserve">  <tspan class="k">"name"</tspan>: [{</text>
+      <text x="706" y="258" xml:space="preserve">    <tspan class="k">"use"</tspan>: <tspan class="s">"official"</tspan>,</text>
+      <text x="706" y="272" xml:space="preserve">    <tspan class="k">"family"</tspan>: <tspan class="s">"Will178"</tspan>,</text>
+      <text x="706" y="286" xml:space="preserve">    <tspan class="k">"given"</tspan>: [<tspan class="s">"Jeramy610"</tspan>]</text>
+      <text x="706" y="300" xml:space="preserve">  }],</text>
+      <text x="706" y="314" xml:space="preserve">  <tspan class="k">"gender"</tspan>: <tspan class="s">"male"</tspan>,</text>
+      <text x="706" y="328" xml:space="preserve">  <tspan class="k">"birthDate"</tspan>: <tspan class="s">"1994-07-01"</tspan>,</text>
+      <text x="706" y="342" xml:space="preserve">  <tspan class="k">"address"</tspan>: [{</text>
+      <text x="706" y="356" xml:space="preserve">    <tspan class="k">"line"</tspan>: [<tspan class="s">"782 Howell Port"</tspan>],</text>
+      <text x="706" y="370" xml:space="preserve">    <tspan class="k">"city"</tspan>: <tspan class="s">"Cannon Hill"</tspan>,</text>
+      <text x="706" y="384" xml:space="preserve">    <tspan class="k">"state"</tspan>: <tspan class="s">"Queensland"</tspan>,</text>
+      <text x="706" y="398" xml:space="preserve">    <tspan class="k">"postalCode"</tspan>: <tspan class="s">"4170"</tspan></text>
+      <text x="706" y="412" xml:space="preserve">  }]</text>
+      <text x="706" y="426" xml:space="preserve">}</text>
+    </g>
+  </g>
+
+  <!-- Steps of the exercise -->
+  <g data-layer="steps">
+    <rect x="27.00" y="454" width="240" height="36" rx="18" fill="#e6e9ec"/>
+    <text x="147.00" y="477.5" class="mid step">Patient · Encounter · Immunization</text>
+    <path d="M275.00 472 H289.25" stroke="#757579" stroke-width="2.25"/>
+    <path d="M298.25 472 L287.51 466.63 L287.51 477.37 Z" fill="#757579"/>
+    <rect x="306.25" y="454" width="106" height="36" rx="18" fill="#e6e9ec"/>
+    <text x="359.25" y="477.5" class="mid step">NDJSON files</text>
+    <path d="M420.25 472 H434.50" stroke="#757579" stroke-width="2.25"/>
+    <path d="M443.50 472 L432.76 466.63 L432.76 477.37 Z" fill="#757579"/>
+    <rect x="451.50" y="454" width="186" height="36" rx="18" fill="#e6e9ec"/>
+    <text x="544.50" y="477.5" class="mid step">referential integrity check</text>
+    <path d="M645.50 472 H659.75" stroke="#757579" stroke-width="2.25"/>
+    <path d="M668.75 472 L658.01 466.63 L658.01 477.37 Z" fill="#757579"/>
+    <rect x="676.75" y="454" width="122" height="36" rx="18" fill="#00a9ce"/>
+    <text x="737.75" y="477.5" class="mid mono stepcode white b">pc.encode(…)</text>
+    <path d="M806.75 472 H821.00" stroke="#757579" stroke-width="2.25"/>
+    <path d="M830.00 472 L819.26 466.63 L819.26 477.37 Z" fill="#757579"/>
+    <rect x="838.00" y="454" width="101" height="36" rx="18" fill="#001d34"/>
+    <text x="888.50" y="477.5" class="mid step white b">Delta tables</text>
+  </g>
+</svg>

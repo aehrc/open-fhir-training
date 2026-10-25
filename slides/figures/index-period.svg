@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "4 · The index period": a timeline for one ICU stay. The index period
+  runs from ICU admission to the earliest of the first ventilation beyond
+  supplemental oxygen, discharge and admission + 5 days (here, ventilation),
+  and must last at least 12 hours. SpO2, SaO2 and O2 flow readings are kept
+  only inside it, and the SQL from st_subject.sql that computes the end is
+  shown beneath.
+  Layers, bottom first: timeline (axis, admission, end markers, band),
+  readings (the three rows of readings), sql (SQL strip and cohort note).
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Timeline of one ICU stay: the index period runs from ICU admission to the earliest of first ventilation beyond supplemental oxygen, discharge and admission plus 5 days, lasts at least 12 hours, and contains SpO2, SaO2 and nasal cannula O2 flow readings; the SQL GREATEST(admittime, LEAST(dischtime, COALESCE(inttime, dischtime), admittime + INTERVAL 5 DAYS)) computes its end.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono, .mono text { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .label { font-size: 17px; font-weight: 700; }
+    .desc { font-size: 16.5px; }
+    .id { font-size: 11.41px; fill: #757579; }
+    .term { font-size: 14px; }
+    .sub { font-size: 14.27px; fill: #757579; }
+    .code { font-size: 12.55px; fill: #3a3a3d; }
+    .k { fill: #004b87; }
+  </style>
+
+  <g data-layer="timeline">
+    <!-- Index period band, sitting on the axis -->
+    <rect x="60" y="213" width="340" height="37" fill="#00a9ce" fill-opacity="0.25"/>
+    <text x="74" y="237.5" class="desc b" style="fill: #007377">index period · at least 12 hours</text>
+
+    <!-- Axis -->
+    <line x1="40" y1="250" x2="916" y2="250" stroke="#757579" stroke-width="2"/>
+    <path d="M915 244 L927 250 L915 256 Z" fill="#757579"/>
+
+    <!-- ICU admission -->
+    <line x1="60" y1="206" x2="60" y2="258" stroke="#001d34" stroke-width="2.5"/>
+    <text x="60" y="182" class="label">ICU admission</text>
+    <text x="60" y="200" class="mono id">admittime</text>
+
+    <!-- First ventilation beyond supplemental oxygen: the earliest end here -->
+    <line x1="400" y1="206" x2="400" y2="258" stroke="#007377" stroke-width="2.5"/>
+    <text x="400" y="164" text-anchor="middle" class="label">first ventilation beyond supplemental oxygen</text>
+    <text x="400" y="182" text-anchor="middle" class="mono id">Tracheostomy, InvasiveVent, NonInvasiveVent or HFNC</text>
+    <text x="400" y="200" text-anchor="middle" class="mono id">inttime</text>
+
+    <!-- Discharge -->
+    <line x1="660" y1="206" x2="660" y2="258" stroke="#757579" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="660" y="182" text-anchor="middle" class="label">discharge</text>
+    <text x="660" y="200" text-anchor="middle" class="mono id">dischtime</text>
+
+    <!-- Admission + 5 days -->
+    <line x1="860" y1="206" x2="860" y2="258" stroke="#757579" stroke-width="1.8" stroke-dasharray="4 3"/>
+    <text x="860" y="182" text-anchor="middle" class="label">admission + 5 days</text>
+    <text x="860" y="200" text-anchor="middle" class="mono id">+ INTERVAL 5 DAYS</text>
+
+    <!-- Period bounds as named in st_subject -->
+    <text x="60" y="268" class="mono id">ip_starttime</text>
+    <text x="400" y="268" text-anchor="end" class="mono id">ip_endtime</text>
+    <text x="933" y="274" text-anchor="end" class="sub">the period ends at whichever comes first</text>
+  </g>
+
+  <g data-layer="readings">
+    <!-- Readings are kept BETWEEN ip_starttime AND ip_endtime -->
+    <path d="M60 278 V376 M400 278 V376" stroke="#757579" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="60" y1="294" x2="400" y2="294" stroke="#e6e9ec" stroke-width="1.5"/>
+    <rect x="66.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="80.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="94.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="108.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="122.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="136.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="150.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="164.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="178.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="192.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="206.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="220.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="234.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="248.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="262.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="276.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="290.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="304.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="318.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="332.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="346.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="360.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="374.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <rect x="388.5" y="286" width="3" height="16" rx="1.5" fill="#00a9ce"/>
+    <text x="420" y="299.5" class="desc"><tspan class="b">SpO2</tspan> · pulse oximeter · item <tspan class="mono term">220277</tspan></text>
+    <line x1="60" y1="328" x2="400" y2="328" stroke="#e6e9ec" stroke-width="1.5"/>
+    <rect x="94.5" y="320" width="3" height="16" rx="1.5" fill="#6d2077"/>
+    <rect x="169.5" y="320" width="3" height="16" rx="1.5" fill="#6d2077"/>
+    <rect x="236.5" y="320" width="3" height="16" rx="1.5" fill="#6d2077"/>
+    <rect x="303.5" y="320" width="3" height="16" rx="1.5" fill="#6d2077"/>
+    <rect x="370.5" y="320" width="3" height="16" rx="1.5" fill="#6d2077"/>
+    <text x="420" y="333.5" class="desc"><tspan class="b">SaO2</tspan> · arterial blood gas · item <tspan class="mono term">50817</tspan>, specimen <tspan class="mono term">ART.</tspan></text>
+    <line x1="60" y1="362" x2="400" y2="362" stroke="#e6e9ec" stroke-width="1.5"/>
+    <rect x="82.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="128.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="150.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="212.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="260.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="288.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="334.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <rect x="382.5" y="354" width="3" height="16" rx="1.5" fill="#e87722"/>
+    <text x="420" y="367.5" class="desc"><tspan class="b">O2 flow</tspan> · nasal cannula · ≤ 6 L/min</text>
+  </g>
+
+  <g data-layer="sql">
+    <!-- Code panel: grey border showing on the left, background with rounded right corners -->
+    <rect x="27" y="392" width="906" height="56" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 392 H930.14 A2.86 2.86 0 0 1 933 394.86 V445.14 A2.86 2.86 0 0 1 930.14 448 H31.28 Z" fill="#f6f7f8"/>
+    <g class="mono code">
+      <text x="44" y="415" xml:space="preserve"><tspan class="k">GREATEST</tspan>(admittime, <tspan class="k">LEAST</tspan>(dischtime, <tspan class="k">COALESCE</tspan>(inttime, dischtime), admittime + <tspan class="k">INTERVAL</tspan> 5 <tspan class="k">DAYS</tspan>)) <tspan class="k">AS</tspan> ip_endtime</text>
+      <text x="44" y="434" xml:space="preserve"><tspan class="k">WHERE</tspan> … <tspan class="k">AND</tspan> (ip_endtime - ip_starttime) &gt;= <tspan class="k">INTERVAL</tspan> 12 <tspan class="k">HOURS</tspan></text>
+    </g>
+    <text x="27" y="472" class="sub"><tspan class="mono" style="font-size: 12.55px">coh_subject</tspan> keeps subjects with all three readings</text>
+  </g>
+</svg>

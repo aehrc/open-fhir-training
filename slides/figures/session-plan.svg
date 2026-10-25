@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "This session": the standards and tools taught (FHIR Bulk Data Access,
+  SQL on FHIR, Pathling) beside the four exercises, with a closing strip for
+  the pick-your-own-adventure time.
+  Split into layers that build up over clicks: standards, then exercises,
+  then the adventure strip.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Session plan: the standards and tools (FHIR Bulk Data Access, SQL on FHIR and Pathling), the four exercises (CSV to FHIR, importing Synthea AU and MIMIC-IV, prostate cancer risk factors, pulse oximetry bias), then pick your own adventure.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .muted { fill: #757579; }
+    .teal { fill: #00a9ce; }
+    .blue { fill: #1e22aa; }
+    .head { font-size: 25.68px; }
+    .name { font-size: 20px; }
+    .sub { font-size: 16.41px; }
+    .num { font-size: 18.55px; }
+    .cta { font-size: 23px; }
+  </style>
+
+  <!-- Standards and tools -->
+  <g data-layer="standards">
+    <rect x="27" y="148" width="447" height="270" rx="10" fill="#e0f5fa"/>
+    <text x="49" y="188" class="b teal head">Standards and tools</text>
+    <g fill="#00a9ce">
+      <rect x="49" y="212" width="9.99" height="44" rx="2.14"/>
+      <rect x="49" y="279" width="9.99" height="44" rx="2.14"/>
+      <rect x="49" y="346" width="9.99" height="44" rx="2.14"/>
+    </g>
+    <text x="73" y="229" class="b name">FHIR Bulk Data Access</text>
+    <text x="73" y="252" class="muted sub">getting data out of a FHIR server</text>
+    <text x="73" y="296" class="b name">SQL on FHIR</text>
+    <text x="73" y="319" class="muted sub">flattening resources into tables</text>
+    <text x="73" y="363" class="b name">Pathling</text>
+    <text x="73" y="386" class="muted sub">running both at scale on Apache Spark</text>
+  </g>
+
+  <!-- The exercises -->
+  <g data-layer="exercises">
+    <rect x="486" y="148" width="447" height="270" rx="10" fill="#e8e9f7"/>
+    <text x="508" y="188" class="b blue head">The exercises</text>
+    <g fill="#1e22aa">
+      <circle cx="523" cy="226" r="15"/>
+      <circle cx="523" cy="276" r="15"/>
+      <circle cx="523" cy="326" r="15"/>
+      <circle cx="523" cy="376" r="15"/>
+    </g>
+    <text x="523" y="232.4" class="b white mid num">1</text>
+    <text x="523" y="282.4" class="b white mid num">2</text>
+    <text x="523" y="332.4" class="b white mid num">3</text>
+    <text x="523" y="382.4" class="b white mid num">4</text>
+    <text x="550" y="233" class="b name">CSV to FHIR</text>
+    <text x="550" y="283" class="b name">Importing Synthea AU and MIMIC-IV</text>
+    <text x="550" y="333" class="b name">Prostate cancer risk factors</text>
+    <text x="550" y="383" class="b name">Pulse oximetry bias</text>
+  </g>
+
+  <!-- Pick your own adventure -->
+  <g data-layer="adventure">
+    <rect x="27" y="434" width="906" height="58" rx="7.13" fill="#e87722"/>
+    <text x="480" y="470.5" class="b white mid cta">Then: pick your own adventure</text>
+  </g>
+</svg>

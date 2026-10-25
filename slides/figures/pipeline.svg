@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "From FHIR server to analysis": the chain FHIR server → NDJSON files →
+  Spark tables → flat views → answers, with the standard or tool that does each
+  step labelled above its arrow, and brackets beneath showing which exercise
+  covers which span (a CSV stub feeds NDJSON for exercise 1).
+  Split into layers that build up over clicks: export, encode, views, sql,
+  then the exercises.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Pipeline from a FHIR server to analysis: Bulk Data $export produces NDJSON files, Pathling encoders load them into Spark tables, SQL on FHIR ViewDefinitions flatten them into views, and SQL turns the views into answers; exercise 1 converts CSV to FHIR, exercise 2 imports NDJSON into Spark tables, and exercises 3 and 4 go from Spark tables to answers.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .light { fill: #dadbdc; }
+    .muted { fill: #757579; }
+    .orange { fill: #e87722; }
+    .teal { fill: #00a9ce; }
+    .blue { fill: #1e22aa; }
+    .name { font-size: 20px; }
+    .sub { font-size: 14.28px; }
+    .tool { font-size: 17px; }
+    .code { font-size: 15.5px; }
+    .ex { font-size: 18.55px; }
+    .num { font-size: 15px; }
+  </style>
+
+  <!-- Export: FHIR server, Bulk Data $export, NDJSON files -->
+  <g data-layer="export">
+    <rect x="27" y="222" width="156" height="90" rx="7.14" fill="#001d34"/>
+    <text x="105" y="274" class="b white mid name">FHIR server</text>
+
+    <text x="198.75" y="184" class="b orange mid tool">Bulk Data</text>
+    <text x="198.75" y="205" class="mono b orange mid code">$export</text>
+    <path d="M186 267 H203" stroke="#e87722" stroke-width="4"/>
+    <path d="M212 267 L201 260 L201 274 Z" fill="#e87722"/>
+
+    <rect x="214.5" y="222" width="156" height="90" rx="7.14" fill="#001d34"/>
+    <text x="292.5" y="263" class="b white mid name">NDJSON files</text>
+    <text x="292.5" y="285" class="light mid sub">one resource per line</text>
+  </g>
+
+  <!-- Encode: Pathling encoders, Spark tables -->
+  <g data-layer="encode">
+    <text x="386.25" y="184" class="b mid tool">Pathling</text>
+    <text x="386.25" y="205" class="b mid tool">encoders</text>
+    <path d="M373.5 267 H390.5" stroke="#757579" stroke-width="4"/>
+    <path d="M399.5 267 L388.5 260 L388.5 274 Z" fill="#757579"/>
+
+    <rect x="402" y="222" width="156" height="90" rx="7.14" fill="#001d34"/>
+    <text x="480" y="263" class="b white mid name">Spark tables</text>
+    <text x="480" y="285" class="light mid sub">Delta · Parquet</text>
+  </g>
+
+  <!-- Views: SQL on FHIR ViewDefinitions, flat views -->
+  <g data-layer="views">
+    <text x="573.75" y="184" class="b teal mid tool">SQL on FHIR</text>
+    <text x="573.75" y="205" class="b teal mid tool">ViewDefinitions</text>
+    <path d="M561 267 H578" stroke="#00a9ce" stroke-width="4"/>
+    <path d="M587 267 L576 260 L576 274 Z" fill="#00a9ce"/>
+
+    <rect x="589.5" y="222" width="156" height="90" rx="7.14" fill="#00a9ce"/>
+    <text x="667.5" y="263" class="b white mid name">Flat views</text>
+    <text x="667.5" y="285" class="white mid sub">one row per thing</text>
+  </g>
+
+  <!-- SQL: answers -->
+  <g data-layer="sql">
+    <text x="761.25" y="205" class="b blue mid tool">SQL</text>
+    <path d="M748.5 267 H765.5" stroke="#1e22aa" stroke-width="4"/>
+    <path d="M774.5 267 L763.5 260 L763.5 274 Z" fill="#1e22aa"/>
+
+    <rect x="777" y="222" width="156" height="90" rx="7.14" fill="#1e22aa"/>
+    <text x="855" y="263" class="b white mid name">Answers</text>
+    <text x="855" y="285" class="white mid sub">cohorts · tables · charts</text>
+  </g>
+
+  <!-- Exercises: CSV stub feeding NDJSON, and brackets for each exercise's span -->
+  <g data-layer="exercises">
+    <rect x="80" y="340" width="76" height="36" rx="5.73" fill="#e6e9ec"/>
+    <text x="118" y="364.5" class="b mid ex">CSV</text>
+    <path d="M159 358 H292.5 V327" stroke="#757579" stroke-width="2.25" fill="none"/>
+    <path d="M292.5 316 L286.5 328 L298.5 328 Z" fill="#757579"/>
+
+    <g stroke="#757579" stroke-width="2" fill="none">
+      <path d="M118 400 V412 H286.5 V400"/>
+      <path d="M298.5 400 V412 H474 V400"/>
+      <path d="M486 400 V412 H855 V400"/>
+    </g>
+    <g fill="#1e22aa">
+      <circle cx="154" cy="440" r="11.5"/>
+      <circle cx="356.5" cy="440" r="11.5"/>
+      <circle cx="522.25" cy="440" r="11.5"/>
+      <circle cx="699" cy="440" r="11.5"/>
+    </g>
+    <text x="154" y="445.2" class="b white mid num">1</text>
+    <text x="356.5" y="445.2" class="b white mid num">2</text>
+    <text x="522.25" y="445.2" class="b white mid num">3</text>
+    <text x="699" y="445.2" class="b white mid num">4</text>
+    <text x="172.5" y="446.5" class="b ex">CSV to FHIR</text>
+    <text x="375" y="446.5" class="b ex">Import</text>
+    <text x="541.25" y="446.5" class="b ex">Prostate cancer</text>
+    <text x="717.5" y="446.5" class="b ex">Pulse oximetry</text>
+  </g>
+</svg>

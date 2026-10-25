@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "3 · Risk factors before the diagnosis": the Spark SQL that combines the
+  four prostate cancer views (sql/synthea/combine_prostate_cancer_views.sql),
+  abridged with "…", with highlight bands keyed to a legend: join on the view
+  keys, keep observations before the diagnosis, take the latest per patient,
+  and LEFT JOIN so that every patient stays.
+  Split into layers (top-level data-layer groups) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Abridged Spark SQL that joins the patient, diagnosis, cholesterol and BMI views on their keys, keeps only observations before the prostate cancer diagnosis, takes the latest per patient with ROW_NUMBER, and left joins so every patient stays in the result.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .code { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 11.4px; fill: #3a3a3d; }
+    .k { font-weight: 700; fill: #004b87; }
+    .s { fill: #a31515; }
+    .c { fill: #757579; }
+    .key { font-size: 18.5px; }
+    .term { font-size: 12.5px; fill: #757579; }
+  </style>
+
+  <!-- Code panels: grey border strip on the left, background with rounded right corners -->
+  <g data-layer="panel">
+    <rect x="27" y="146" width="543.03" height="349.3" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 146 H567.18 A2.85 2.85 0 0 1 570.03 148.85 V492.45 A2.85 2.85 0 0 1 567.18 495.3 H31.28 Z" fill="#f6f7f8"/>
+    <rect x="584.03" y="146" width="348.97" height="165.7" rx="2.85" fill="#dadbdc"/>
+    <path d="M588.31 146 H930.15 A2.85 2.85 0 0 1 933 148.85 V308.85 A2.85 2.85 0 0 1 930.15 311.7 H588.31 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- SQL: patient_diagnoses and cholesterol_with_rank (left), the rest (right) -->
+  <g data-layer="code">
+    <text class="code" x="43.28" y="164" xml:space="preserve"><tspan class="k">WITH</tspan> patient_diagnoses <tspan class="k">AS</tspan> (</text>
+    <text class="code" x="43.28" y="179.3" xml:space="preserve">  <tspan class="k">SELECT</tspan> p.id <tspan class="k">as</tspan> patient_id, …, pc.onset <tspan class="k">as</tspan> prostate_cancer_onset</text>
+    <text class="code" x="43.28" y="194.6" xml:space="preserve">  <tspan class="k">FROM</tspan> synthea_prostate_cancer_views.patient_demographics_view p</text>
+    <text class="code" x="43.28" y="209.9" xml:space="preserve">  <tspan class="k">LEFT JOIN</tspan> synthea_prostate_cancer_views.prostate_cancer_diagnosis_view pc</text>
+    <text class="code" x="43.28" y="225.2" xml:space="preserve">    <tspan class="k">ON</tspan> p.id = pc.patient_id</text>
+    <text class="code" x="43.28" y="240.5" xml:space="preserve">),</text>
+    <text class="code" x="43.28" y="255.8" xml:space="preserve">cholesterol_with_rank <tspan class="k">AS</tspan> (</text>
+    <text class="code" x="43.28" y="271.1" xml:space="preserve">  <tspan class="k">SELECT</tspan></text>
+    <text class="code" x="43.28" y="286.4" xml:space="preserve">    h.patient_id,</text>
+    <text class="code" x="43.28" y="301.7" xml:space="preserve">    h.date <tspan class="k">as</tspan> cholesterol_date,</text>
+    <text class="code" x="43.28" y="317" xml:space="preserve">    h.value <tspan class="k">as</tspan> cholesterol_value,</text>
+    <text class="code" x="43.28" y="332.3" xml:space="preserve">    h.unit <tspan class="k">as</tspan> cholesterol_unit,</text>
+    <text class="code" x="43.28" y="347.6" xml:space="preserve">    pd.prostate_cancer_onset,</text>
+    <text class="code" x="43.28" y="362.9" xml:space="preserve">    ROW_NUMBER() <tspan class="k">OVER</tspan> (</text>
+    <text class="code" x="43.28" y="378.2" xml:space="preserve">      <tspan class="k">PARTITION BY</tspan> h.patient_id</text>
+    <text class="code" x="43.28" y="393.5" xml:space="preserve">      <tspan class="k">ORDER BY</tspan> h.date <tspan class="k">DESC</tspan></text>
+    <text class="code" x="43.28" y="408.8" xml:space="preserve">    ) <tspan class="k">as</tspan> rn</text>
+    <text class="code" x="43.28" y="424.1" xml:space="preserve">  <tspan class="k">FROM</tspan> synthea_prostate_cancer_views.hyperlipidemia_view h</text>
+    <text class="code" x="43.28" y="439.4" xml:space="preserve">  <tspan class="k">INNER JOIN</tspan> patient_diagnoses pd <tspan class="k">ON</tspan> h.patient_id = pd.patient_id</text>
+    <text class="code" x="43.28" y="454.7" xml:space="preserve">  <tspan class="k">WHERE</tspan> pd.prostate_cancer_onset <tspan class="k">IS NULL</tspan></text>
+    <text class="code" x="43.28" y="470" xml:space="preserve">     <tspan class="k">OR</tspan> h.date &lt; pd.prostate_cancer_onset</text>
+    <text class="code" x="43.28" y="485.3" xml:space="preserve">),</text>
+    <text class="code" x="600.31" y="164" xml:space="preserve">latest_cholesterol <tspan class="k">AS</tspan> (</text>
+    <text class="code" x="600.31" y="179.3" xml:space="preserve">  <tspan class="k">SELECT</tspan> patient_id, …</text>
+    <text class="code" x="600.31" y="194.6" xml:space="preserve">  <tspan class="k">FROM</tspan> cholesterol_with_rank</text>
+    <text class="code" x="600.31" y="209.9" xml:space="preserve">  <tspan class="k">WHERE</tspan> rn = 1</text>
+    <text class="code" x="600.31" y="225.2" xml:space="preserve">),</text>
+    <text class="code" x="600.31" y="240.5" xml:space="preserve"><tspan class="c">-- bmi_with_rank, latest_bmi: the same for BMI</tspan></text>
+    <text class="code" x="600.31" y="255.8" xml:space="preserve"><tspan class="k">SELECT</tspan> pd.patient_id, …</text>
+    <text class="code" x="600.31" y="271.1" xml:space="preserve"><tspan class="k">FROM</tspan> patient_diagnoses pd</text>
+    <text class="code" x="600.31" y="286.4" xml:space="preserve"><tspan class="k">LEFT JOIN</tspan> latest_cholesterol lc <tspan class="k">ON</tspan> …</text>
+    <text class="code" x="600.31" y="301.7" xml:space="preserve"><tspan class="k">LEFT JOIN</tspan> latest_bmi lb <tspan class="k">ON</tspan> …</text>
+  </g>
+
+  <g data-layer="key-join">
+    <rect x="40.28" y="198.3" width="520.75" height="30.6" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+    <rect x="586.03" y="329.7" width="9.99" height="28.53" rx="2.14" fill="#00a9ce"/>
+    <text x="606" y="338.66" class="key" xml:space="preserve">join on the keys the views emit</text>
+    <text x="606" y="358.39" class="mono term" xml:space="preserve">LEFT JOIN … ON p.id = pc.patient_id</text>
+  </g>
+
+  <g data-layer="key-before">
+    <rect x="40.28" y="443.1" width="520.75" height="30.6" rx="2.77" fill="#e87722" fill-opacity="0.2"/>
+    <rect x="586.03" y="372.2" width="9.99" height="28.53" rx="2.14" fill="#e87722"/>
+    <text x="606" y="381.16" class="key" xml:space="preserve">only observations before the diagnosis</text>
+    <text x="606" y="400.89" class="mono term" xml:space="preserve">h.date &lt; pd.prostate_cancer_onset</text>
+  </g>
+
+  <g data-layer="key-latest">
+    <rect x="40.28" y="351.3" width="520.75" height="61.2" rx="2.77" fill="#007377" fill-opacity="0.18"/>
+    <rect x="597.31" y="198.3" width="326.69" height="15.3" rx="2.77" fill="#007377" fill-opacity="0.18"/>
+    <rect x="586.03" y="414.7" width="9.99" height="28.53" rx="2.14" fill="#007377"/>
+    <text x="606" y="423.66" class="key" xml:space="preserve">latest observation per patient</text>
+    <text x="606" y="443.39" class="mono term" xml:space="preserve">ROW_NUMBER() OVER (…) · WHERE rn = 1</text>
+  </g>
+
+  <g data-layer="key-everyone">
+    <rect x="597.31" y="274.8" width="326.69" height="30.6" rx="2.77" fill="#1e22aa" fill-opacity="0.14"/>
+    <rect x="586.03" y="457.2" width="9.99" height="28.53" rx="2.14" fill="#1e22aa"/>
+    <text x="606" y="466.16" class="key" xml:space="preserve">everyone stays, with or without risk factors</text>
+    <text x="606" y="485.89" class="mono term" xml:space="preserve">FROM patient_diagnoses pd LEFT JOIN …</text>
+  </g>
+</svg>

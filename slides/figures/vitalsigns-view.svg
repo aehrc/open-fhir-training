@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "4 · Local codes and SQL types": the rv_obs_vitalsigns view from
+  notebooks/mimic_iv/create_spo2_views.py, written as JSON (one line per column),
+  with highlight bands keyed to a legend: reference keys, ansi/type tags and the
+  where filter on MIMIC item IDs.
+  Split into layers (top-level data-layer groups) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>The rv_obs_vitalsigns ViewDefinition over Observation: subject and encounter become subject_id and stay_id keys, ansi/type tags ask for TIMESTAMP and INTEGER columns, and a where clause keeps MIMIC item IDs 220045, 220277, 220210 and 224690.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .code { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 11.4px; fill: #3a3a3d; }
+    .k { fill: #004b87; }
+    .s { fill: #a31515; }
+    .term { font-size: 15px; }
+    .desc { font-size: 18.5px; }
+    .sub { font-size: 14.3px; fill: #757579; }
+  </style>
+
+  <!-- Code panel: grey border strip on the left, background with rounded right corners -->
+  <g data-layer="panel">
+    <rect x="27" y="146" width="640.26" height="346.5" rx="2.85" fill="#dadbdc"/>
+    <path d="M31.28 146 H664.41 A2.85 2.85 0 0 1 667.26 148.85 V489.65 A2.85 2.85 0 0 1 664.41 492.5 H31.28 Z" fill="#f6f7f8"/>
+  </g>
+
+  <!-- The view as JSON -->
+  <g data-layer="code">
+    <text class="code" x="47.28" y="167" xml:space="preserve">{</text>
+    <text class="code" x="47.28" y="183.5" xml:space="preserve">  <tspan class="k">"resource"</tspan>: <tspan class="s">"Observation"</tspan>,</text>
+    <text class="code" x="47.28" y="200" xml:space="preserve">  <tspan class="k">"select"</tspan>: [{</text>
+    <text class="code" x="47.28" y="216.5" xml:space="preserve">    <tspan class="k">"column"</tspan>: [</text>
+    <text class="code" x="47.28" y="233" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"subject_id"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"subject.getReferenceKey()"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"string"</tspan> },</text>
+    <text class="code" x="47.28" y="249.5" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"stay_id"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"encounter.getReferenceKey()"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"string"</tspan> },</text>
+    <text class="code" x="47.28" y="266" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"charttime"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"effective.ofType(dateTime)"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"dateTime"</tspan>,</text>
+    <text class="code" x="47.28" y="282.5" xml:space="preserve">        <tspan class="k">"tag"</tspan>: [{ <tspan class="k">"name"</tspan>: <tspan class="s">"ansi/type"</tspan>, <tspan class="k">"value"</tspan>: <tspan class="s">"TIMESTAMP"</tspan> }] },</text>
+    <text class="code" x="47.28" y="299" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"storetime"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"issued"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"instant"</tspan>,</text>
+    <text class="code" x="47.28" y="315.5" xml:space="preserve">        <tspan class="k">"tag"</tspan>: [{ <tspan class="k">"name"</tspan>: <tspan class="s">"ansi/type"</tspan>, <tspan class="k">"value"</tspan>: <tspan class="s">"TIMESTAMP"</tspan> }] },</text>
+    <text class="code" x="47.28" y="332" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"valuenum"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"value.ofType(Quantity).value"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"decimal"</tspan> },</text>
+    <text class="code" x="47.28" y="348.5" xml:space="preserve">      { <tspan class="k">"name"</tspan>: <tspan class="s">"itemid"</tspan>, <tspan class="k">"path"</tspan>: <tspan class="s">"code.coding.code"</tspan>, <tspan class="k">"type"</tspan>: <tspan class="s">"code"</tspan>,</text>
+    <text class="code" x="47.28" y="365" xml:space="preserve">        <tspan class="k">"tag"</tspan>: [{ <tspan class="k">"name"</tspan>: <tspan class="s">"ansi/type"</tspan>, <tspan class="k">"value"</tspan>: <tspan class="s">"INTEGER"</tspan> }] }</text>
+    <text class="code" x="47.28" y="381.5" xml:space="preserve">    ]</text>
+    <text class="code" x="47.28" y="398" xml:space="preserve">  }],</text>
+    <text class="code" x="47.28" y="414.5" xml:space="preserve">  <tspan class="k">"where"</tspan>: [{</text>
+    <text class="code" x="47.28" y="431" xml:space="preserve">    <tspan class="k">"path"</tspan>: <tspan class="s">"code.coding.code = '220045' or code.coding.code = '220277'</tspan></text>
+    <text class="code" x="47.28" y="447.5" xml:space="preserve">             <tspan class="s">or code.coding.code = '220210' or code.coding.code = '224690'"</tspan></text>
+    <text class="code" x="47.28" y="464" xml:space="preserve">  }]</text>
+    <text class="code" x="47.28" y="480.5" xml:space="preserve">}</text>
+  </g>
+
+  <g data-layer="key-keys">
+    <rect x="44.28" y="220.8" width="609.98" height="33" rx="2.77" fill="#00a9ce" fill-opacity="0.2"/>
+    <rect x="689.26" y="227" width="9.99" height="28.53" rx="2.14" fill="#00a9ce"/>
+    <text x="709.23" y="235.96" class="desc" xml:space="preserve"><tspan class="mono term">getReferenceKey()</tspan></text>
+    <text x="709.23" y="255.69" class="sub" xml:space="preserve">subject → subject_id</text>
+    <text x="709.23" y="273.89" class="sub" xml:space="preserve">encounter → stay_id</text>
+  </g>
+
+  <g data-layer="key-types">
+    <rect x="44.28" y="270.3" width="609.98" height="16.5" rx="2.77" fill="#ffb81c" fill-opacity="0.3"/>
+    <rect x="44.28" y="303.3" width="609.98" height="16.5" rx="2.77" fill="#ffb81c" fill-opacity="0.3"/>
+    <rect x="44.28" y="352.8" width="609.98" height="16.5" rx="2.77" fill="#ffb81c" fill-opacity="0.3"/>
+    <rect x="689.26" y="293" width="9.99" height="28.53" rx="2.14" fill="#ffb81c"/>
+    <text x="709.23" y="301.96" class="desc" xml:space="preserve"><tspan class="mono term">ansi/type</tspan></text>
+    <text x="709.23" y="321.69" class="sub" xml:space="preserve">ask for TIMESTAMP and</text>
+    <text x="709.23" y="339.89" class="sub" xml:space="preserve">INTEGER columns</text>
+  </g>
+
+  <g data-layer="key-where">
+    <rect x="44.28" y="402.3" width="609.98" height="49.5" rx="2.77" fill="#6d2077" fill-opacity="0.15"/>
+    <rect x="689.26" y="408.5" width="9.99" height="28.53" rx="2.14" fill="#6d2077"/>
+    <text x="709.23" y="417.46" class="desc" xml:space="preserve"><tspan class="mono term">where</tspan> MIMIC item IDs</text>
+    <text x="709.23" y="437.19" class="sub" xml:space="preserve">220045 heart rate, 220277 SpO2,</text>
+    <text x="709.23" y="455.39" class="sub" xml:space="preserve">220210 and 224690 respiratory rate</text>
+  </g>
+</svg>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "Views don't join, they emit keys": the patient_demographics_view and
+  bmi_view from the prostate cancer exercise, each emitting a key, with an
+  arrow from a bmi_view row's patient_id back to the patient row, and the SQL
+  join below.
+  The figure is split into layers (tables, arrow, sql) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Two view outputs: patient_demographics_view, keyed by getResourceKey(), with one patient row; and bmi_view, whose patient_id column comes from subject.getReferenceKey(). An arrow links the first BMI row's patient_id to the patient's id, and the SQL below joins the views on p.id = b.patient_id.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .teal { fill: #00a9ce; }
+    .orange { fill: #e87722; }
+    .navy { fill: #004b87; }
+    .white { fill: #ffffff; }
+    .view { font-size: 18.49px; }
+    .key { font-size: 14.24px; }
+    .cell { font-size: 14.24px; }
+    .ref { font-size: 12.09px; }
+    .sql { font-size: 18.49px; }
+  </style>
+
+  <!-- Both views: headings, key expressions and tables -->
+  <g data-layer="tables">
+    <!-- patient_demographics_view -->
+    <text x="27" y="178.12" class="b teal view">patient_demographics_view</text>
+    <text x="27" y="203.28" class="mono orange key">getResourceKey()</text>
+    <rect x="27" y="213.3" width="347.43" height="31.31" fill="#00a9ce"/>
+    <text x="37" y="234.6" class="b white cell">id</text>
+    <text x="194.02" y="234.6" class="b white cell">birth_date</text>
+    <text x="286.48" y="234.6" class="b white cell">postal_code</text>
+    <rect x="27" y="244.61" width="347.43" height="31.31" fill="#e0f5fa"/>
+    <text x="37" y="264.54" class="mono ref">Patient/0c8af814-…</text>
+    <text x="194.02" y="265.92" class="cell">1975-11-30</text>
+    <text x="286.48" y="265.92" class="cell">[4000]</text>
+
+    <!-- bmi_view -->
+    <text x="430.93" y="178.12" class="b teal view">bmi_view</text>
+    <text x="430.93" y="203.28" class="mono orange key">subject.getReferenceKey()</text>
+    <rect x="430.93" y="213.3" width="502.07" height="31.31" fill="#00a9ce"/>
+    <text x="440.93" y="234.6" class="b white cell">id</text>
+    <text x="629.06" y="234.6" class="b white cell">patient_id</text>
+    <text x="788.08" y="234.6" class="b white cell">date</text>
+    <text x="882.54" y="234.6" class="b white cell">value</text>
+    <text x="440.93" y="264.54" class="mono ref">Observation/0c8af814-…</text>
+    <text x="629.06" y="264.54" class="mono ref">Patient/0c8af814-…</text>
+    <text x="788.08" y="265.92" class="cell">2017-12-10</text>
+    <text x="882.54" y="265.92" class="cell">30.4</text>
+    <text x="440.93" y="295.85" class="mono ref">Observation/40ec78a0-…</text>
+    <text x="629.06" y="295.85" class="mono ref">Patient/40ec78a0-…</text>
+    <text x="788.08" y="297.23" class="cell">2020-05-19</text>
+    <text x="882.54" y="297.23" class="cell">30.03</text>
+    <text x="440.93" y="327.16" class="mono ref">Observation/00c2916a-…</text>
+    <text x="629.06" y="327.16" class="mono ref">Patient/00c2916a-…</text>
+    <text x="788.08" y="328.54" class="cell">2026-08-27</text>
+    <text x="882.54" y="328.54" class="cell">36.09</text>
+    <text x="440.93" y="358.47" class="mono ref">Observation/6374c48b-…</text>
+    <text x="629.06" y="358.47" class="mono ref">Patient/6374c48b-…</text>
+    <text x="788.08" y="359.85" class="cell">2020-06-12</text>
+    <text x="882.54" y="359.85" class="cell">30.21</text>
+    <g stroke="#dadbdc" stroke-width="0.75">
+      <path d="M430.93 275.92 H933"/>
+      <path d="M430.93 307.23 H933"/>
+      <path d="M430.93 338.54 H933"/>
+      <path d="M430.93 369.85 H933"/>
+    </g>
+  </g>
+
+  <!-- Key arrow: the first BMI row's patient_id back to the patient row -->
+  <g data-layer="arrow">
+    <rect x="620.56" y="246.11" width="156.02" height="28.31" rx="2.5" fill="none" stroke="#e87722" stroke-width="2"/>
+    <rect x="28.5" y="246.11" width="154.02" height="28.31" rx="2.5" fill="none" stroke="#e87722" stroke-width="2"/>
+    <path d="M620.56 275.42 H426.93 C340.93 275.42 105.51 365.42 105.51 294.92" fill="none" stroke="#e87722" stroke-width="3.75"/>
+    <path d="M105.51 277.92 L96.14 296.67 L114.88 296.67 Z" fill="#e87722"/>
+  </g>
+
+  <!-- The SQL that expresses the join -->
+  <g data-layer="sql">
+    <rect x="27" y="415.41" width="906" height="54.09" rx="7.12" fill="#f6f7f8"/>
+    <text x="48.35" y="449.99" class="mono sql" xml:space="preserve">… <tspan class="b navy">FROM</tspan> bmi_view b <tspan class="b navy">JOIN</tspan> patient_demographics_view p <tspan class="b navy">ON</tspan> p.id = b.patient_id</text>
+  </g>
+</svg>

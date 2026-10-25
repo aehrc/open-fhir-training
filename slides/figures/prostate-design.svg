@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "3 · Prostate cancer risk factors": four ViewDefinitions run by Pathling
+  (patient demographics, hyperlipidaemia, BMI, prostate cancer diagnosis) feed the
+  prostate_cancer_risk_factors Spark SQL view, which has one row per patient with
+  the columns listed on the right; row counts from an 800-patient sample below.
+  Split into layers (top-level data-layer groups) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>Four ViewDefinitions, for patient demographics, high cholesterol, high BMI and prostate cancer diagnoses, are combined by the prostate_cancer_risk_factors Spark SQL view into one row per patient with demographics, prostate cancer onset and the latest risk factor observations.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .mono { font-family: 'DejaVu Sans Mono', Menlo, monospace; }
+    .b { font-weight: 700; }
+    .mid { text-anchor: middle; }
+    .white { fill: #ffffff; }
+    .light { fill: #dadbdc; }
+    .muted { fill: #757579; }
+    .head { font-size: 18.5px; }
+    .name { font-size: 13.6px; }
+    .col { font-size: 14.3px; }
+    .sub { font-size: 14.3px; }
+  </style>
+
+  <!-- The four ViewDefinitions -->
+  <g data-layer="views">
+    <text x="27" y="166" class="muted sub">4 ViewDefinitions (Pathling)</text>
+    <rect x="27" y="178" width="312" height="58" rx="7.14" fill="#e0f5fa" stroke="#00a9ce" stroke-width="2.25"/>
+    <text x="41" y="202" class="mono b name" style="fill: #007377">patient_demographics_view</text>
+    <text x="41" y="222.5" class="muted sub">Patient · id, birth date, postal code, deceased</text>
+    <rect x="27" y="251.33" width="312" height="58" rx="7.14" fill="#e0f5fa" stroke="#00a9ce" stroke-width="2.25"/>
+    <text x="41" y="275.33" class="mono b name" style="fill: #007377">hyperlipidemia_view</text>
+    <text x="41" y="295.83" class="muted sub">Observation · LOINC 2093-3 &gt; 240 mg/dL</text>
+    <rect x="27" y="324.67" width="312" height="58" rx="7.14" fill="#e0f5fa" stroke="#00a9ce" stroke-width="2.25"/>
+    <text x="41" y="348.67" class="mono b name" style="fill: #007377">bmi_view</text>
+    <text x="41" y="369.17" class="muted sub">Observation · LOINC 39156-5 &gt; 30 kg/m2</text>
+    <rect x="27" y="398" width="312" height="58" rx="7.14" fill="#e0f5fa" stroke="#00a9ce" stroke-width="2.25"/>
+    <text x="41" y="422" class="mono b name" style="fill: #007377">prostate_cancer_diagnosis_view</text>
+    <text x="41" y="442.5" class="muted sub">Condition · SNOMED CT 126906006</text>
+  </g>
+
+  <!-- Connectors from each view into the Spark SQL view -->
+  <g data-layer="sql">
+    <g stroke="#757579" stroke-width="2.25" stroke-linecap="square" fill="none">
+      <path d="M342.12 207 H364.12"/>
+      <path d="M342.12 280.33 H364.12"/>
+      <path d="M342.12 353.67 H364.12"/>
+      <path d="M342.12 427 H364.12"/>
+      <path d="M364.12 207 V427"/>
+      <path d="M364.12 317 H378"/>
+    </g>
+    <path d="M389 317 L378.26 322.37 L378.26 311.63 Z" fill="#757579"/>
+    <rect x="390" y="275" width="248" height="84" rx="7.14" fill="#1e22aa"/>
+    <text x="514" y="315" class="mono b white mid name">prostate_cancer_risk_factors</text>
+    <text x="514" y="337" class="light mid sub">Spark SQL view</text>
+  </g>
+
+  <!-- Output: arrow, one row per patient with its columns, sample counts -->
+  <g data-layer="output">
+    <path d="M646 317 H658" stroke="#757579" stroke-width="6"/>
+    <path d="M686 317 L656 302 L656 332 Z" fill="#757579"/>
+    <rect x="694" y="178" width="239" height="278" rx="10" fill="#e8e9f7"/>
+    <text x="712" y="208" class="b head" style="fill: #1e22aa">One row per patient</text>
+    <text x="712" y="242" class="mono col">patient_id</text>
+    <text x="712" y="266.5" class="mono col">birth_date</text>
+    <text x="712" y="291" class="mono col">postal_code</text>
+    <text x="712" y="315.5" class="mono col">deceased</text>
+    <text x="712" y="340" class="mono col">prostate_cancer_onset</text>
+    <text x="712" y="364.5" class="mono col">high_bmi_observed</text>
+    <text x="712" y="389" class="mono col">bmi_value</text>
+    <text x="712" y="413.5" class="mono col">hyperlipidemia_observed</text>
+    <text x="712" y="438" class="mono col">total_cholesterol_mg_dl</text>
+    <text x="27" y="486" class="muted sub">800-patient sample: 800 rows · 6 with prostate cancer · 219 high BMI and 334 high cholesterol observations</text>
+  </g>
+</svg>

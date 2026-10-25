@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Slide "What we have → what analysts want": a BMI Observation from the
+  Synthea AU data as JSON, turned by a ViewDefinition into flat bmi_view rows.
+  The figure is split into layers (tree, then table) that build up over clicks.
+  Slide units (960 x 540 slide, 96 per inch); the viewBox is the region of the
+  slide the figure covers. Render with `uv run slides/build.py figures`.
+  Author: John Grimes
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="21 142 918 358" width="918" height="358">
+  <title>A BMI Observation as nested JSON on the left; an arrow labelled ViewDefinition leads to a flat bmi_view table with columns id, patient_id, date, code, unit and value, whose first row comes from that Observation.</title>
+  <style>
+    text { font-family: Carlito, Calibri, sans-serif; fill: #001d34; }
+    .code text { font-family: 'DejaVu Sans Mono', Menlo, monospace; font-size: 11.4px; fill: #3a3a3d; }
+    .b { font-weight: 700; }
+    .code .k { fill: #004b87; }
+    .code .s { fill: #a31515; }
+    .code .hl { fill: #007377; font-weight: 700; }
+    .code .dim { fill: #a8a8ab; }
+    .white { fill: #ffffff; }
+    .label { font-size: 12.85px; fill: #757579; }
+    .cell { font-size: 11.44px; }
+  </style>
+
+  <!-- Layer 1: the JSON resource; the values that become columns are bold teal -->
+  <g data-layer="tree">
+    <rect x="27" y="148" width="378.03" height="346" rx="2.86" fill="#dadbdc"/>
+    <path d="M31.29 148 H402.17 A2.86 2.86 0 0 1 405.03 150.86 V491.14 A2.86 2.86 0 0 1 402.17 494 H31.29 Z" fill="#f6f7f8"/>
+    <g class="code">
+      <text x="43" y="174" xml:space="preserve">{</text>
+      <text x="43" y="189.1" xml:space="preserve">  <tspan class="k">"resourceType"</tspan>: <tspan class="s">"Observation"</tspan>,</text>
+      <text x="43" y="204.2" xml:space="preserve">  <tspan class="k">"id"</tspan>: <tspan class="hl">"0c8af814-1c2d-66c7-d9af-35d7833f3148"</tspan>,</text>
+      <text x="43" y="219.3" xml:space="preserve">  <tspan class="k">"status"</tspan>: <tspan class="s">"final"</tspan>,</text>
+      <text x="43" y="234.4" xml:space="preserve">  <tspan class="dim">…</tspan></text>
+      <text x="43" y="249.5" xml:space="preserve">  <tspan class="k">"code"</tspan>: {</text>
+      <text x="43" y="264.6" xml:space="preserve">    <tspan class="k">"coding"</tspan>: [{</text>
+      <text x="43" y="279.7" xml:space="preserve">      <tspan class="k">"system"</tspan>: <tspan class="s">"http://loinc.org"</tspan>,</text>
+      <text x="43" y="294.8" xml:space="preserve">      <tspan class="k">"code"</tspan>: <tspan class="hl">"39156-5"</tspan>,</text>
+      <text x="43" y="309.9" xml:space="preserve">      <tspan class="k">"display"</tspan>: <tspan class="s">"Body mass index (BMI) [Ratio]"</tspan></text>
+      <text x="43" y="325" xml:space="preserve">    }]</text>
+      <text x="43" y="340.1" xml:space="preserve">  },</text>
+      <text x="43" y="355.2" xml:space="preserve">  <tspan class="k">"subject"</tspan>: {</text>
+      <text x="43" y="370.3" xml:space="preserve">    <tspan class="k">"reference"</tspan>:</text>
+      <text x="43" y="385.4" xml:space="preserve">    <tspan class="hl">"Patient/0c8af814-1c2d-66c7-873e-c8e4ae845ea6"</tspan></text>
+      <text x="43" y="400.5" xml:space="preserve">  },</text>
+      <text x="43" y="415.6" xml:space="preserve">  <tspan class="k">"effectiveDateTime"</tspan>: <tspan class="hl">"2017-12-10T17:39:36+10:00"</tspan>,</text>
+      <text x="43" y="430.7" xml:space="preserve">  <tspan class="k">"valueQuantity"</tspan>: {</text>
+      <text x="43" y="445.8" xml:space="preserve">    <tspan class="k">"value"</tspan>: <tspan class="hl">30.4</tspan>, <tspan class="k">"unit"</tspan>: <tspan class="hl">"kg/m2"</tspan>, <tspan class="k">"code"</tspan>: <tspan class="s">"kg/m2"</tspan></text>
+      <text x="43" y="460.9" xml:space="preserve">  }</text>
+      <text x="43" y="476" xml:space="preserve">}</text>
+    </g>
+  </g>
+
+  <!-- Layer 2: balloon, arrow, label and the bmi_view table; row 1 comes from the JSON -->
+  <g data-layer="table">
+    <image href="../assets/sql-on-fhir-balloon.svg" x="422.03" y="255" width="56" height="56"/>
+    <path d="M414.03 321 H468.03" stroke="#757579" stroke-width="3.75"/>
+    <path d="M486.03 321 L467.28 311.63 L467.28 330.37 Z" fill="#757579"/>
+    <text x="450.03" y="349" class="label" text-anchor="middle">ViewDefinition</text>
+
+    <rect x="495.03" y="263" width="439.97" height="24" fill="#00a9ce"/>
+    <rect x="495.03" y="287" width="439.97" height="23" fill="#00a9ce" fill-opacity="0.12"/>
+    <g stroke="#dadbdc" stroke-width="0.75">
+      <path d="M495.03 310 H935"/>
+      <path d="M495.03 333 H935"/>
+      <path d="M495.03 356 H935"/>
+      <path d="M495.03 379 H935"/>
+    </g>
+    <g class="cell">
+      <!-- header -->
+      <text x="501.03" y="279" class="b white">id</text>
+      <text x="633.99" y="279" class="b white">patient_id</text>
+      <text x="742.94" y="279" class="b white">date</text>
+      <text x="808.63" y="279" class="b white">code</text>
+      <text x="859.22" y="279" class="b white">unit</text>
+      <text x="902.45" y="279" class="b white">value</text>
+      <!-- row 1 -->
+      <text x="501.03" y="302.5" class="b">Observation/0c8af814-…</text>
+      <text x="633.99" y="302.5" class="b">Patient/0c8af814-…</text>
+      <text x="742.94" y="302.5" class="b">2017-12-10</text>
+      <text x="808.63" y="302.5" class="b">39156-5</text>
+      <text x="859.22" y="302.5" class="b">kg/m2</text>
+      <text x="902.45" y="302.5" class="b">30.4</text>
+      <!-- row 2 -->
+      <text x="501.03" y="325.5">Observation/40ec78a0-…</text>
+      <text x="633.99" y="325.5">Patient/40ec78a0-…</text>
+      <text x="742.94" y="325.5">2020-05-19</text>
+      <text x="808.63" y="325.5">39156-5</text>
+      <text x="859.22" y="325.5">kg/m2</text>
+      <text x="902.45" y="325.5">30.03</text>
+      <!-- row 3 -->
+      <text x="501.03" y="348.5">Observation/00c2916a-…</text>
+      <text x="633.99" y="348.5">Patient/00c2916a-…</text>
+      <text x="742.94" y="348.5">2026-08-27</text>
+      <text x="808.63" y="348.5">39156-5</text>
+      <text x="859.22" y="348.5">kg/m2</text>
+      <text x="902.45" y="348.5">36.09</text>
+      <!-- row 4 -->
+      <text x="501.03" y="371.5">Observation/6374c48b-…</text>
+      <text x="633.99" y="371.5">Patient/6374c48b-…</text>
+      <text x="742.94" y="371.5">2020-06-12</text>
+      <text x="808.63" y="371.5">39156-5</text>
+      <text x="859.22" y="371.5">kg/m2</text>
+      <text x="902.45" y="371.5">30.21</text>
+    </g>
+  </g>
+</svg>
