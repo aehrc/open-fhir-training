@@ -194,10 +194,12 @@ measurements (SaO₂) to identify potential measurement disparities.
     - Copy and execute the SQL script contents in SQL cells
     - This allows mixing SQL queries with Python analysis code
 
-3. **Running directly from files:**
-    - In a notebook cell, use:
-      `%run ./sql/synthea/combine_prostate_cancer_views.sql`
-    - This executes the SQL script in the current Spark context
+3. **Opening the files directly:**
+    - `%run` only runs notebooks, so it cannot execute a `.sql` file
+    - In a Databricks Git folder, open a file such as
+      `sql/synthea/combine_prostate_cancer_views.sql` from the workspace browser
+      to view and run it in the SQL editor, or paste its contents into a `%sql`
+      notebook cell
 
 ## Key Concepts
 
