@@ -108,7 +108,7 @@ print("Helper functions defined")
 # MAGIC - **Into FHIR structure with**: resourceType, identifier, name, gender, birthDate, address
 # MAGIC
 # MAGIC ### Key transformations:
-# MAGIC - Remove hyphens from IDs (FHIR doesn't allow them)
+# MAGIC - Use the CSV UUID as-is for the resource ID (FHIR IDs may contain hyphens)
 # MAGIC - Map gender codes (M → male, F → female)
 # MAGIC - Structure addresses with proper fields (line, city, state, postalCode)
 # MAGIC - Create identifier objects for SSN, driver's license, and passport
