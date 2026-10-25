@@ -10,7 +10,7 @@ WITH combined_o2_data AS (
         f.stay_id,
         f.charttime,
         f.valuenum AS o2_flow,
-        d.value AS o2_delivery_device
+        TRIM(d.value) AS o2_delivery_device  -- Some source values carry a trailing space
     FROM mimic_iv_views.rv_obs_o2_flow f
     LEFT JOIN mimic_iv_views.rv_o2_delivery_device d
         ON f.subject_id = d.subject_id
@@ -109,7 +109,7 @@ SELECT
             'Medium conc mask',
             'Partial rebreath mask',
             'High flow neb',
-            'Non-rebreath mask'
+            'Non-rebreather'
         ) OR (o2_delivery_device = 'None' AND o2_flow > 0) THEN 'SupplementalOxygen'
 
         -- None
