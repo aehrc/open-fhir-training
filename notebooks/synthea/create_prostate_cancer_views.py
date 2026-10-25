@@ -178,7 +178,7 @@ patients.write.saveAsTable("synthea_prostate_cancer_views.patient_demographics_v
 # MAGIC - Total cholesterol unit
 # MAGIC - Total cholesterol value
 # MAGIC
-# MAGIC The view will be filtered to only total cholesterol observations that exceed 240 mg/dL.
+# MAGIC The view will be filtered to only total cholesterol observations recorded in mg/dL that exceed 240 mg/dL. The filter matches the UCUM unit code `mg/dL` literally, so observations recorded in other units (such as mmol/L) are excluded rather than converted.
 
 # COMMAND ----------
 
@@ -269,9 +269,7 @@ cholesterol.write.saveAsTable("synthea_prostate_cancer_views.hyperlipidemia_view
 # MAGIC - BMI unit
 # MAGIC - BMI value
 # MAGIC
-# MAGIC The view will be filtered to only BMI observations that exceed 30 kg/m2.
-# MAGIC
-# MAGIC One of the nice things about the Pathling implementation is that the encoding process includes canonicalisation of UCUM units. This means that the comparison of total cholesterol values in this query will also pick up observations that were made with different but comparable units, such as mg/dL.
+# MAGIC The view will be filtered to only BMI observations recorded in kg/m2 that exceed 30 kg/m2. As with the cholesterol view, the filter matches the UCUM unit code `kg/m2` literally, so no unit conversion is applied.
 
 # COMMAND ----------
 
