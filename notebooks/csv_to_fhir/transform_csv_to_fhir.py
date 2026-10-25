@@ -508,7 +508,6 @@ encounter_json_df.show(2, truncate=False)
 # MAGIC - **Vaccine Code**: Uses CVX codes (standardised vaccine codes used in the US)
 # MAGIC - **Status**: All marked as "completed" since these are historical records
 # MAGIC - **References**: Links to the Patient who received it and the Encounter when it was given
-# MAGIC - **Route/Site**: Default values for typical vaccine administration (intramuscular injection in left arm)
 
 # COMMAND ----------
 
