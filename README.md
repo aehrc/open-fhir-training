@@ -76,7 +76,7 @@ open-fhir-training/
 
 [Synthea](https://synthetichealth.github.io/synthea/) generates realistic
 synthetic patient data in FHIR format. Our examples use an Australian dataset
-of approximately 8,000 Queensland patients, generated with
+of 800 Queensland patients, generated with
 [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to
 [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles, with:
 

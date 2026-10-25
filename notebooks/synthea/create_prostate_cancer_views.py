@@ -37,7 +37,7 @@ pc.spark.catalog.setCurrentDatabase("synthea")
 # MAGIC %md
 # MAGIC # Read data from tables
 # MAGIC
-# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is an Australian [Synthea](https://synthetichealth.github.io/synthea/) dataset containing approximately 8,000 patients from Queensland, generated with [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles. It was imported by the `import_synthea` notebook.
+# MAGIC Now we will read some data from a set of previously persisted Delta tables. The data we are using here is an Australian [Synthea](https://synthetichealth.github.io/synthea/) dataset containing 800 patients from Queensland, generated with [synthea-au-core](https://github.com/aehrc/synthea-au-core) and conforming to [AU Core](https://build.fhir.org/ig/hl7au/au-fhir-core/) profiles. It was imported by the `import_synthea` notebook.
 # MAGIC
 # MAGIC The object returned is a "data source", which contains each of the data frames that have been encoded, as well as methods to run queries over them.
 
