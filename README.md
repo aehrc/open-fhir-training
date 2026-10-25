@@ -118,6 +118,10 @@ into proper FHIR resources:
 - **Encounter resources** - Healthcare visits and encounters
 - **Immunisation resources** - Vaccination records
 
+The notebook reads the `synthea_csv.patients`, `synthea_csv.encounters` and
+`synthea_csv.immunizations` tables. No notebook in this repository creates
+them; they are pre-loaded into the training workspace from Synthea CSV output.
+
 ## Clinical Studies
 
 ### 1. Prostate Cancer Risk Factors Analysis (Synthea AU)
