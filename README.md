@@ -164,6 +164,17 @@ measurements (SaO₂) to identify potential measurement disparities.
 
 ## Usage Instructions in Databricks
 
+### Using a Shared Training Workspace
+
+In a shared training workspace, the datasets and views are already built, so
+you do not need to run the import or view creation steps.
+
+- Run the notebooks in place to explore the data and the queries
+- To change a notebook, clone it to your home folder first
+- Write any tables or views to a personal schema (for example,
+  `CREATE SCHEMA IF NOT EXISTS <your_name>`), not to the shared schemas
+- Do not upload sensitive or identifiable data
+
 ### Running the Notebooks
 
 1. **Navigate to the imported repository:**
