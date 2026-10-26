@@ -462,7 +462,7 @@ def exercises_map():
         text(
             470,
             336,
-            "Synthea AU (800 patients)   ·   MIMIC-IV demo (100 ICU patients)   ·   CSV extract",
+            "Synthea AU (8,297 patients)   ·   MIMIC-IV demo (100 ICU patients)   ·   CSV extract",
             14,
             fill=MUTED,
             italic=True,
@@ -540,7 +540,7 @@ def your_turn():
             586,
             140,
             [("gender", 110), ("count(1)", 110)],
-            [("female", "411"), ("male", "389")],
+            [("female", "4103"), ("male", "4194")],
             CYAN,
             14,
             26,
@@ -813,9 +813,10 @@ DECK = {
             "Now it's your turn. Sign in with your invitation, open the README, then run the first "
             "few cells of the Synthea import notebook - up to resource_types, and not the cell that "
             "writes tables. Browse the synthea schema in Catalog Explorer. Then open the SQL Editor, "
-            "check it's on the Serverless Starter Warehouse, and run this query: you should get 411 "
-            "female and 389 male patients. If you finish early, open the patient table's sample data "
-            "and compare the nested columns with the JSON from earlier. Put your hand up if anything "
+            "check it's on the Serverless Starter Warehouse, and run this query: you should get "
+            "4,103 female and 4,194 male patients. If you finish early, open the patient table's "
+            "sample data and compare the nested columns with the JSON from earlier. Put your hand "
+            "up if anything "
             "doesn't work.",
         ),
         section(

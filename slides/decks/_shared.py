@@ -154,7 +154,7 @@ def environment():
         )
     )
     data = [
-        (CYAN, ["synthea", "800 patients · AU Core"]),
+        (CYAN, ["synthea", "8,297 patients · AU Core"]),
         (CYAN, ["synthea_csv", "flat CSV extract"]),
         (MINT, ["synthea_mi_secondary_", "prevention_views"]),
         (PINK, ["mimic_iv_demo", "100 ICU patients"]),

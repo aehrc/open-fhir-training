@@ -136,7 +136,7 @@ DECK = {
             "environment",
             environment(),
             "For the analytics strand we've set up a Databricks workspace. It already has two "
-            "datasets loaded as FHIR: 800 synthetic Queensland patients from Synthea, conforming to "
+            "datasets loaded as FHIR: 8,297 synthetic Queensland patients from Synthea, conforming to "
             "AU Core, and the MIMIC-IV demo, 100 de-identified intensive care patients. There is "
             "also a flat CSV extract to practise mapping legacy data into FHIR. The notebooks from "
             "our open FHIR training repository are ready to run against a shared cluster. Everyone "

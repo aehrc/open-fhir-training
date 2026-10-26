@@ -954,8 +954,8 @@ DECK = {
             your_turn(),
             "For the rest of the block, open the SQL editor and attach the Serverless Starter "
             "Warehouse. Please don't run the import notebooks; the data is already there. Start "
-            "with the first query: rows per resource type. You should see 800 patients and "
-            "222,787 observations; add the other types. The second shows how to reach into "
+            "with the first query: rows per resource type. You should see 8,297 patients and "
+            "2,472,497 observations; add the other types. The second shows how to reach into "
             "nested elements with dots and array indexes. The third groups conditions by the "
             "display of their first coding. For a stretch, use explode to turn a repeating "
             "element into rows; each patient carries two profiles. Then pick a resource that "

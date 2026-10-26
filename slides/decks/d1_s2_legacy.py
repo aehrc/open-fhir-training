@@ -307,7 +307,7 @@ def contract():
             34,
             [("Source", 140), ("male", 70), ("female", 78)],
             [
-                ("synthea", "389", "411"),
+                ("synthea", "4194", "4103"),
                 ("synthea_encoded", "554", "589"),
             ],
             MINT,
