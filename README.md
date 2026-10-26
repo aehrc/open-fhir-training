@@ -33,16 +33,18 @@ open-fhir-training/
 │   │   └── import_amt_classification.py
 │   └── mimic_iv/                 # MIMIC-IV clinical database
 │       ├── import_mimic_iv_demo.py
-│       └── create_spo2_views.py
+│       ├── create_spo2_views.py
+│       └── create_beta_blocker_septic_shock_views.py
 ├── sql/                          # Spark SQL analysis scripts
 │   ├── synthea/                  # Synthea AU studies
 │   │   ├── combine_prostate_cancer_views.sql
 │   │   └── combine_mi_secondary_prevention_views.sql
-│   └── mimic_iv/                 # Pulse oximetry bias study
-│       ├── st_subject.sql        # Study subject definition
-│       ├── st_ventilation.sql    # Ventilation categorisation
-│       ├── st_reading_*.sql      # Clinical measurements
-│       └── coh_*.sql            # Final cohort definitions
+│   └── mimic_iv/                 # MIMIC-IV studies
+│       ├── st_subject.sql        # Pulse oximetry: study subject definition
+│       ├── st_ventilation.sql    # Pulse oximetry: ventilation categorisation
+│       ├── st_reading_*.sql      # Pulse oximetry: clinical measurements
+│       ├── coh_*.sql             # Pulse oximetry: final cohort definitions
+│       └── combine_beta_blocker_septic_shock_views.sql
 ```
 
 ## Getting Started
@@ -119,7 +121,13 @@ demo version contains de-identified data from:
 
 - `notebooks/mimic_iv/import_mimic_iv_demo.py` - Import data from S3
 - `notebooks/mimic_iv/create_spo2_views.py` - Create analytical views
-- `sql/mimic_iv/*.sql` - Complete pulse oximetry bias study
+- `sql/mimic_iv/st_*.sql`, `sql/mimic_iv/coh_*.sql` - Complete pulse oximetry
+  bias study
+- `notebooks/mimic_iv/create_beta_blocker_septic_shock_views.py` - Create views
+  for the beta-blockers in septic shock study, combine them and chart the
+  results
+- `sql/mimic_iv/combine_beta_blocker_septic_shock_views.sql` - Patient-level
+  cohort view and 28-day mortality summary query
 
 ### CSV to FHIR Transformation
 
@@ -208,6 +216,43 @@ measurements (SaO₂) to identify potential measurement disparities.
 - `st_*.sql` - Study view definitions (subjects, readings, ventilation)
 - `coh_*.sql` - Final cohort with complete measurement sets
 
+### 4. Beta-Blockers in Septic Shock (MIMIC-IV)
+
+This study selects the cohort of
+[Zhang et al. 2024](https://doi.org/10.3389/fcvm.2024.1438798), who found lower
+28-day mortality in patients with septic shock given a beta-blocker within 48
+hours of starting vasopressors.
+
+**Objective:** Among adults with septic shock in their first ICU stay, compare
+28-day mortality between those given esmolol, metoprolol or labetalol within 48
+hours of their first vasopressor and those who were not.
+
+**Study Design:**
+
+- **Inclusion:** First ICU stay, aged 18 or over, ICU stay of at least 48
+  hours, Sepsis-3 (suspected infection and a SOFA score of 2 or more), and
+  norepinephrine or vasopressin within 48 hours of the onset of sepsis
+- **Exclusion:** Complete heart block, acute myocardial infarction, acute heart
+  failure or asthma during the hospital admission
+- **Baseline:** First norepinephrine or vasopressin
+- **Outcome:** Death within 28 days of the baseline
+
+**Implementation:**
+
+- Creates eight views from Patient, Encounter, Condition,
+  MedicationAdministration, Specimen and Observation resources
+- Identifies medicines across the ICU and hospital medication records, which
+  use different code systems
+- Calculates the SOFA score from the worst value of each measurement around the
+  suspected infection
+- Produces a patient-level view with one column per criterion, and a summary
+  query of 28-day mortality by group
+- Charts the attrition at each step, each patient's SOFA score and timeline,
+  and mortality and survival against the published figures
+
+The demo dataset yields a cohort of about ten patients, so the results
+illustrate the method rather than test the hypothesis.
+
 ## Usage Instructions in Databricks
 
 ### Using a Shared Training Workspace
@@ -244,6 +289,10 @@ you do not need to run the import or view creation steps.
       results
     - Run `notebooks/mimic_iv/create_spo2_views.py` for pulse oximetry study
       views
+    - Run `notebooks/mimic_iv/create_beta_blocker_septic_shock_views.py` for
+      the beta-blockers in septic shock study; it also runs
+      `sql/mimic_iv/combine_beta_blocker_septic_shock_views.sql` and charts the
+      results
 
 ### Running SQL Scripts
 
