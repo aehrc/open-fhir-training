@@ -55,7 +55,7 @@ plt.rcParams.update(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The follow-up window is the number of days after the MI within which a prescription counts as treatment. Change it in the widget at the top of the notebook and re-run the results section to see its effect.
+# MAGIC The follow-up window is the number of days after the MI within which a prescription counts as treatment. Change it in the widget at the top of the notebook and re-run the Results section to see its effect.
 
 # COMMAND ----------
 
@@ -256,7 +256,7 @@ plt.show()
 # MAGIC
 # MAGIC One row per MedicationRequest with an AMT code, with the date it was written and its status. AMT is distributed as part of SNOMED CT-AU, so its codes use the SNOMED CT system URI.
 # MAGIC
-# MAGIC The medicine is a choice element (`medication[x]`), so `ofType(CodeableConcept)` selects the coded form. A handful of requests in the data name a medicine in text without a code; the `forEach` leaves them out, as they cannot be classified.
+# MAGIC The medicine is a choice element (`medication[x]`), so `ofType(CodeableConcept)` selects the coded form. Some requests in the data have a SNOMED CT coding with a display but no code, e.g. `Acetaminophen 300 MG / Hydrocodone Bitartrate 5 MG Oral Tablet`. The `forEach` keeps only codings that have a code, so these requests are left out, as they cannot be classified.
 
 # COMMAND ----------
 
@@ -289,7 +289,7 @@ medication_requests = data.view(
             "select": [
                 {
                     "forEach": "medication.ofType(CodeableConcept).coding"
-                    ".where(system = 'http://snomed.info/sct')",
+                    ".where(system = 'http://snomed.info/sct' and code.exists())",
                     "column": [
                         {
                             "description": "AMT code",
@@ -472,6 +472,8 @@ plt.show()
 # MAGIC %md
 # MAGIC Note the product in red. `Aspirin 325 mg + codeine phosphate hemihydrate 8 mg tablet` is an analgesic, but it contains aspirin, so the map relates it to `771452004 |Platelet aggregation inhibitor|`. It also relates it to `404642006 |Opioid receptor agonist|`, which is how the chart picks it out. This analysis uses the classes exactly as the map asserts them, so it counts as an antiplatelet. We will measure the effect of that choice at the end of the notebook.
 # MAGIC
+# MAGIC Aspirin is a similar case on a smaller scale: `Aspirin 500 mg tablet` is an analgesic strength, while antiplatelet doses are usually 100 mg or less. The map classes every aspirin product as a platelet aggregation inhibitor, whatever its strength.
+# MAGIC
 # MAGIC The chart counts prescriptions at any time, before or after the MI. The analysis below counts only those on or after it.
 
 # COMMAND ----------
@@ -484,7 +486,7 @@ plt.show()
 # MAGIC 1. A view, `mi_secondary_prevention`, with one row per patient with an MI. For each drug class it gives the number of days from the first MI to the first prescription of that class written on or after it. It is empty where the patient was never prescribed the class after their MI.
 # MAGIC 2. A summary query, with the follow-up window as the parameter `:follow_up_days`. It gives the number and percentage of patients prescribed each class within the window, and the number prescribed all four.
 # MAGIC
-# MAGIC Keeping the days, rather than a yes or no for a fixed window, means that any window can be summarised from the same view. You can run the file in the Databricks SQL editor, which shows a box to enter the parameter. Here we read it from the repository and run it with the value of the widget.
+# MAGIC Keeping the days, rather than a yes or no for a fixed window, means that any window can be summarised from the same view. You can run the file in the Databricks SQL editor, which shows a box to enter the parameter. Here we read the file from the repository and create the view; the summary query is run with the value of the widget in the Results section.
 
 # COMMAND ----------
 
@@ -497,10 +499,6 @@ pc.spark.sql(create_view_sql)
 cohort = pc.spark.table(f"{VIEWS_SCHEMA}.mi_secondary_prevention").toPandas()
 display(cohort.head(10))
 
-# COMMAND ----------
-
-summary = pc.spark.sql(summary_sql, args={"follow_up_days": follow_up_days}).toPandas()
-display(summary)
 
 # COMMAND ----------
 
@@ -537,7 +535,12 @@ plt.show()
 # MAGIC %md
 # MAGIC ## How many were treated?
 # MAGIC
-# MAGIC The percentage of the cohort prescribed each class within the follow-up window, against the percentages that Halvorsen et al. reported at discharge. The comparison is loose: their figures are dispensings to patients under 85 who were discharged alive, ours are prescriptions written within the window.
+# MAGIC The percentage of the cohort prescribed each class within the follow-up window, against the percentages that Halvorsen et al. reported at discharge. The comparison is loose: their figures are dispensings to patients under 85 who were discharged alive, ours are prescriptions written within the window. Our cohort also includes patients who had less than a full window in which to be treated: with the default window of 365 days, 16 patients died within the window (4 on the day of their MI), and 8 had their MI less than 365 days before the most recent prescription in the data.
+
+# COMMAND ----------
+
+summary = pc.spark.sql(summary_sql, args={"follow_up_days": follow_up_days}).toPandas()
+display(summary)
 
 # COMMAND ----------
 
@@ -590,7 +593,7 @@ plt.show()
 
 # COMMAND ----------
 
-days = range(731)
+days = range(max(731, follow_up_days + 61))
 fig, ax = plt.subplots()
 for drug_class in DRUG_CLASSES:
     column = cohort[DAY_COLUMNS[drug_class]]
@@ -604,7 +607,7 @@ for drug_class in DRUG_CLASSES:
     )
 ax.axvline(follow_up_days, color="#555", linestyle="--", linewidth=1)
 ax.text(follow_up_days + 5, 3, f"{follow_up_days} days", color="#555")
-ax.set_xlim(0, 730)
+ax.set_xlim(0, max(730, follow_up_days + 60))
 ax.set_ylim(0, 100)
 ax.set_xlabel("Days since first MI")
 ax.set_ylabel("Patients treated (%)")

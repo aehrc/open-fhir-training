@@ -26,11 +26,11 @@ pc = PathlingContext.create()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC The import streams the map from the JSON file, so the driver never holds all of its mappings in memory. Importing the same version again replaces it. The source is a single JSON file rather than a FHIR package, so there is no registry checksum to verify.
+# MAGIC The import streams the map from the JSON file, so the driver never holds all of its mappings in memory. Importing the same version again replaces it.
 
 # COMMAND ----------
 
-pc.import_fhir_terminology(TERMINOLOGY_SOURCE, TERMINOLOGY_STORE, verify_package=False)
+pc.import_fhir_terminology(TERMINOLOGY_SOURCE, TERMINOLOGY_STORE)
 
 # COMMAND ----------
 
