@@ -38,34 +38,39 @@ from kit import (
 
 from decks._shared import EVENT, LINKS, PRESENTER, standards_map
 
-# Validated with the cql-to-elm translator (no errors or warnings).
+# Validated with the cql-to-elm translator at signature level Overloads (no errors
+# or warnings). The statin value set URL is illustrative.
 CQL = [
-    "library CholesterolRisk version '1.0.0'",
+    "library StatinAfterMI version '1.0.0'",
     "using FHIR version '4.0.1'",
     "include FHIRHelpers version '4.0.1'",
-    "codesystem \"LOINC\": 'http://loinc.org'",
-    'code "Total cholesterol": \'2093-3\' from "LOINC"',
+    "valueset \"MI\": 'http://snomed.info/sct?fhir_vs=ecl/<< 22298006'",
+    "valueset \"Statins\": 'https://example.org/ValueSet/statins'",
     "context Patient",
     "",
-    'define "Recent total cholesterol":',
-    '  [Observation: "Total cholesterol"] O',
-    "    where O.effective as dateTime",
-    "      during Interval[Now() - 2 years, Now()]",
+    'define "Recent MI":',
+    '  [Condition: "MI"] C',
+    "    where C.onset as dateTime",
+    "      during Interval[Now() - 1 year, Now()]",
     "",
-    'define "High cholesterol":',
-    '  exists ("Recent total cholesterol" O',
-    "    where O.value as Quantity > 240 'mg/dL')",
+    'define "Statin since MI":',
+    '  [MedicationRequest: "Statins"] M',
+    '    with "Recent MI" C',
+    "      such that M.authoredOn on or after C.onset as dateTime",
+    "",
+    'define "Statin gap":',
+    '  exists "Recent MI" and not exists "Statin since MI"',
 ]
 
 CARD = [
     "{",
     '  "cards": [{',
-    '    "summary": "Cholesterol over 240 mg/dL",',
+    '    "summary": "No statin since recent MI",',
     '    "indicator": "warning",',
-    '    "source": { "label": "Lipid risk service" },',
+    '    "source": { "label": "Post-MI care service" },',
     '    "links": [{',
-    '      "label": "Review lipid history",',
-    '      "url": "https://lipids.example.org",',
+    '      "label": "Review cardiac medicines",',
+    '      "url": "https://meds.example.org",',
     '      "type": "smart"',
     "    }]",
     "  }]",
@@ -96,19 +101,24 @@ def msg(x1, x2, y, label, fs=14, below=None, dash=None):
 
 def cql_anatomy():
     """The CQL example with the parts of a library labelled."""
-    cx, fs, lh = 395, 14, 1.35
+    cx, fs, lh = 395, 12.5, 1.24
 
     def base(i):
         return 30 + 8 + fs + i * fs * lh
 
-    b = [code(cx, 0, 545, CQL, "CholesterolRisk.cql", fs, lh)]
+    b = [code(cx, 0, 545, CQL, "StatinAfterMI.cql", fs, lh)]
     notes = [
         (0, 0, ["A versioned, shareable library"]),
-        (1, 2, ["Data model: FHIR R4,", "FHIRHelpers converts types"]),
-        (3, 4, ["Terminology: LOINC 2093-3"]),
+        (1, 2, ["Data model: FHIR R4"]),
+        (3, 4, ["Terminology: two value sets"]),
         (5, 5, ["Evaluated once per patient"]),
-        (7, 10, ["Named expression: a query over", "Observations in the last 2 years"]),
-        (12, 14, ["Named expression: true or false,", "with a UCUM quantity"]),
+        (
+            7,
+            10,
+            ["An MI in the last year, including", "STEMI and NSTEMI (descendants)"],
+        ),
+        (12, 15, ["Statins on or after the MI:", "with relates two queries"]),
+        (17, 18, ["True or false: the gap that", "a CDS service acts on"]),
     ]
     for first, last, rows in notes:
         y1, y2 = base(first) - fs + 2, base(last) + 4
@@ -116,7 +126,7 @@ def cql_anatomy():
             path(f"M{cx - 8},{y1} H{cx - 14} V{y2} H{cx - 8}", TEAL, 2, arrow=None)
         )
         b.append(lines(cx - 22, (y1 + y2) / 2, rows, 14, anchor="end", lh=1.2))
-    return svg(940, 330, b)
+    return svg(940, 342, b)
 
 
 def where_cql_runs():
@@ -396,24 +406,24 @@ def fhir_to_omop():
 
 
 def scenario():
-    """One hyperlipidaemia finding carried through every standard in the track."""
+    """One statin gap finding carried through every standard in the track."""
     steps = [
         (
             BLUE,
             "Find",
             "SQL on FHIR",
             [
-                "hyperlipidemia_view",
-                "in Databricks: 106",
-                "synthetic patients",
-                "over 240 mg/dL",
+                "mi_secondary_",
+                "prevention: 22 of",
+                "274 patients, no",
+                "statin in a year",
             ],
         ),
         (
             LAVENDER,
             "Express",
             "CQL",
-            ['"High cholesterol"', "in a shared,", "versioned Library"],
+            ['"Statin gap"', "in a shared,", "versioned Library"],
         ),
         (
             PEACH,
@@ -425,13 +435,13 @@ def scenario():
             YELLOW,
             "Detail",
             "SMART app",
-            ["lipid history,", "launched from", "the card"],
+            ["medication history,", "launched from", "the card"],
         ),
         (
             MINT,
             "Pool",
             "OMOP",
-            ["measurement rows", "from many sites,", "one network study"],
+            ["drug_exposure rows", "from many sites,", "one network study"],
         ),
     ]
     b = []
@@ -572,7 +582,7 @@ def your_turn():
             1.4,
         )
     )
-    b.append(text(500, 290, "Start from the CholesterolRisk library", 15, "start"))
+    b.append(text(500, 290, "Start from the StatinAfterMI library", 15, "start"))
     b.append(
         text(
             500,
@@ -587,30 +597,28 @@ def your_turn():
 
 
 def backup_results():
-    """The prostate results in the SQL editor, annotated."""
+    """The MI secondary prevention summary in the SQL editor, annotated."""
     w = 600
-    top, _, th, tp = screenshot(
-        "sql-prostate-results", 0, 0, w, crop=(243, 88, 700, 100)
-    )
-    bot, _, bh, bp = screenshot(
-        "sql-prostate-results", 0, th + 20, w, crop=(243, 540, 940, 310)
+    top, _, th, tp = screenshot("sql-mi-results", 0, 0, w, crop=(243, 88, 700, 92))
+    bot, _, _, bp = screenshot(
+        "sql-mi-results", 0, th + 20, w, crop=(243, 540, 940, 310)
     )
     b = [top, bot]
-    x, y = tp(305, 103)
-    b.append(highlight(x - 48, y - 11, 96, 22))
-    b.append(callout(1, x + 62, y))
+    x, y = tp(317, 103)
+    b.append(highlight(x - 60, y - 11, 120, 22))
+    b.append(callout(1, x + 74, y))
     x, y = bp(352, 557)
     b.append(highlight(x - 13, y - 13, 26, 26))
     b.append(callout(2, x + 30, y))
-    x, y = bp(1175, 665)
-    b.append(callout(3, x + 20, y))
+    x, y = bp(829, 665)
+    b.append(callout(3, x + 22, y))
     x, y = bp(268, 835)
     b.append(highlight(x - 14, y - 12, 50, 24))
     b.append(callout(4, x + 11, y - 30))
     notes = [
         (1, ["Run all on the Serverless", "Starter Warehouse"]),
         (2, ["+ next to Table adds a", "visualisation tab"]),
-        (3, ["Results: 6 patients with", "prostate cancer"]),
+        (3, ["Results: one row per", "class, and all four"]),
         (4, ["Download the result if you", "would rather chart elsewhere"]),
     ]
     for i, (n, rows) in enumerate(notes):
@@ -709,13 +717,17 @@ DECK = {
             "cql-anatomy",
             cql_anatomy(),
             "CQL is the Clinical Quality Language from HL7, now at version 1.5. It is designed to "
-            "be read by clinicians and informaticians, not just programmers. This library mirrors "
-            "the prostate exercise: LOINC 2093-3 is total cholesterol, and the threshold is 240 "
-            "milligrams per decilitre. The using and include lines bind it to FHIR R4, with "
-            "FHIRHelpers converting FHIR types to CQL types. The context line says every "
-            "expression is evaluated for one patient. The defines are named expressions you can "
-            "reuse. I ran this through the reference CQL to ELM translator and it compiles "
-            "cleanly. In practice the library is stored in a FHIR Library resource.",
+            "be read by clinicians and informaticians, not just programmers. This library carries "
+            "a finding from this morning's exercise into the workflow: a myocardial infarction in "
+            "the last year with no statin prescribed since. The using and include lines bind it "
+            "to FHIR R4, with FHIRHelpers converting FHIR types to CQL types. The value sets are "
+            "the terminology. The MI one is an ECL expression, 22298006 and its descendants, which "
+            "takes in STEMI and NSTEMI; the statin one stands for the AMT products the ConceptMap "
+            "relates to HMG-CoA reductase inhibitor. The context line says every expression is "
+            "evaluated for one patient. The defines are named expressions you can reuse, and the "
+            "with clause relates statin requests to the MI. I ran this through the reference CQL "
+            "to ELM translator and it compiles cleanly. In practice the library is stored in a "
+            "FHIR Library resource.",
         ),
         diagram(
             "Where CQL runs",
@@ -728,7 +740,7 @@ DECK = {
             "denominator. For decision support, a PlanDefinition references the library and "
             "describes actions to take when conditions are true. Calling apply for a specific "
             "patient returns a CarePlan with the actions that apply to them. The point is that "
-            "the same definition of high cholesterol can drive a measure across a clinic and an "
+            "the same definition of a statin gap can drive a measure across a clinic and an "
             "alert for one patient, without being written twice.",
         ),
         diagram(
@@ -803,16 +815,17 @@ DECK = {
         ),
         diagram(
             "One finding, end to end",
-            "Hyperlipidaemia from the prostate exercise, carried through every standard",
+            "A statin gap after MI, from this morning's exercise, carried through every standard",
             "scenario",
             scenario(),
-            "Let me put it together with the finding from the prostate exercise. In Databricks, "
-            "the hyperlipidaemia view finds 106 synthetic patients with a total cholesterol over "
-            "240. That definition becomes a CQL expression in a shared library. A CDS service "
-            "evaluates it when a chart is opened and returns a warning card. The clinician opens "
-            "a SMART app from the card to see the lipid history. Meanwhile, the same data, mapped "
-            "to OMOP measurement rows, is pooled with other sites in a network study. Those "
-            "results raise new questions and refine the logic. That's the loop.",
+            "Let me put it together with a finding from this morning's exercise. In Databricks, 22 "
+            "of the 274 synthetic patients with an MI had no statin prescribed within a year. That "
+            "definition becomes a CQL expression in a shared library. A CDS service evaluates it "
+            "when a chart is opened and returns a warning card. The clinician opens a SMART app "
+            "from the card to see the medication history. Meanwhile, the same data, mapped to "
+            "OMOP condition occurrence and drug exposure rows, is pooled with other sites in a "
+            "network study. Those results raise new questions and refine the logic. That's the "
+            "loop.",
         ),
         section(
             "Show and tell",
@@ -864,23 +877,23 @@ DECK = {
             "Demo walkthrough (backup)",
             "These slides walk through the demo with screenshots, in case the live environment "
             "isn't cooperating, or for anyone who wants to repeat the steps later. They show the "
-            "same SQL editor and the same two queries from this week's exercises: the prostate "
-            "risk factors table and the pulse oximetry cohort summary. Everything here works on "
+            "same SQL editor and the same two queries from this week's exercises: the MI secondary "
+            "prevention summary and the pulse oximetry cohort summary. Everything here works on "
             "the Serverless Starter Warehouse, so you don't need the notebook cluster to make a "
             "chart.",
         ),
         diagram(
             "Results in the SQL editor",
-            "The prostate risk factors query, with the controls you need",
+            "The MI secondary prevention summary, with the controls you need",
             "backup-results",
             backup_results(),
-            "This is the SQL editor after running the prostate risk factors query. One: Run all "
-            "executes on the Serverless Starter Warehouse. Two: the plus next to the Table tab is "
-            "how you add a visualisation; it opens a new tab beside the table. Three: the result, "
-            "six patients with prostate cancer, one with a BMI value and none with a cholesterol "
-            "value before diagnosis. A small table like this is fine to show as is. Four: the "
-            "download button lets you take the result elsewhere if you'd rather chart it in "
-            "another tool.",
+            "This is the SQL editor after running the summary query from the MI secondary "
+            "prevention exercise, with follow_up_days set to 365. One: Run all executes on the "
+            "Serverless Starter Warehouse. Two: the plus next to the Table tab is how you add a "
+            "visualisation; it opens a new tab beside the table. Three: the result, one row per "
+            "drug class and one for all four - a bar chart of percent_treated by drug_class works "
+            "well. Four: the download button lets you take the result elsewhere if you'd rather "
+            "chart it in another tool.",
         ),
         diagram(
             "From result to chart",
