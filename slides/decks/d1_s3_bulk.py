@@ -27,6 +27,7 @@ from kit import (
     lines,
     path,
     pill,
+    pill_width,
     rect,
     screenshot,
     section,
@@ -265,7 +266,7 @@ def levels():
         b.append(rect(392, y, 538, 100, "#fff", rx=10))
         b.append(pill(408, y + 12, name, PEACH, 14))
         b.append(
-            text(408 + len(name) * 8.4 + 30, y + 30, desc, 14, "start", 400, MUTED)
+            text(408 + pill_width(name, 14) + 12, y + 30, desc, 14, "start", 400, MUTED)
         )
         for j, r in enumerate(req):
             b.append(

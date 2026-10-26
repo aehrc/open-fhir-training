@@ -34,6 +34,7 @@ from kit import (
     svg,
     table,
     text,
+    text_width,
     title_slide,
     vcurve,
 )
@@ -43,7 +44,7 @@ from decks._shared import EVENT, PATHLING_URL, PRESENTER, REPO_URL, SOF_URL
 
 def chip(x, y, s, fill="#fff", fs=12):
     """A small rounded format label; returns (svg, width)."""
-    w = len(s) * fs * 0.58 + 18
+    w = text_width(s, fs) + 1.5 * fs
     return (
         rect(x, y, w, fs + 10, fill, sw=1.1, rx=(fs + 10) / 2)
         + text(x + w / 2, y + fs + 2.5, s, fs, "middle", 400)

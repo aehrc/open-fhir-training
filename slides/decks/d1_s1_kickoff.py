@@ -106,8 +106,7 @@ def rhythm():
     ]
     for i, (fill, title, rows) in enumerate(cards):
         x = 10 + i * 312
-        b.append(rect(x, 172, 296, 112, "#fff", rx=10))
-        b.append(rect(x, 172, 10, 112, fill, sw=0, rx=4))
+        b.append(rect(x, 172, 296, 112, fill, rx=10))
         b.append(text(x + 26, 202, title, 17, "start", 700))
         for j, r in enumerate(rows):
             b.append(text(x + 26, 232 + j * 24, r, 15, "start"))

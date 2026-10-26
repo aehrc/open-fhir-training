@@ -26,6 +26,7 @@ from kit import (
     lines,
     path,
     pill,
+    pill_width,
     rect,
     screenshot,
     section,
@@ -238,7 +239,7 @@ def cds_hooks():
     x = 124
     for h in ("patient-view", "order-select", "order-sign"):
         b.append(pill(x, 284, h, MINT, 13))
-        x += len(h) * 13 * 0.6 + 26
+        x += pill_width(h, 13) + 10
     b.append(
         code(520, 0, 420, CARD, "Response from the service", 13, 1.4, title_fill=PEACH)
     )

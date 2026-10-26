@@ -20,14 +20,18 @@ Author: John Grimes
 """
 
 import base64
+import functools
 import pathlib
 import struct
 from html import escape
 
 import segno
+from fontTools.ttLib import TTFont
+from fontTools.varLib.instancer import instantiateVariableFont
 
 HERE = pathlib.Path(__file__).parent
 SCREENSHOTS = HERE / "screenshots"
+FONT_FILES = {"Open Sans": "OpenSans.ttf", "JetBrains Mono": "JetBrainsMono.ttf"}
 
 # Palette, from the booth deck.
 INK = "#012B36"
@@ -224,12 +228,38 @@ def table(x, y, cols, rows, header_fill, fs=14, rh=30, family=SANS, mono_cols=()
     return "".join(out)
 
 
-def pill(x, y, s, fill=MINT, fs=13):
-    """A small rounded label; returns (svg, width)."""
-    w = len(s) * fs * 0.6 + 16
+@functools.cache
+def _advances(family, weight):
+    """Glyph advance widths (in em) by character, for a font at a given weight."""
+    font = TTFont(HERE / "fonts" / FONT_FILES[family])
+    axes = {a.axisTag: a.defaultValue for a in font["fvar"].axes}
+    axes["wght"] = weight
+    static = instantiateVariableFont(font, axes)
+    upem = static["head"].unitsPerEm
+    hmtx = static["hmtx"].metrics
+    return {chr(cp): hmtx[name][0] / upem for cp, name in static.getBestCmap().items()}
+
+
+def text_width(s, fs=15, weight=400, family=SANS):
+    """The rendered width of one line of text in px, from the bundled font's metrics."""
+    adv = _advances(family, weight)
+    return sum(adv.get(c, 0.6) for c in s) * fs
+
+
+def pill(x, y, s, fill=MINT, fs=13, weight=700):
+    """A small rounded label sized to its text; returns the SVG.
+
+    pill_width gives its width, for laying out a row of pills.
+    """
+    w = pill_width(s, fs, weight)
     return rect(x, y, w, fs + 10, fill, sw=1.2, rx=(fs + 10) / 2) + text(
-        x + w / 2, y + fs + 3, s, fs, "middle", 700
+        x + w / 2, y + fs + 3, s, fs, "middle", weight
     )
+
+
+def pill_width(s, fs=13, weight=700):
+    """The width of a pill: the text plus equal padding on each side."""
+    return text_width(s, fs, weight) + 1.3 * fs
 
 
 def code(
