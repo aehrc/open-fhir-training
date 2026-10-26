@@ -29,6 +29,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from pathling import PathlingContext
+from pyspark.sql import DataFrame
 
 VIEWS_SCHEMA = "mimic_iv_beta_blocker_views"
 
@@ -53,6 +54,21 @@ plt.rcParams.update(
     }
 )
 
+
+def save_view(view: DataFrame, name: str) -> None:
+    """Save a view as a table in the views schema, replacing any earlier version.
+
+    The table's schema is replaced too, so a view definition can be changed and the
+    notebook run again.
+
+    :param view: The result of a view definition.
+    :param name: The name of the table.
+    """
+    view.write.option("overwriteSchema", "true").saveAsTable(
+        f"{VIEWS_SCHEMA}.{name}", mode="overwrite"
+    )
+
+
 # COMMAND ----------
 
 pc = PathlingContext.create()
@@ -63,7 +79,7 @@ pc.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {VIEWS_SCHEMA}")
 # MAGIC %md
 # MAGIC # Read data from tables
 # MAGIC
-# MAGIC The data is the [MIMIC-IV Clinical Database demo on FHIR](https://physionet.org/content/mimic-iv-fhir-demo/), imported by the `import_mimic_iv_demo` notebook into the `mimic_iv_demo` schema. It holds 100 patients, so expect a cohort of about ten. The point is the method, which would run unchanged against the full database.
+# MAGIC The data is the [MIMIC-IV Clinical Database demo on FHIR](https://physionet.org/content/mimic-iv-fhir-demo/), imported by the `import_mimic_iv_demo` notebook into the `mimic_iv_demo` schema. It holds 100 patients, so expect a cohort of about ten. The point is the method, which would run unchanged against the full database. The code lists are taken from the full MIMIC-IV code systems, not just the codes that appear in the demo.
 
 # COMMAND ----------
 
@@ -122,7 +138,7 @@ patients = data.view(
                     "tag": [{"name": "ansi/type", "value": "DATE"}],
                 },
                 {
-                    "description": "Date and time of death",
+                    "description": "Date of death (recorded without a time)",
                     "path": "deceased.ofType(dateTime)",
                     "name": "deceased",
                     "type": "dateTime",
@@ -132,7 +148,7 @@ patients = data.view(
         }
     ],
 )
-patients.write.saveAsTable(f"{VIEWS_SCHEMA}.patient_view", mode="overwrite")
+save_view(patients, "patient_view")
 patients.show(5, truncate=False)
 
 # COMMAND ----------
@@ -183,7 +199,7 @@ icu_stays = data.view(
     ],
     where=[{"path": "class.code = 'ACUTE'"}],
 )
-icu_stays.write.saveAsTable(f"{VIEWS_SCHEMA}.icu_stay_view", mode="overwrite")
+save_view(icu_stays, "icu_stay_view")
 icu_stays.show(5, truncate=False)
 
 # COMMAND ----------
@@ -253,7 +269,7 @@ diagnoses = data.view(
         }
     ],
 )
-diagnoses.write.saveAsTable(f"{VIEWS_SCHEMA}.diagnosis_view", mode="overwrite")
+save_view(diagnoses, "diagnosis_view")
 diagnoses.show(5, truncate=False)
 
 # COMMAND ----------
@@ -261,7 +277,7 @@ diagnoses.show(5, truncate=False)
 # MAGIC %md
 # MAGIC ## Antibiotic view
 # MAGIC
-# MAGIC One row per antibiotic given in the ICU. Medicines given in the ICU are recorded by the bedside system with a category, so rather than listing every antibiotic, the `where` clause selects administrations in the two antibiotic categories. Medicines given on the wards are recorded in a different system without these categories, so antibiotics started before the ICU admission are not seen here.
+# MAGIC One row per administration of a medicine in the ICU's antibiotic categories. Medicines given in the ICU are recorded by the bedside system with a category, so rather than listing every antibiotic, the `where` clause selects administrations in the two antibiotic categories. The categories also hold antifungals and antivirals, and a separate row for the fluid each antibiotic is diluted in (such as `Dextrose 5%`). Only the times are used, and every diluent row is given alongside its antibiotic, so neither affects the result. Medicines given on the wards are recorded in a different system without these categories, so antibiotics started before the ICU admission are not seen here.
 # MAGIC
 # MAGIC Infusions have an `effectivePeriod` and one-off doses an `effectiveDateTime`. The union operator `|` takes whichever is present.
 
@@ -285,9 +301,9 @@ antibiotics = data.view(
                     "tag": [{"name": "ansi/type", "value": "TIMESTAMP"}],
                 },
                 {
-                    "description": "Antibiotic",
+                    "description": "Medicine",
                     "path": "medication.ofType(CodeableConcept).coding.display",
-                    "name": "antibiotic",
+                    "name": "medicine",
                 },
             ]
         }
@@ -300,7 +316,7 @@ antibiotics = data.view(
         }
     ],
 )
-antibiotics.write.saveAsTable(f"{VIEWS_SCHEMA}.antibiotic_view", mode="overwrite")
+save_view(antibiotics, "antibiotic_view")
 antibiotics.show(5, truncate=False)
 
 # COMMAND ----------
@@ -349,9 +365,7 @@ specimens = data.view(
         }
     ],
 )
-specimens.write.saveAsTable(
-    f"{VIEWS_SCHEMA}.microbiology_specimen_view", mode="overwrite"
-)
+save_view(specimens, "microbiology_specimen_view")
 specimens.show(5, truncate=False)
 
 # COMMAND ----------
@@ -468,9 +482,7 @@ sofa_observations = data.view(
     ],
     where=[{"path": "value.ofType(Quantity).value.exists()"}],
 )
-sofa_observations.write.saveAsTable(
-    f"{VIEWS_SCHEMA}.sofa_observation_view", mode="overwrite"
-)
+save_view(sofa_observations, "sofa_observation_view")
 sofa_observations.show(5, truncate=False)
 
 # COMMAND ----------
@@ -570,7 +582,7 @@ vasoactives = data.view(
         }
     ],
 )
-vasoactives.write.saveAsTable(f"{VIEWS_SCHEMA}.vasoactive_view", mode="overwrite")
+save_view(vasoactives, "vasoactive_view")
 vasoactives.show(5, truncate=False)
 
 # COMMAND ----------
@@ -583,7 +595,7 @@ vasoactives.show(5, truncate=False)
 # MAGIC - The ICU bedside system codes intravenous doses with `d_items` item IDs (`mimic-medication-icu`).
 # MAGIC - The hospital's electronic medication administration record (eMAR) codes most doses with the pharmacy's formulary code (`mimic-medication-formulary-drug-cd`), and some with the medicine's name (`mimic-medication-name`). Oral metoprolol, the most common beta-blocker, is recorded only here. `TOPR` is Toprol XL, a brand of metoprolol succinate.
 # MAGIC
-# MAGIC The `forEach` keeps only the codings that match one of the three code lists.
+# MAGIC The lists below hold every matching code in the [MIMIC-IV on FHIR code systems](https://kind-lab.github.io/mimic-fhir/), following the list in [the thesis this study is taken from](https://github.com/fhnaumann/master_thesis_pipeline/blob/main/langgraph-orchestration/dataset/case_002/notes.md). The trial's placebo is recorded under names such as `Esmolol Study Control (0.9% NaCl)`, which are left out. The `forEach` keeps only the codings that match one of the three lists.
 
 # COMMAND ----------
 
@@ -594,41 +606,64 @@ BETA_BLOCKER_ICU_ITEMS = [
 ]
 BETA_BLOCKER_FORMULARY_CODES = [
     "ESMO100I",
+    "ESMO2.5PM",
+    "ESMO2IND",
     "ESMO2PM",
-    "METO10",
-    "METO10I",
-    "METO12.5HT",
-    "METO25",
-    "METO50",
-    "METO5I",
-    "TOPR25",
-    "TOPR50",
-    "TOPR100",
+    "ESMOB100",
+    "ESMOBASE",
+    "ESMOIND",
     "LABE100",
     "LABE100I",
+    "LABE1200/400",
     "LABE200",
+    "LABE600/200",
+    "LABE600/200NS",
+    "METO10",
+    "METO10I",
+    "METO10L",
+    "METO10PB",
+    "METO12.5HT",
+    "METO1L",
+    "METO25",
+    "METO37.5",
+    "METO5",
+    "METO50",
+    "METO50I",
+    "METO5I",
+    "METOSUSP",
+    "METOSUSP10L",
+    "TOPR100",
+    "TOPR25",
+    "TOPR50",
 ]
 BETA_BLOCKER_NAMES = [
+    "Dutoprol",
     "Esmolol",
     "esmolol",
-    "Esmolol Study Drug",
-    "esmolol study drug",
     "Esmolol 2000mg/100mL 100mL Bag",
-    "Metoprolol",
-    "metoprolol",
-    "Metoprolol Tartrate",
-    "metoprolol tartrate",
-    "Metoprolol Tartrate Suspension",
-    "Metoprolol Tartra 12.5mg HALFTAB",
-    "Metoprolol Tart 5mg/5mL 5mL VIAL",
-    "Metoprolol Succinate XL",
-    "Metoprolol Succinate",
-    "metoprolol succinate",
-    "meTOPROLOL succinate",
-    "Metoprolol XL (Toprol XL)",
+    "Esmolol Study Drug",
+    "Esmolol study drug",
+    "esmolol study drug",
+    "Labet",
     "Labetalol",
     "laBETalol",
     "Labetalol 100mg/20mL 20mL VIAL",
+    "Metoprol",
+    "Metoprolo",
+    "Metoprolol",
+    "metoprolol",
+    "Metoprolol Succinate",
+    "meTOPROLOL succinate",
+    "metoprolol succinate",
+    "Metoprolol Succinate XL",
+    "Metoprolol Tart 5mg/5mL 5mL VIAL",
+    "Metoprolol Tartra 12.5mg HALFTAB",
+    "Metoprolol Tartrate",
+    "metoprolol tartrate",
+    "Metoprolol Tartrate Suspension",
+    "Metoprolol XL (Toprol XL)",
+    "toprol",
+    "Toprol XL",
 ]
 
 
@@ -688,7 +723,7 @@ beta_blockers = data.view(
         }
     ],
 )
-beta_blockers.write.saveAsTable(f"{VIEWS_SCHEMA}.beta_blocker_view", mode="overwrite")
+save_view(beta_blockers, "beta_blocker_view")
 beta_blockers.show(5, truncate=False)
 
 # COMMAND ----------
@@ -728,7 +763,12 @@ plt.show()
 # MAGIC 1. A view, `beta_blocker_septic_shock`, with one row per patient describing their first ICU stay. It is built as a chain of common table expressions, one for each step of the cohort definition, and each criterion becomes a column. `in_cohort` is true for the patients who meet them all.
 # MAGIC 2. A summary query, giving the 28-day mortality of each group in the cohort.
 # MAGIC
-# MAGIC The SOFA score is the worst value of each measurement from 48 hours before to 24 hours after the suspected infection, following [Seymour et al. (2016)](https://doi.org/10.1001/jama.2016.0288). Two simplifications are made: the respiratory component is scored on the PaO2 / FiO2 ratio alone, without checking for mechanical ventilation, and the renal component uses creatinine but not urine output.
+# MAGIC The SOFA score is the worst value of each measurement from 48 hours before to 24 hours after the suspected infection, following [Seymour et al. (2016)](https://doi.org/10.1001/jama.2016.0288). It is simplified in four ways:
+# MAGIC
+# MAGIC - The respiratory component is scored on the PaO2 / FiO2 ratio alone, without checking for mechanical ventilation.
+# MAGIC - The renal component uses creatinine but not urine output.
+# MAGIC - Vasopressor rates are taken from the start of each administration record. MIMIC-IV starts a new record whenever the rate changes, so this sees most rate changes.
+# MAGIC - The Glasgow Coma Scale is summed as charted. Intubated patients cannot speak, and MIMIC-IV charts their verbal response as 1, the lowest score, so their central nervous system component may be overstated.
 # MAGIC
 # MAGIC For acute heart failure, the query uses the ICD codes for acute and acute on chronic heart failure. It does not use the unspecified code `428.0` (congestive heart failure, unspecified), which is the most common heart failure code in the data and would exclude many patients with chronic heart failure.
 # MAGIC
