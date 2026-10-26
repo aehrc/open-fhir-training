@@ -27,13 +27,17 @@ open-fhir-training/
 │   │   └── transform_csv_to_fhir.py
 │   ├── synthea/                  # Synthea AU synthetic patient data
 │   │   ├── import_synthea.py     # Data import from S3
-│   │   └── create_prostate_cancer_views.py
+│   │   ├── create_prostate_cancer_views.py
+│   │   └── create_mi_secondary_prevention_views.py
+│   ├── terminology/              # Local terminology store
+│   │   └── import_amt_classification.py
 │   └── mimic_iv/                 # MIMIC-IV clinical database
 │       ├── import_mimic_iv_demo.py
 │       └── create_spo2_views.py
 ├── sql/                          # Spark SQL analysis scripts
-│   ├── synthea/                  # Prostate cancer risk analysis
-│   │   └── combine_prostate_cancer_views.sql
+│   ├── synthea/                  # Synthea AU studies
+│   │   ├── combine_prostate_cancer_views.sql
+│   │   └── combine_mi_secondary_prevention_views.sql
 │   └── mimic_iv/                 # Pulse oximetry bias study
 │       ├── st_subject.sql        # Study subject definition
 │       ├── st_ventilation.sql    # Ventilation categorisation
@@ -46,6 +50,8 @@ open-fhir-training/
 ### Prerequisites
 
 - Access to a Databricks workspace with the Pathling library installed
+  (version 10.0.0 or later for the secondary prevention study, which uses
+  Terminology in SQL)
 - Access to the training datasets (Synthea and MIMIC-IV demo)
 
 ### Setting Up in Databricks
@@ -91,6 +97,12 @@ of 8,297 Queensland patients, generated with
 - `notebooks/synthea/import_synthea.py` - Import data from S3 to Delta tables
 - `notebooks/synthea/create_prostate_cancer_views.py` - Create analytical views
 - `sql/synthea/combine_prostate_cancer_views.sql` - Final analysis query
+- `notebooks/terminology/import_amt_classification.py` - Import an AMT
+  medicine classification ConceptMap into a local terminology store
+- `notebooks/synthea/create_mi_secondary_prevention_views.py` - Create views,
+  classify medicines with the ConceptMap and chart the results
+- `sql/synthea/combine_mi_secondary_prevention_views.sql` - Patient-level view
+  and summary query
 
 ### MIMIC-IV Clinical Database
 
@@ -141,7 +153,41 @@ risk factors including:
 - Combines views using temporal logic (risk factors before diagnosis)
 - Produces a final analytical dataset for statistical analysis
 
-### 2. Pulse Oximetry Bias Study (MIMIC-IV)
+### 2. Secondary Prevention After Myocardial Infarction (Synthea AU)
+
+This study measures whether patients were prescribed guideline-recommended
+medicines after a myocardial infarction, following
+[Halvorsen et al. 2016](https://pubmed.ncbi.nlm.nih.gov/27246583/).
+
+**Objective:** For each patient with a myocardial infarction, indexed on their
+first, determine whether they were prescribed each of four drug classes within
+a follow-up window (365 days by default):
+
+- Antiplatelet
+- Statin
+- Beta-blocker
+- ACE inhibitor or angiotensin receptor blocker
+
+**Implementation:**
+
+- Creates views of patients, myocardial infarction diagnoses and medication
+  requests, with no drug class logic in the views
+- Classifies the AMT-coded medicines in SQL by joining to an AMT
+  product-to-classification ConceptMap, presented as a table through
+  [Terminology in SQL](https://build.fhir.org/ig/HL7/sql-on-fhir/en/terminology-in-sql.html)
+  and read from a Pathling local terminology store
+- Produces a patient-level view of the days to the first prescription of each
+  class, and a summary query that takes the follow-up window as a parameter
+- Charts the cohort, the treatment rates against the published figures, time to
+  treatment, combinations of classes and treatment by age
+
+The ConceptMap source is
+`s3://open-fhir-training-data/terminology/amt/product-to-classification.json`,
+and `notebooks/terminology/import_amt_classification.py` imports it into the
+store at `s3://open-fhir-training-data/terminology/tx-store`. The store only
+needs to be built once.
+
+### 3. Pulse Oximetry Bias Study (MIMIC-IV)
 
 A comprehensive study examining potential bias in pulse oximetry readings across
 different patient populations:
@@ -186,10 +232,16 @@ you do not need to run the import or view creation steps.
       concepts
     - Run `notebooks/synthea/import_synthea.py` to import Synthea data
     - Run `notebooks/mimic_iv/import_mimic_iv_demo.py` to import MIMIC-IV data
+    - Run `notebooks/terminology/import_amt_classification.py` to build the
+      local terminology store used by the secondary prevention study
 
 3. **Create analytical views:**
     - Run `notebooks/synthea/create_prostate_cancer_views.py` for cancer study
       views
+    - Run `notebooks/synthea/create_mi_secondary_prevention_views.py` for the
+      secondary prevention study; it also runs
+      `sql/synthea/combine_mi_secondary_prevention_views.sql` and charts the
+      results
     - Run `notebooks/mimic_iv/create_spo2_views.py` for pulse oximetry study
       views
 
@@ -237,6 +289,15 @@ on FHIR that provides:
 - **FHIRPath expression** evaluation for complex data extraction
 - **View runner** for executing SQL on FHIR view definitions
 - **Performance optimisation** for large-scale healthcare analytics
+
+### Terminology in SQL
+
+[Terminology in SQL](https://build.fhir.org/ig/HL7/sql-on-fhir/en/terminology-in-sql.html)
+is the part of the SQL on FHIR specification that presents value sets and
+concept maps to SQL as tables with fixed columns. A query classifies or
+translates codes by joining to the table, so the SQL does not need to contain
+lists of codes. Pathling's `value_set` and `concept_map` methods return these
+tables as Spark DataFrames.
 
 ### View-Based Analytics
 
