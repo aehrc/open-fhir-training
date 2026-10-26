@@ -1,4 +1,4 @@
-"""Track 3 analytics part: CQL, CDS Hooks, SMART App Launch and OMOP, then show and tell prep.
+"""Track 3 analytics part: CQL, CDS Hooks, SMART App Launch and OMOP, and charting a result.
 
 Author: John Grimes
 """
@@ -469,39 +469,6 @@ def scenario():
     return svg(940, 330, b)
 
 
-def show_and_tell():
-    """The five prompts for a show and tell slot, with tips."""
-    b = [rect(0, 0, 580, 335, "#fff", rx=12)]
-    b.append(text(24, 36, "Your group · 3 minutes", 19, "start", 700))
-    prompts = [
-        ("The question", "what did you want to know?"),
-        ("The data", "which dataset, which resources?"),
-        ("What you did", "which standards and tools?"),
-        ("What you found", "one result, one picture"),
-        ("What's next", "what would you try with more time?"),
-    ]
-    for i, (h, s) in enumerate(prompts):
-        y = 62 + i * 54
-        b.append(circle(44, y + 20, 16, BLUE))
-        b.append(text(44, y + 26, str(i + 1), 15, weight=700))
-        b.append(text(74, y + 26, h, 17, "start", 700))
-        b.append(text(250, y + 26, s, 15, "start", fill=MUTED))
-    b.append(rect(610, 0, 330, 335, YELLOW, rx=12))
-    b.append(text(632, 36, "Tips", 19, "start", 700))
-    tips = [
-        ["One screenshot or chart", "beats a page of text"],
-        ["Say what didn't work -", "it helps the next group"],
-        ["Name the standards", "and tools you used"],
-        ["Keep to time; questions", "can follow in the break"],
-    ]
-    for i, rows in enumerate(tips):
-        y = 70 + i * 66
-        b.append(text(632, y, "·", 20, "start", 700))
-        b.append(text(650, y, rows[0], 15, "start"))
-        b.append(text(650, y + 21, rows[1], 15, "start", fill=MUTED))
-    return svg(940, 340, b)
-
-
 def demo_steps():
     """The SQL editor, with the run button and visualisation tab marked."""
     w = 560
@@ -521,7 +488,7 @@ def demo_steps():
         ["Run the summary query: 28-day", "mortality by group"],
         ["Click + next to Table, then", "Visualization"],
         ["Bar chart: X treatment_group,", "Y mortality_percent"],
-        ["Save it, then screenshot the", "chart for your slide"],
+        ["Save it with the query", "to keep the chart"],
     ]
     for i, rows in enumerate(steps):
         y = 22 + i * 64
@@ -532,46 +499,29 @@ def demo_steps():
 
 
 def your_turn():
-    """The hands-on time before show and tell, with a stretch task."""
-    b = []
-    b.append(
-        box(
-            0,
-            0,
-            940,
-            60,
-            AMBER,
-            ["Show and tell: Friday 3:30, main room - about 3 minutes per group"],
-            16,
-            700,
-        )
-    )
-    b.append(rect(0, 84, 460, 250, "#fff", rx=12))
-    b.append(text(20, 116, "Now", 18, "start", 700))
+    """The hands-on task, with a stretch task."""
+    b = [rect(0, 0, 460, 250, "#fff", rx=12)]
+    b.append(text(20, 32, "Now", 18, "start", 700))
     todo = [
         ["Finish the exercise or question you started"],
         ["Pick one result and chart it"],
-        [
-            "Fill in the five prompts: question, data,",
-            "what you did, what you found, what's next",
-        ],
-        ["Rehearse 3 minutes; choose a speaker"],
+        ["Note what you tried, and what didn't work"],
     ]
-    y = 150
+    y = 66
     for rows in todo:
         b.append(text(20, y, "·", 18, "start", 700))
         for r in rows:
             b.append(text(36, y, r, 15, "start"))
             y += 22
         y += 12
-    b.append(rect(480, 84, 460, 250, PEACH, rx=12))
-    b.append(text(500, 116, "Stretch", 18, "start", 700))
-    b.append(text(500, 142, "Write the CQL define or the CDS Hooks", 15, "start"))
-    b.append(text(500, 164, "card that would deliver your finding", 15, "start"))
+    b.append(rect(480, 0, 460, 250, PEACH, rx=12))
+    b.append(text(500, 32, "Stretch", 18, "start", 700))
+    b.append(text(500, 58, "Write the CQL define or the CDS Hooks", 15, "start"))
+    b.append(text(500, 80, "card that would deliver your finding", 15, "start"))
     b.append(
         code(
             500,
-            182,
+            98,
             420,
             [
                 '{ "summary": "Your finding, one line",',
@@ -583,18 +533,18 @@ def your_turn():
             1.4,
         )
     )
-    b.append(text(500, 290, "Start from the StatinAfterMI library", 15, "start"))
+    b.append(text(500, 206, "Start from the StatinAfterMI library", 15, "start"))
     b.append(
         text(
             500,
-            312,
+            228,
             "on the CQL slide; check against cql.hl7.org",
             15,
             "start",
             fill=MUTED,
         )
     )
-    return svg(940, 340, b)
+    return svg(940, 256, b)
 
 
 def backup_results():
@@ -645,7 +595,7 @@ def backup_chart():
             "2  Visualization type: Bar",
             "3  X column treatment_group, Y column",
             "    mortality_percent",
-            "4  Save, then screenshot the chart",
+            "4  Save it with the query",
         ]
     ):
         b.append(text(0, 30 + sh + 40 + i * 30, s, 16, "start"))
@@ -675,7 +625,7 @@ def backup_chart():
         text(
             760,
             338,
-            "2 and 8 patients - put the n on your slide",
+            "2 and 8 patients - always show the n",
             13,
             fill=MUTED,
             italic=True,
@@ -691,9 +641,8 @@ SLIDES = [
         "data, shaping it with SQL on FHIR, and analysing it in Databricks. This section is "
         "about what happens next: how an analytic finding becomes something a clinician sees "
         "at the right moment, and how it feeds research across many sites. I'll cover four "
-        "standards briefly - CQL, CDS Hooks, SMART App Launch and OMOP - then we'll talk "
-        "about how show and tell works, and I'll show you how to turn a query into a chart "
-        "for your slide.",
+        "standards briefly - CQL, CDS Hooks, SMART App Launch and OMOP - then I'll show you "
+        "how to turn a query result into a chart.",
         part="Closing the loop",
     ),
     diagram(
@@ -828,30 +777,9 @@ SLIDES = [
         "network study. The results of that study raise new questions and feed back into the "
         "logic, which closes the loop.",
     ),
-    section(
-        "Show and tell",
-        "Now for the last part of the connectathon: show and tell. Every group across the "
-        "three tracks gets a chance to share what they did, in the main room after afternoon "
-        "tea. It doesn't need to be polished. The most useful presentations are honest about "
-        "what you tried, what worked and what didn't. So let's talk about how to make the most "
-        "of a few minutes, and then I'll show you a quick way to get a chart out of the "
-        "workspace for your slide.",
-    ),
-    diagram(
-        "Show and tell",
-        "Main room, 3:30-4:30: a few minutes per group, across all three tracks",
-        "show-and-tell",
-        show_and_tell(),
-        "Show and tell is in the main room at 3:30, after afternoon tea. Each group gets a "
-        "few minutes; plan on about three. A simple structure works well: the question you "
-        "asked, the data you used, what you did - which standards and tools - what you found, "
-        "and what you'd do next. Show a screenshot or a chart rather than a lot of text. "
-        "Please say what didn't work. That is often the most useful thing for the room, and "
-        "for us as organisers. Name the standards and tools, and keep to time.",
-    ),
     diagram(
         "Demo",
-        "From a query result to a chart for your show and tell slide",
+        "From a query result to a chart in the SQL editor",
         "demo",
         demo_steps(),
         "Live demo. One: open the SQL Editor from the left navigation and attach the "
@@ -859,21 +787,21 @@ SLIDES = [
         "exercise, which counts patients and deaths within 28 days by treatment group, and "
         "click Run all. Two rows appear, one per group. Three: click the plus next to the "
         "Table tab and choose Visualization. Four: pick a bar chart, put treatment group on "
-        "the X axis and mortality percent on the Y axis. Five: save it, and take a screenshot "
-        "for your slide. I'll point out that there are only 10 patients, so this is a "
+        "the X axis and mortality percent on the Y axis. Five: save it with the query. "
+        "I'll point out that there are only 10 patients, so this is a "
         "picture, not a result.",
     ),
     diagram(
         "Your turn",
-        "Finish, chart one result, and prepare 3 minutes for show and tell",
+        "Finish, chart one result, then try the stretch task",
         "your-turn",
         your_turn(),
-        "The rest of the time before show and tell is yours. Finish the exercise or "
-        "the question you've been working on. Pick one result and chart it the way I just "
-        "showed. Then fill in the five prompts and decide who will speak. If you finish "
-        "early, here's a stretch task: write the CQL define or the CDS Hooks card that would "
-        "deliver your finding to a clinician. The card on the right is valid and has only the "
-        "required fields. James, Dion, Duncan and I will be around the room to help.",
+        "Now it's your turn. Finish the exercise or the question you've been working on. "
+        "Pick one result and chart it the way I just showed, and note what you tried and "
+        "what didn't work. If you finish early, here's a stretch task: write the CQL define "
+        "or the CDS Hooks card that would deliver your finding to a clinician. The card on "
+        "the right is valid and has only the required fields. James, Dion, Duncan and I will "
+        "be around the room to help.",
     ),
     section(
         "Demo walkthrough",
@@ -906,7 +834,7 @@ SLIDES = [
         "counts and the percentage who died within 28 days. Click the plus, choose "
         "Visualization, then a bar chart with treatment group on the X axis and mortality "
         "percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
-        "rows: 50.0 and 37.5. Put the number of patients on the slide, because with 2 and 8 "
+        "rows: 50.0 and 37.5. Always show the number of patients, because with 2 and 8 "
         "patients one death moves a bar by 12.5 to 50 points. Present it as a demonstration "
         "of the method, not a finding.",
     ),
