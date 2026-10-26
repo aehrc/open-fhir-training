@@ -32,7 +32,7 @@ from kit import (
     title_slide,
 )
 
-from decks._shared import EVENT, FORM_URL, LINKS, PRESENTER
+from decks._shared import EVENT, FORM_URL, LINKS, PRESENTER, show_and_tell
 
 # One (team, question, progress) tuple per group, e.g.
 #   ("Metro North", "Does SpO2 overestimate SaO2?", "Cohort built; comparing means"),
@@ -230,46 +230,6 @@ def friday():
         )
     )
     return svg(940, 330, b)
-
-
-def show_and_tell():
-    """What each group brings to the 3:30 show and tell."""
-    items = [
-        ("1", "The question", ["What did you", "want to know?"]),
-        ("2", "The data", ["Which tables,", "resources, codes?"]),
-        ("3", "What you did", ["Views, queries,", "mappings, notebooks"]),
-        ("4", "What you found", ["A result, a number,", "or a dead end"]),
-        ("5", "What's next", ["What would you", "do with more time?"]),
-    ]
-    b = []
-    w, gap = 168, 20
-    for i, (n, title, rows) in enumerate(items):
-        x = 10 + i * (w + gap)
-        cx = x + w / 2
-        b.append(rect(x, 10, w, 200, YELLOW if i % 2 == 0 else BLUE, rx=12))
-        b.append(f'<circle cx="{cx}" cy="52" r="22" fill="{TEAL}"/>')
-        b.append(text(cx, 60, n, 20, weight=700, fill="#fff"))
-        b.append(text(cx, 112, title, 17, weight=700))
-        b.append(text(cx, 152, rows[0], 15))
-        b.append(text(cx, 174, rows[1], 15))
-        if i < len(items) - 1:
-            b.append(line(x + w + 2, 110, x + w + gap - 2, 110, sw=2))
-    b.append(rect(10, 238, 920, 84, "#fff", TEAL, 2, 12))
-    b.append(
-        text(
-            470, 272, "3:30-4:30 · main room · a few minutes per group", 18, weight=700
-        )
-    )
-    b.append(
-        text(
-            470,
-            302,
-            "A query, a chart or a screenshot from the workspace is enough",
-            15,
-            fill=MUTED,
-        )
-    )
-    return svg(940, 335, b)
 
 
 def reminders():
