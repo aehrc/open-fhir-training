@@ -702,12 +702,13 @@ DECK = {
             "standards-map-act",
             standards_map(highlight="act"),
             "Here is the map we've used all track. We've worked mostly in the middle two stages. "
-            "The fourth stage, act on it, is where analytics meets care. Three standards matter "
-            "here. CQL lets you write clinical logic once, in a form that can be shared and "
-            "executed. CDS Hooks delivers advice into the EHR at a workflow moment. SMART App "
-            "Launch lets an app open inside the EHR with the patient already selected. And I'll "
-            "come back to OMOP from the analyse box, because it is how findings get pooled across "
-            "sites for research. None of these replace what you've built this week; they consume it.",
+            "The fourth stage, act on it, is about using the results in clinical care, and there are "
+            "three standards to cover. CQL lets you write clinical logic once, in a form that can be "
+            "shared and executed. CDS Hooks delivers advice into the EHR at a point in the workflow. "
+            "SMART App Launch lets an app open inside the EHR with the patient already selected. I'll "
+            "also come back to OMOP from the analyse box, because it is how findings get pooled across "
+            "sites for research. These standards build on the data and views you've worked with this "
+            "week, rather than replacing them.",
         ),
         diagram(
             "CQL: clinical logic you can share",
@@ -737,7 +738,7 @@ DECK = {
             "evaluate-measure gives you a MeasureReport with counts like numerator and "
             "denominator. For decision support, a PlanDefinition references the library and "
             "describes actions to take when conditions are true. Calling apply for a specific "
-            "patient returns a CarePlan with the actions that apply to them. The point is that "
+            "patient returns a CarePlan with the actions that apply to them. This means that "
             "the same definition of a statin gap can drive a measure across a clinic and an "
             "alert for one patient, without being written twice.",
         ),
@@ -760,8 +761,9 @@ DECK = {
             "CDS Hooks v2.0: the EHR calls a service at a workflow event and shows the cards it returns",
             "cds-hooks",
             cds_hooks(),
-            "CDS Hooks is how the logic reaches a clinician. The EHR discovers services at a "
-            "well-known endpoint, then calls a service when something happens in the workflow - "
+            "CDS Hooks is one way of getting this logic in front of a clinician. The EHR discovers "
+            "services at a well-known endpoint, then calls a service when something happens in the "
+            "workflow - "
             "here, patient-view, when a chart is opened. The request carries context, such as the "
             "patient id, and prefetched FHIR data the service asked for up front, so it doesn't "
             "have to query back. The service evaluates its logic, perhaps our CQL, and returns "
@@ -774,8 +776,9 @@ DECK = {
             "SMART App Launch v2.2: OAuth 2.0 with launch context, so the app opens on the right patient",
             "smart-launch",
             smart_launch(),
-            "SMART App Launch is the other half. In an EHR launch the EHR opens the app with the "
-            "FHIR server address and a launch id. The app reads the server's SMART configuration, "
+            "SMART App Launch is often used alongside CDS Hooks. In an EHR launch, the EHR opens the "
+            "app with the FHIR server address and a launch id. The app reads the server's SMART "
+            "configuration, "
             "then asks the authorisation server for access, with scopes such as read access to "
             "the patient's Observations. It exchanges a code for an access token, and the token "
             "response says which patient is in context. Then it calls the FHIR API. Yesterday's "
@@ -788,8 +791,8 @@ DECK = {
             "OHDSI OMOP CDM v5.4: person-centric tables and standardised vocabularies",
             "omop-cdm",
             omop_cdm(),
-            "Now to research. OMOP is the Common Data Model from the OHDSI community, at version "
-            "5.4. Everything hangs off a person: visits, conditions, drug exposures, procedures, "
+            "Moving to research, OMOP is the Common Data Model from the OHDSI community, now at "
+            "version 5.4. Everything hangs off a person: visits, conditions, drug exposures, procedures, "
             "measurements and observations. Every clinical code is mapped to a standard concept "
             "in the OHDSI vocabularies, so the same query means the same thing at every site. "
             "That is what makes federated network studies possible, with tools like ATLAS and "
@@ -807,7 +810,7 @@ DECK = {
             "codes and load OMOP tables. HL7's Vulcan accelerator has published a FHIR to OMOP "
             "implementation guide, version 1.0.0, informative, targeting CDM 5.4, with mapping "
             "patterns. Patient becomes person, Encounter becomes visit occurrence, Condition "
-            "becomes condition occurrence. Observation is the interesting one: it goes to "
+            "becomes condition occurrence. Observation is more complicated: it goes to "
             "measurement or observation depending on the domain of the mapped concept. And some "
             "fields OMOP requires, like a drug exposure end date, may have to be derived.",
         ),
@@ -816,14 +819,14 @@ DECK = {
             "A statin gap after MI, from this morning's exercise, carried through every standard",
             "scenario",
             scenario(),
-            "Let me put it together with a finding from this morning's exercise. In Databricks, 22 "
+            "To bring this together, take a finding from this morning's exercise. In Databricks, 22 "
             "of the 274 synthetic patients with an MI had no statin prescribed within a year. That "
             "definition becomes a CQL expression in a shared library. A CDS service evaluates it "
             "when a chart is opened and returns a warning card. The clinician opens a SMART app "
             "from the card to see the medication history. Meanwhile, the same data, mapped to "
             "OMOP condition occurrence and drug exposure rows, is pooled with other sites in a "
-            "network study. Those results raise new questions and refine the logic. That's the "
-            "loop.",
+            "network study. The results of that study raise new questions and feed back into the "
+            "logic, which closes the loop.",
         ),
         section(
             "Show and tell",
@@ -842,7 +845,7 @@ DECK = {
             "Show and tell is in the main room at 3:30, after afternoon tea. Each group gets a "
             "few minutes; plan on about three. A simple structure works well: the question you "
             "asked, the data you used, what you did - which standards and tools - what you found, "
-            "and what you'd do next. One screenshot or chart is worth more than a page of text. "
+            "and what you'd do next. Show a screenshot or a chart rather than a lot of text. "
             "Please say what didn't work. That is often the most useful thing for the room, and "
             "for us as organisers. Name the standards and tools, and keep to time.",
         ),
@@ -874,9 +877,8 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "These slides walk through the demo with screenshots, in case the live environment "
-            "isn't cooperating, or for anyone who wants to repeat the steps later. They show the "
+            "Backup slides, in case the live demo fails. They walk through the demo with screenshots, "
+            "and are also useful for anyone who wants to repeat the steps later. They show the "
             "same SQL editor and the same two queries from this week's exercises: the MI secondary "
             "prevention summary and the septic shock mortality summary. Everything here works on "
             "the Serverless Starter Warehouse, so you don't need the notebook cluster to make a "

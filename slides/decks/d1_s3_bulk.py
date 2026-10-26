@@ -821,7 +821,7 @@ DECK = {
             "Kick off, poll the status URL, then download the files listed in the manifest",
             "export-flow",
             export_flow(),
-            "Here is the whole conversation. The client sends a GET to the export endpoint with "
+            "This is the full sequence of requests. The client sends a GET to the export endpoint with "
             "two headers: Accept application/fhir+json, and Prefer respond-async. The server "
             "replies 202 Accepted, with a Content-Location header pointing at a status URL. The "
             "client polls that URL, backing off between requests. While the job runs, the server "
@@ -873,12 +873,12 @@ DECK = {
         ),
         section(
             "Pathling",
-            "So now we have a directory of NDJSON files. The next question is how to analyse them. "
+            "At this point we have a directory of NDJSON files, and we need a way to analyse them. "
             "FHIR resources are deeply nested, with repeating elements, choice types and "
-            "extensions, and most analytic tools expect flat tables. This is where Pathling comes "
-            "in. Pathling is the set of open-source tools my team at CSIRO builds for FHIR "
-            "analytics, and it is what all the notebooks in our workspace use. I'll explain what "
-            "it is, how it encodes FHIR, and how the import notebooks use it.",
+            "extensions, and most analytic tools expect flat tables. Pathling is a set of "
+            "open-source tools that my team at CSIRO develops to address this problem, and it's "
+            "what all the notebooks in our workspace use. I'll explain what it is, how it encodes "
+            "FHIR, and how the import notebooks use it.",
         ),
         diagram(
             "What Pathling is",
@@ -898,9 +898,9 @@ DECK = {
             "FHIR JSON becomes nested Spark columns, with nothing lost along the way",
             "encoders",
             encoders(),
-            "The encoders are the foundation. They take FHIR JSON, from NDJSON files, Bundles or "
-            "an existing data frame, and turn each resource type into a Spark data frame. Every "
-            "element becomes a column, keeping the FHIR structure: complex types become structs "
+            "The rest of Pathling is built on the encoders. They take FHIR JSON, from NDJSON files, "
+            "Bundles or an existing data frame, and turn each resource type into a Spark data frame. "
+            "Every element becomes a column, keeping the FHIR structure: complex types become structs "
             "and repeating elements become arrays. You can see that on the right, in the patient "
             "table in our catalog. One, meta is a struct. Two, meta.profile is an array of "
             "strings. Three, meta.security is an array of structs. Because nothing is dropped, you "
@@ -925,8 +925,8 @@ DECK = {
             "When you want a service that others can call, rather than a notebook",
             "server",
             server(),
-            "Everything so far runs in a notebook: you run the job. Sometimes you want a service "
-            "instead, that other systems call. The Pathling server packages the same engine "
+            "Everything so far has run in a notebook. Sometimes you need a service that other "
+            "systems can call instead. The Pathling server packages the same engine "
             "behind a FHIR API. It supports the REST API, bulk $import and $export, so it can "
             "receive and serve NDJSON, and the SQL on FHIR operations $sql-run and $sql-export, "
             "which run a view and return the result. It supports SMART on FHIR authorisation, has "
@@ -963,13 +963,11 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "If the live demo doesn't work, I'll walk through these screenshots instead. They "
-            "show the same steps: the import notebook, its output, the synthea schema in the "
-            "catalog, and the sample data in the patient table. They were captured from the "
-            "same workspace you are using, so what you see on your screen should match. If you "
-            "are following along at your own pace later, these slides also work as a written "
-            "guide to the notebook.",
+            "Backup slides, in case the live demo fails. They show the same steps as screenshots: "
+            "the import notebook, its output, the synthea schema in the catalog, and the sample "
+            "data in the patient table. They were captured from the same workspace you are using, "
+            "so what you see on your screen should match. They also work as a written guide to the "
+            "notebook if you're following along at your own pace later.",
         ),
         diagram(
             "Running the import notebook",

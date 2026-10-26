@@ -1147,9 +1147,9 @@ DECK = {
             "ICU bedside system codes intravenous doses with item ids. The hospital's electronic "
             "medication administration record uses the pharmacy's formulary codes, and sometimes "
             "the medicine's name. Oral metoprolol, the most common beta-blocker, is only in the "
-            "eMAR. Looking at the ICU record alone finds 30 patients; both records find 53. The "
-            "trap: formulary codes have no display text, and METO10 and METO10I look like "
-            "metoprolol, but the NDC codes they were dispensed under show they are "
+            "eMAR. Looking at the ICU record alone finds 30 patients; both records find 53. One "
+            "complication is that formulary codes have no display text. METO10 and METO10I look like "
+            "metoprolol, but the NDC codes they were dispensed under show that they are "
             "metoclopramide, an anti-emetic. So the view lists confirmed codes, not prefixes.",
         ),
         diagram(
@@ -1236,12 +1236,11 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "If the live demo doesn't cooperate, here's what you would have seen. The next two "
-            "slides show the summary query in the SQL editor, with its result, and then the row "
-            "counts of each view and the output of the Your turn query. They're also a useful "
-            "reference later in the block: if your own numbers differ from these, check that "
-            "you're reading the shared mimic_iv_beta_blocker_views tables.",
+            "Backup slides, in case the live demo fails. The next two slides show the summary query "
+            "in the SQL editor, with its result, and then the row counts of each view and the output "
+            "of the Your turn query. They're also a useful reference later in the block: if your own "
+            "numbers differ from these, check that you're reading the shared "
+            "mimic_iv_beta_blocker_views tables.",
         ),
         diagram(
             "The summary query",
@@ -1263,16 +1262,17 @@ DECK = {
             "the 10 patients where in_cohort is true. On the right is the Your turn query with "
             "four windows, shown as deaths over patients. At 48 hours it matches the summary. At "
             "24 hours one patient moves to the control group; at 7 days five patients are "
-            "treated, and at 28 days six. That's the honest answer for a 100-patient demo: the "
-            "pipeline works, and the definition matters, but the question needs the full "
-            "dataset.",
+            "treated, and at 28 days six. With 100 patients this is as far as we can go. The pipeline "
+            "works and the choice of window clearly affects the groups, but answering the question "
+            "would need the full dataset.",
         ),
         closing(
             "Questions?",
             PRESENTER,
             "That's the septic shock study. We took a published question, rebuilt its cohort from "
-            "FHIR with SQL on FHIR views and plain SQL, and found that timing and the shape of the "
-            "medication records mattered more than the SQL. The notebook and SQL are in the "
+            "FHIR with SQL on FHIR views and plain SQL. Most of the difficulty was in the timing of "
+            "events and the way medicines are recorded, rather than in the SQL itself. The notebook "
+            "and SQL are in the "
             "open-fhir-training repository, and the SQL on FHIR and Pathling sites have the "
             "specification and the documentation. Grab me or one of the other leads if you get "
             "stuck on the window query.",

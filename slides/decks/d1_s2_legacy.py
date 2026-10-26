@@ -946,16 +946,17 @@ DECK = {
             "database, a laboratory system, radiology, patient administration, a long tail of "
             "departmental and niche systems, an integration engine carrying HL7 version 2 feeds "
             "between them, a data warehouse with nightly extracts, and a great deal of documents "
-            "and free text. Look at the chips: SQL extracts, HL7 v2 messages, CSV, DICOM, PDF. Only "
-            "occasionally FHIR. Most of this will not arrive as FHIR any time soon. The point of "
-            "this session is that you don't have to wait for it to.",
+            "and free text. Under each system are the formats it typically produces: SQL extracts, "
+            "HL7 v2 messages, CSV, DICOM and PDF, and only occasionally FHIR. Most of this data "
+            "won't arrive as FHIR any time soon, but that doesn't mean we have to wait before we "
+            "can use FHIR for analytics.",
         ),
         diagram(
             "Don't wait for a FHIR server",
             "Use FHIR as the analytic interchange model at the edge of your analytics platform",
             "edge",
             edge(),
-            "The idea is simple. Leave the source systems alone. At the edge of your analytics "
+            "The approach is to leave the source systems as they are. At the edge of your analytics "
             "platform, map each source into FHIR resources once. Store them as NDJSON and as "
             "tables, here Delta tables in Databricks. Then everything downstream - SQL on FHIR "
             "views, terminology, dashboards, research cohorts, machine learning features - is "
@@ -982,8 +983,8 @@ DECK = {
             "The same view runs over FHIR from any source, so analysis outlives any one system",
             "contract",
             contract(),
-            "Why go to the trouble of mapping? Because the analysis becomes independent of the "
-            "source. Our workspace has two Patient tables: one Synthea generated directly as FHIR, "
+            "The main benefit of mapping is that the analysis no longer depends on the source. Our "
+            "workspace has two Patient tables: one Synthea generated directly as FHIR, "
             "and one we mapped from the CSV extract. The same view definition - id, gender, birth "
             "date - runs over either of them and gives the same columns. Terminology bindings to "
             "SNOMED CT-AU, LOINC and AMT make the codes mean the same thing across sources. You can "
@@ -1015,11 +1016,11 @@ DECK = {
         ),
         section(
             "Exercise: CSV to FHIR",
-            "Now let's make this concrete. The exercise takes the Synthea CSV export, which stands "
-            "in for a legacy flat extract, and turns three of its tables into FHIR resources. It's "
-            "deliberately simple code, written with plain Spark functions, so you can see every "
-            "decision the mapping makes - including some decisions that turn out to be wrong. "
-            "That's the useful part.",
+            "Now for the exercise. It takes the Synthea CSV export, which stands in for a legacy "
+            "flat extract, and turns three of its tables into FHIR resources. The code is "
+            "deliberately simple, using plain Spark functions, so you can see every decision the "
+            "mapping makes. A few of those decisions turn out to be wrong, and we'll look at those "
+            "afterwards.",
         ),
         diagram(
             "From flat to nested",
@@ -1103,11 +1104,10 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "If the live demo doesn't cooperate, here are the same steps as screenshots, so you "
-            "can follow along on your own laptop. The first shows the notebook and where to attach "
-            "it, the second compares the flat extract with the FHIR table in Catalog Explorer, and "
-            "the third shows how to clone the notebook so you can change it safely.",
+            "Backup slides, in case the live demo fails. They show the same steps as screenshots, "
+            "so you can follow along on your own laptop. The first shows the notebook and where to "
+            "attach it, the second compares the flat extract with the FHIR table in Catalog "
+            "Explorer, and the third shows how to clone the notebook so you can change it safely.",
         ),
         diagram(
             "The CSV to FHIR notebook",

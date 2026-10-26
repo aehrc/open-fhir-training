@@ -910,13 +910,13 @@ DECK = {
             "FHIR resources are nested and repeating; most analytic tools expect flat tables",
             "tree-to-table",
             tree_to_table(),
-            "Here is the problem we're solving. A FHIR Patient is a tree: this patient has two "
+            "This is the problem that SQL on FHIR addresses. A FHIR Patient is a tree: this patient has two "
             "names and two addresses, and each of those has its own structure. Analysts, "
             "statisticians and dashboard tools want flat tables with one value per cell. If you "
             "flatten everything naively you get two names times two addresses, so four rows for "
-            "one patient, and every count you do afterwards is wrong. The answer is to decide the "
+            "one patient, and every count you do afterwards is wrong. The solution is to decide the "
             "grain of each table up front: one row per patient here, one row per address there. "
-            "That decision is exactly what a ViewDefinition records.",
+            "A ViewDefinition is a way of recording that decision.",
         ),
         diagram(
             "Anatomy of a ViewDefinition",
@@ -970,9 +970,9 @@ DECK = {
             "have it: NDJSON files from a bulk export, a FHIR server, or tables in a lakehouse. In "
             "the middle is the view layer: ViewDefinitions, executed by a view runner. Pathling is "
             "one runner, on Spark; there are others on DuckDB, BigQuery, JavaScript and more. On "
-            "top is analytics, in whatever tool you prefer. The point is that the middle layer is "
-            "portable. In today's exercise the data is Delta tables in Databricks, Pathling runs "
-            "the views, and Databricks SQL does the analysis.",
+            "top is analytics, in whatever tool you prefer. Because the middle layer is standardised, "
+            "the same views can be run on any of these engines. In today's exercise the data is Delta "
+            "tables in Databricks, Pathling runs the views, and Databricks SQL does the analysis.",
         ),
         diagram(
             "What's next in the spec",
@@ -990,7 +990,7 @@ DECK = {
         ),
         section(
             "Exercise: secondary prevention after myocardial infarction",
-            "Let's put this into practice. After a heart attack, guidelines recommend four classes "
+            "Now for the exercise. After a heart attack, guidelines recommend four classes "
             "of medicine: an antiplatelet, a statin, a beta-blocker, and an ACE inhibitor or ARB. "
             "A Norwegian registry study by Halvorsen and colleagues found 91, 90, 82 and 60 per "
             "cent of patients discharged on each. The exercise asks the same question of the "
@@ -1033,13 +1033,14 @@ DECK = {
             "Terminology in SQL: the map is a table you join to",
             "concept-map",
             concept_map(),
-            "Here's the terminology part. The ConceptMap relates each AMT product to the classes "
+            "Next, we use terminology to classify the medicines. The ConceptMap relates each AMT "
+            "product to the classes "
             "of substance it contains, using SNOMED CT concepts as the classes. Atenolol 100 "
             "milligram is related to beta blocker, and to broader classes like antihypertensive "
             "agent. In Python, concept_map returns the map as a table with the columns that the "
             "SQL on FHIR specification defines. It's read from a local terminology store on S3, so "
             "no terminology server is involved. In SQL, it's a join like any other, to a short list "
-            "of the class codes we care about. One thing to watch: aspirin with codeine is related "
+            "of the class codes we care about. Note that aspirin with codeine is related "
             "to platelet aggregation inhibitor, because it contains aspirin, as well as to opioid "
             "receptor agonist. The exercise uses the map as it stands, so it counts as an "
             "antiplatelet. Leave out products the map also relates to opioids, and the number of "
@@ -1107,12 +1108,11 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "These slides are a fallback in case the live demo doesn't work - for example if the "
-            "network or the cluster is slow. They show the same steps as screenshots and real "
-            "output from the workspace, so you can follow along and still do the exercise "
-            "afterwards. If the demo did work, I'll skip straight past them to questions, and you "
-            "can come back to them later in the slides we share after the connectathon.",
+            "Backup slides, in case the live demo fails - for example if the network or the cluster "
+            "is slow. They show the same steps as screenshots and real output from the workspace, so "
+            "you can follow along and still do the exercise afterwards. If the demo works, I'll skip "
+            "past them to questions, and you can come back to them later in the slides we share after "
+            "the connectathon.",
         ),
         diagram(
             "The summary query",

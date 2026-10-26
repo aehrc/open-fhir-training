@@ -649,18 +649,18 @@ DECK = {
             "Kick-off: the environment and the standards map",
             f"Track 3 kick-off · {EVENT}",
             "Welcome to the Track 3 room. I'm John Grimes from CSIRO's Australian e-Health Research "
-            "Centre, and I look after the analytics strand of this track. This first block has two "
-            "jobs. The first is practical: get everyone into the Databricks workspace, find the "
-            "notebooks and know the ground rules. The second is a map of the standards we'll keep "
-            "coming back to over the two days, and of the exercises that go with them. Then I'll do "
-            "a short tour of the workspace, and the rest of the block is yours.",
+            "Centre, and I look after the analytics strand of this track. In this first block I'll "
+            "get everyone into the Databricks workspace, show you where to find the notebooks and go "
+            "through a few ground rules. Then I'll give an overview of the standards we'll keep "
+            "coming back to over the two days, and the exercises that go with them. After a short "
+            "tour of the workspace, the rest of the block is yours.",
         ),
         diagram(
             "How this track runs",
             "Six blocks over two days - this is the first",
             "schedule",
             schedule(now=0),
-            "Here are the six Track 3 blocks. Each one opens with a short slab from me on one theme. "
+            "Here are the six Track 3 blocks. Each one opens with a short talk from me on one topic. "
             "Today, after this kick-off, we look at using FHIR alongside legacy and proprietary "
             "systems, then at getting data out with Bulk Data and Pathling. Tomorrow morning is SQL "
             "on FHIR and terminology, then a real-world study of beta-blockers in septic shock, and in the "
@@ -757,7 +757,7 @@ DECK = {
             "A resource is a tree; analysis wants tables",
             "fhir-as-data",
             fhir_as_data(),
-            "Here's why the shaping stage matters. On the left is one Patient from our Synthea data, "
+            "This is why we need a shaping stage. On the left is one Patient from our Synthea data, "
             "abridged. It's a tree: meta is an object, profile is a list inside it, name is a list of "
             "objects with its own list of given names. On the right is the same resource type as a "
             "table in Databricks. Pathling has encoded every element, so meta becomes a struct column "
@@ -821,12 +821,10 @@ DECK = {
         ),
         section(
             "Demo walkthrough",
-            "Backup slides, for when the live demo fails. "
-            "These slides are a fallback in case the live demo doesn't cooperate - the wifi, the "
-            "cluster, or me. They walk through the same tour with annotated screenshots: Catalog "
-            "Explorer and the synthea schema, the patient table's sample data, and the shared "
-            "cluster on the Compute page. They're also a useful reference later in the block if you "
-            "get lost in the workspace and want to retrace the steps on your own.",
+            "Backup slides, in case the live demo fails. They walk through the same tour with "
+            "annotated screenshots: Catalog Explorer and the synthea schema, the patient table's "
+            "sample data, and the shared cluster on the Compute page. They're also useful later in "
+            "the block if you get lost in the workspace and want to retrace the steps.",
         ),
         diagram(
             "The data in Catalog Explorer",

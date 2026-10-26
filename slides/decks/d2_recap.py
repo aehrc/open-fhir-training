@@ -313,7 +313,7 @@ DECK = {
             "Here is a snapshot of where the groups had got to at the end of yesterday: the team, "
             "the question each group picked up, and how far they got. I'll read through these "
             "briefly. If your group isn't here, or I've got it wrong, come and tell me and I'll "
-            "update it before show and tell. The point isn't to compare groups. Several of these "
+            "update it before show and tell. This isn't meant as a comparison between groups. Several of these "
             "questions will carry on today, and some of you may want to join another group whose "
             "question interests you.",
         ),
