@@ -102,7 +102,7 @@ def schedule(now=None):
         ("Thu 2:00", "FHIR amid legacy and proprietary systems"),
         ("Thu 3:30", "Getting data out: Bulk Data and Pathling"),
         ("Fri 9:30", "SQL on FHIR, Pathling views and terminology"),
-        ("Fri 11:00", "A real-world study: pulse oximetry bias"),
+        ("Fri 11:00", "A real-world study: beta-blockers in septic shock"),
         ("Fri 1:30", "Closing the loop: CQL, CDS Hooks, SMART, OMOP"),
     ]
     b = []
@@ -158,7 +158,7 @@ def environment():
         (CYAN, ["synthea_csv", "flat CSV extract"]),
         (MINT, ["synthea_mi_secondary_", "prevention_views"]),
         (PINK, ["mimic_iv_demo", "100 ICU patients"]),
-        (PINK, ["mimic_iv_views", "rv · st · coh"]),
+        (PINK, ["mimic_iv_beta_", "blocker_views"]),
     ]
     for i, (fill, rows) in enumerate(data):
         b.append(box(30 + i * 180, 154, 166, 76, fill, rows, 14))

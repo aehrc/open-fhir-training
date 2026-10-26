@@ -35,7 +35,7 @@ from kit import (
 from decks._shared import EVENT, FORM_URL, LINKS, PRESENTER, show_and_tell
 
 # One (team, question, progress) tuple per group, e.g.
-#   ("Metro North", "Does SpO2 overestimate SaO2?", "Cohort built; comparing means"),
+#   ("Metro North", "Do beta-blockers help in septic shock?", "Cohort built; comparing mortality"),
 # Fill in on Thursday night, then run `uv run build.py d2_recap` in slides/.
 PROGRESS = []
 
@@ -190,7 +190,7 @@ def friday():
         (
             "11:00",
             "A real-world study",
-            ["Pulse oximetry bias", "in MIMIC-IV"],
+            ["Beta-blockers in", "septic shock"],
             "Track 3 room",
             MINT,
         ),
@@ -324,7 +324,7 @@ DECK = {
             friday(),
             "Here's today. At 9:30 we start in the Track 3 room with SQL on FHIR: Pathling views and "
             "terminology, on the synthetic Synthea data. At 11:00 we look at a "
-            "real-world study, pulse oximetry bias, using the MIMIC-IV intensive care demo data. At "
+            "real-world study, beta-blockers in septic shock, using the MIMIC-IV intensive care demo data. At "
             "1:30 we close the loop, with CQL, CDS Hooks, SMART apps and OMOP: how analytics results "
             "get back to clinicians and researchers. Each block starts with about 30 minutes of "
             "context and a demo from me, then the rest is hands-on time. At 3:30 we all come back "

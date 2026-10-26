@@ -40,7 +40,7 @@ def two_days():
         ("Thu", "FHIR amid legacy systems"),
         ("Thu", "Getting data out: Bulk Data"),
         ("Fri", "SQL on FHIR and terminology"),
-        ("Fri", "Pulse oximetry bias in MIMIC-IV"),
+        ("Fri", "Beta-blockers in septic shock"),
         ("Fri", "Closing the loop: CQL to OMOP"),
     ]
     for i, (day, topic) in enumerate(blocks):
@@ -90,7 +90,7 @@ DECK = {
             "Over the two days Track 3 ran as four strands. In the analytics strand we had six "
             "blocks: the environment and the standards map; mapping a legacy CSV extract into "
             "FHIR; getting data out with Bulk Data and Pathling; SQL on FHIR views and "
-            "terminology; a real-world study of pulse oximetry bias in the MIMIC-IV demo data; and "
+            "terminology; a real-world study of beta-blockers in septic shock in the MIMIC-IV demo data; and "
             "closing the loop with CQL, CDS Hooks, SMART and OMOP. Alongside that, James Grant led "
             "terminology, Dion McMurtrie led the work on turning clinical text into coded FHIR "
             "data, and Duncan Pullen brought the Queensland Health perspective.",

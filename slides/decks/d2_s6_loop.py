@@ -507,10 +507,9 @@ def show_and_tell():
 def demo_steps():
     """The SQL editor, with the run button and visualisation tab marked."""
     w = 560
-    top, _, th, tp = screenshot("sql-mimic-cohort", 0, 0, w, crop=(243, 88, 740, 180))
-    bot, _, _, bp = screenshot(
-        "sql-mimic-cohort", 0, th + 26, w, crop=(243, 540, 740, 150)
-    )
+    shot = "sql-septic-shock-summary"
+    top, _, th, tp = screenshot(shot, 0, 0, w, crop=(243, 88, 740, 222))
+    bot, _, _, bp = screenshot(shot, 0, th + 26, w, crop=(243, 540, 740, 130))
     b = [top, bot]
     b.append(text(w / 2, th + 18, "...", 14, fill=MUTED))
     rx, ry = tp(305, 103)
@@ -521,9 +520,9 @@ def demo_steps():
     b.append(callout(3, px + 36, py))
     steps = [
         ["Open the SQL Editor; attach the", "Serverless Starter Warehouse"],
-        ["Run the cohort query: mean SaO2", "by race category"],
+        ["Run the summary query: 28-day", "mortality by group"],
         ["Click + next to Table, then", "Visualization"],
-        ["Bar chart: X race_category,", "Y mean_sao2"],
+        ["Bar chart: X treatment_group,", "Y mortality_percent"],
         ["Save it, then screenshot the", "chart for your slide"],
     ]
     for i, rows in enumerate(steps):
@@ -630,9 +629,9 @@ def backup_results():
 
 
 def backup_chart():
-    """The cohort result beside a sketch of the bar chart it produces."""
-    shot, sw, sh, p = screenshot(
-        "sql-mimic-cohort", 0, 30, 500, crop=(243, 540, 640, 150)
+    """The mortality summary beside a sketch of the bar chart it produces."""
+    shot, _, sh, p = screenshot(
+        "sql-septic-shock-summary", 0, 30, 500, crop=(243, 540, 640, 120)
     )
     b = [text(0, 16, "Result in the SQL editor", 15, "start", 700), shot]
     x, y = p(352, 557)
@@ -642,40 +641,39 @@ def backup_chart():
         [
             "1  + next to Table > Visualization",
             "2  Visualization type: Bar",
-            "3  X column race_category, Y column mean_sao2",
+            "3  X column treatment_group, Y column",
+            "    mortality_percent",
             "4  Save, then screenshot the chart",
         ]
     ):
-        b.append(text(0, 30 + sh + 40 + i * 32, s, 16, "start"))
-    # Sketch of the bar chart, drawn from the same three rows.
+        b.append(text(0, 30 + sh + 40 + i * 30, s, 16, "start"))
+    # Sketch of the bar chart, drawn from the same two rows.
     b.append(text(540, 16, "What the bar chart shows", 15, "start", 700))
-    ox, oy, ph = 590, 258, 196
+    ox, oy, ph = 600, 258, 196
     b.append(line(ox, oy, ox, oy - ph - 6, INK, 1.4, arrow=None))
     b.append(line(ox, oy, 930, oy, INK, 1.4, arrow=None))
-    lo, hi = 90, 100
-    for v in (90, 95, 100):
-        y = oy - (v - lo) / (hi - lo) * ph
+    hi = 60
+    for v in (0, 20, 40, 60):
+        y = oy - v / hi * ph
         b.append(line(ox - 5, y, ox, y, INK, 1.2, arrow=None))
         b.append(text(ox - 10, y + 5, str(v), 13, "end", fill=MUTED))
     data = [
-        ("2106-3", 96.7, ["White"]),
-        ("2054-5", 94.6, ["Black or African", "American"]),
-        ("UNK", 95.8, ["Unknown"]),
+        ("Beta-blocker", 50.0, "1 of 2"),
+        ("No beta-blocker", 37.5, "3 of 8"),
     ]
-    for i, (code_, v, label) in enumerate(data):
-        x = ox + 22 + i * 120
-        h = (v - lo) / (hi - lo) * ph
-        b.append(rect(x, oy - h, 70, h, BLUE, rx=2))
-        b.append(text(x + 35, oy - h - 8, f"{v}", 14, weight=700))
-        b.append(text(x + 35, oy + 20, code_, 13))
-        for j, r in enumerate(label):
-            b.append(text(x + 35, oy + 38 + j * 17, r, 13, fill=MUTED))
-    b.append(text(ox - 40, oy - ph - 16, "mean SaO2 (%)", 13, "start", fill=MUTED))
+    for i, (name, v, n) in enumerate(data):
+        x = ox + 40 + i * 150
+        h = v / hi * ph
+        b.append(rect(x, oy - h, 90, h, BLUE, rx=2))
+        b.append(text(x + 45, oy - h - 8, f"{v}", 14, weight=700))
+        b.append(text(x + 45, oy + 20, name, 13))
+        b.append(text(x + 45, oy + 38, n, 13, fill=MUTED))
+    b.append(text(ox - 40, oy - ph - 16, "mortality_percent", 13, "start", fill=MUTED))
     b.append(
         text(
             760,
             338,
-            "y axis starts at 90 - say so on your slide",
+            "2 and 8 patients - put the n on your slide",
             13,
             fill=MUTED,
             italic=True,
@@ -854,12 +852,13 @@ DECK = {
             "demo",
             demo_steps(),
             "Live demo. One: open the SQL Editor from the left navigation and attach the "
-            "Serverless Starter Warehouse. Two: paste the cohort query from the pulse oximetry "
-            "exercise, which counts subjects and averages SaO2 by race category, and click Run "
-            "all. Three rows appear, one per race category. Three: click the plus next to the "
-            "Table tab and choose Visualization. Four: pick a bar chart, put race category on the "
-            "X axis and mean SaO2 on the Y axis. Five: save it, and take a screenshot for your "
-            "slide. I'll point out that there are only 19 subjects, so this is a picture, not a result.",
+            "Serverless Starter Warehouse. Two: paste the summary query from the septic shock "
+            "exercise, which counts patients and deaths within 28 days by treatment group, and "
+            "click Run all. Two rows appear, one per group. Three: click the plus next to the "
+            "Table tab and choose Visualization. Four: pick a bar chart, put treatment group on "
+            "the X axis and mortality percent on the Y axis. Five: save it, and take a screenshot "
+            "for your slide. I'll point out that there are only 10 patients, so this is a "
+            "picture, not a result.",
         ),
         diagram(
             "Your turn",
@@ -878,7 +877,7 @@ DECK = {
             "These slides walk through the demo with screenshots, in case the live environment "
             "isn't cooperating, or for anyone who wants to repeat the steps later. They show the "
             "same SQL editor and the same two queries from this week's exercises: the MI secondary "
-            "prevention summary and the pulse oximetry cohort summary. Everything here works on "
+            "prevention summary and the septic shock mortality summary. Everything here works on "
             "the Serverless Starter Warehouse, so you don't need the notebook cluster to make a "
             "chart.",
         ),
@@ -897,15 +896,16 @@ DECK = {
         ),
         diagram(
             "From result to chart",
-            "The pulse oximetry cohort as a bar chart",
+            "The septic shock mortality summary as a bar chart",
             "backup-chart",
             backup_chart(),
-            "On the left is the aggregated cohort result: three race categories with subject "
-            "counts and mean SaO2. Click the plus, choose Visualization, then a bar chart with "
-            "race category on the X axis and mean SaO2 on the Y axis. On the right is roughly "
-            "what you'll get, drawn from those three rows: 96.7, 94.6 and 95.8. If the chart's "
-            "axis doesn't start at zero, say so, because it exaggerates small differences. And "
-            "with only 19 subjects, present it as a demonstration of the method, not a finding.",
+            "On the left is the summary result: two treatment groups with patient and death "
+            "counts and the percentage who died within 28 days. Click the plus, choose "
+            "Visualization, then a bar chart with treatment group on the X axis and mortality "
+            "percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
+            "rows: 50.0 and 37.5. Put the number of patients on the slide, because with 2 and 8 "
+            "patients one death moves a bar by 12.5 to 50 points. Present it as a demonstration "
+            "of the method, not a finding.",
         ),
         closing(
             "Thank you",

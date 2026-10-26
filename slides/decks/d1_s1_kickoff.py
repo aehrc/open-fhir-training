@@ -438,8 +438,8 @@ def exercises_map():
         ),
         (
             PINK,
-            "Pulse oximetry bias study",
-            "layered views (rv, st, coh), building a cohort",
+            "Septic shock study",
+            "beta-blocker cohort: eight views, timed criteria, SOFA in SQL",
             "Fri 11:00",
         ),
     ]
@@ -663,7 +663,7 @@ DECK = {
             "Here are the six Track 3 blocks. Each one opens with a short slab from me on one theme. "
             "Today, after this kick-off, we look at using FHIR alongside legacy and proprietary "
             "systems, then at getting data out with Bulk Data and Pathling. Tomorrow morning is SQL "
-            "on FHIR and terminology, then a real-world study on pulse oximetry bias, and in the "
+            "on FHIR and terminology, then a real-world study of beta-blockers in septic shock, and in the "
             "afternoon the standards that close the loop: CQL, CDS Hooks, SMART and OMOP. James, "
             "Dion and Duncan run their own strands in this room as well, so you can move between "
             "them.",
@@ -788,9 +788,9 @@ DECK = {
             "import notebooks read NDJSON files with Pathling and store them as tables; you'll run "
             "part of the Synthea one today. The MI secondary prevention exercise builds SQL on FHIR "
             "views, classifies medicines with a ConceptMap and joins them in SQL, for tomorrow "
-            "morning. The pulse oximetry study is a full analysis on "
-            "de-identified intensive care data, for tomorrow's late morning block. You don't need to "
-            "do them in order.",
+            "morning. The septic shock study selects the cohort of a published study of "
+            "beta-blockers from de-identified intensive care data, for tomorrow's late morning "
+            "block. You don't need to do them in order.",
         ),
         diagram(
             "Demo",
