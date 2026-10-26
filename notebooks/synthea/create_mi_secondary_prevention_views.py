@@ -499,7 +499,6 @@ pc.spark.sql(create_view_sql)
 cohort = pc.spark.table(f"{VIEWS_SCHEMA}.mi_secondary_prevention").toPandas()
 display(cohort.head(10))
 
-
 # COMMAND ----------
 
 # MAGIC %md
