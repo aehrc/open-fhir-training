@@ -426,8 +426,8 @@ def exercises_map():
         ),
         (
             CYAN,
-            "Prostate cancer risk factors",
-            "SQL on FHIR views, FHIRPath, joins over time",
+            "MI secondary prevention",
+            "SQL on FHIR views, a ConceptMap in SQL, time windows",
             "Fri 9:30",
         ),
         (
@@ -786,8 +786,9 @@ DECK = {
             "These are the five exercises in the repository. CSV to FHIR maps a flat legacy extract "
             "into FHIR resources, and goes with this afternoon's block on legacy systems. The two "
             "import notebooks read NDJSON files with Pathling and store them as tables; you'll run "
-            "part of the Synthea one today. The prostate cancer exercise builds SQL on FHIR views and "
-            "joins them in SQL, for tomorrow morning. The pulse oximetry study is a full analysis on "
+            "part of the Synthea one today. The MI secondary prevention exercise builds SQL on FHIR "
+            "views, classifies medicines with a ConceptMap and joins them in SQL, for tomorrow "
+            "morning. The pulse oximetry study is a full analysis on "
             "de-identified intensive care data, for tomorrow's late morning block. You don't need to "
             "do them in order.",
         ),

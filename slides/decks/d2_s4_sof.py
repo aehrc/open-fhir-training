@@ -1,4 +1,4 @@
-"""Day 2, 9:30 block: SQL on FHIR views, Pathling and terminology, with the prostate cancer exercise.
+"""Day 2, 9:30 block: SQL on FHIR views, Pathling and terminology, with the MI secondary prevention exercise.
 
 Author: John Grimes
 """
@@ -163,18 +163,14 @@ def fhirpath_table():
     rows = [
         (
             "where()",
-            "code.coding.where(system = 'http://snomed.info/sct').code",
+            "code.coding.where(system = 'http://snomed.info/sct')",
             "Filter a collection",
         ),
-        (
-            "exists()",
-            "code.coding.exists(system = 'http://loinc.org' and code = '2093-3')",
-            "True if any item matches",
-        ),
+        ("exists()", "coding.where(code.exists())", "True if there is any item"),
         (
             "ofType()",
-            "value.ofType(Quantity).where(code = 'mg/dL').value > 240",
-            "Pick one type of a value[x]",
+            "medication.ofType(CodeableConcept).coding",
+            "Pick one type of a choice [x]",
         ),
         ("first()", "name.first().family", "Keep only the first item"),
         ("getResourceKey()", "getResourceKey()", "This row's key"),
@@ -200,7 +196,7 @@ def fhirpath_table():
         text(
             470,
             338,
-            "All examples except first() come from the prostate cancer views in the repo",
+            "All examples except first() come from the MI secondary prevention views in the repo",
             14,
             fill=MUTED,
             italic=True,
@@ -211,15 +207,15 @@ def fhirpath_table():
 
 def keys_join():
     """Two views joined in SQL on the keys they emit."""
-    b = [text(0, 16, "patient_demographics_view", 15, "start", 700, MUTED)]
+    b = [text(0, 16, "patient_view", 15, "start", 700, MUTED)]
     b.append(
         table(
             0,
             26,
             [("id", 210), ("birth_date", 110)],
             [
-                ("Patient/6a793f8f-…", "1958-05-05"),
-                ("Patient/2220fdc9-…", "1919-02-25"),
+                ("Patient/da17b438-…", "1955-03-13"),
+                ("Patient/3ab94520-…", "1955-01-28"),
             ],
             LAVENDER,
             13,
@@ -227,17 +223,16 @@ def keys_join():
             mono_cols=(0,),
         )
     )
-    b.append(text(0, 148, "bmi_view", 15, "start", 700, MUTED))
+    b.append(text(0, 148, "myocardial_infarction_view", 15, "start", 700, MUTED))
     b.append(
         table(
             0,
             158,
-            [("patient_id", 210), ("date", 120), ("value", 70)],
+            [("patient_id", 210), ("onset", 110), ("code", 80)],
             [
-                ("Patient/6a793f8f-…", "2019-12-16", "30.47"),
-                ("Patient/2220fdc9-…", "2001-02-06", "30.06"),
-                ("Patient/2220fdc9-…", "2000-05-09", "30.06"),
-                ("Patient/2220fdc9-…", "1999-06-15", "30.05"),
+                ("Patient/da17b438-…", "2025-11-30", "22298006"),
+                ("Patient/da17b438-…", "2025-11-30", "401303003"),
+                ("Patient/3ab94520-…", "2021-04-11", "22298006"),
             ],
             MINT,
             13,
@@ -246,15 +241,15 @@ def keys_join():
         )
     )
     # Key labels.
-    b.append(pill(222, 0, "getResourceKey()", BLUE, 12))
-    b.append(pill(222, 132, "subject.getReferenceKey()", BLUE, 12))
+    b.append(pill(240, 0, "getResourceKey()", BLUE, 12))
+    b.append(pill(240, 132, "subject.getReferenceKey()", BLUE, 12))
     b.append(path_join())
     sql = [
         "SELECT p.id, p.birth_date,",
-        "       b.date, b.value",
-        "FROM patient_demographics_view p",
-        "LEFT JOIN bmi_view b",
-        "  ON p.id = b.patient_id",
+        "       m.onset, m.code",
+        "FROM patient_view p",
+        "JOIN myocardial_infarction_view m",
+        "  ON p.id = m.patient_id",
     ]
     b.append(code(470, 26, 340, sql, "SQL, not the view, does the join", 14))
     b.append(rect(470, 200, 465, 112, "#fff", TEAL, 2, 10))
@@ -361,31 +356,41 @@ def whats_next():
     return svg(940, 335, b)
 
 
-def four_views():
-    """The four Pathling views feeding the combine SQL."""
-    views = [
+def views_and_map():
+    """The three Pathling views and the ConceptMap table feeding the combine SQL."""
+    inputs = [
+        (LAVENDER, "patient_view", "Patient: id, gender, birth_date, deceased"),
         (
-            LAVENDER,
-            "patient_demographics_view",
-            "Patient: id, birth_date, postal_code, deceased",
+            PINK,
+            "myocardial_infarction_view",
+            "Condition: SNOMED CT 22298006, 401303003, 401314000",
         ),
-        (YELLOW, "hyperlipidemia_view", "Observation: LOINC 2093-3, > 240 mg/dL"),
-        (YELLOW, "bmi_view", "Observation: LOINC 39156-5, > 30 kg/m2"),
-        (PINK, "prostate_cancer_diagnosis_view", "Condition: SNOMED CT 126906006"),
+        (
+            YELLOW,
+            "medication_request_view",
+            "MedicationRequest: AMT code, authored_on, status",
+        ),
+        (CYAN, "product_to_class", "ConceptMap: AMT product to class, 925,540 rows"),
     ]
     b = []
-    for i, (fill, name, desc) in enumerate(views):
+    for i, (fill, name, desc) in enumerate(inputs):
         y = 4 + i * 82
         b.append(rect(0, y, 430, 68, fill, rx=8))
         b.append(text(16, y + 28, name, 15, "start", 700))
         b.append(text(16, y + 52, desc, 14, "start"))
         b.append(hcurve(432, y + 34, 516, 168, stroke=GREY))
-    b.append(rect(518, 108, 190, 120, "#F7F7F7", rx=10))
+    b.append(rect(518, 98, 190, 140, "#F7F7F7", rx=10))
     b.append(
         lines(
             613,
             168,
-            ["combine_prostate_", "cancer_views.sql", "", "joins + temporal", "logic"],
+            [
+                "combine_mi_secondary_",
+                "prevention_views.sql",
+                "",
+                "map join, then days",
+                "to first prescription",
+            ],
             14,
         )
     )
@@ -396,58 +401,62 @@ def four_views():
             841,
             168,
             [
-                "prostate_cancer_",
-                "risk_factors",
+                "mi_secondary_",
+                "prevention",
                 "",
-                "800 rows,",
-                "one per patient",
-                "6 with prostate",
-                "cancer",
+                "274 rows, one per",
+                "patient with an MI",
             ],
             14,
         )
     )
-    b.append(text(613, 290, "Views: create_prostate_cancer_views", 14, fill=MUTED))
-    b.append(text(613, 312, "notebook (Pathling, Python)", 14, fill=MUTED))
+    b.append(
+        text(
+            690,
+            290,
+            "Views and map: create_mi_secondary_prevention_views",
+            14,
+            fill=MUTED,
+        )
+    )
+    b.append(text(690, 312, "notebook (Pathling, Python)", 14, fill=MUTED))
     return svg(940, 335, b)
 
 
-CHOLESTEROL = [
-    "cholesterol = data.view(",
-    '    "Observation",',
+MEDICATION = [
+    "medication_requests = data.view(",
+    '    "MedicationRequest",',
     "    select=[{",
     '        "column": [',
     '            {"path": "getResourceKey()", "name": "id"},',
     '            {"path": "subject.getReferenceKey()", "name": "patient_id"},',
-    '            {"path": "effective.ofType(dateTime)", "name": "date"},',
+    '            {"path": "authoredOn", "name": "authored_on"},',
+    '            {"path": "status", "name": "status"},',
     "        ],",
-    '        "select": [',
-    '            {"forEach": "code.coding", ...},',
-    '            {"forEach": "value.ofType(Quantity)",',
-    '             "column": [{"path": "unit", "name": "unit"},',
-    '                        {"path": "value", "name": "value"}]},',
-    "        ],",
+    '        "select": [{',
+    '            "forEach": "medication.ofType(CodeableConcept).coding"',
+    "                \".where(system = 'http://snomed.info/sct'\"",
+    '                " and code.exists())",',
+    '            "column": [{"path": "code", "name": "code"},',
+    '                       {"path": "display", "name": "display"}],',
+    "        }],",
     "    }],",
-    '    where=[{"path":',
-    "        \"where(code.coding.exists(system = 'http://loinc.org'\"",
-    "        \" and code = '2093-3'))\"",
-    "        \".value.ofType(Quantity).where(code = 'mg/dL').value > 240\"}],",
     ")",
 ]
 
 
-def cholesterol_card():
-    """The cholesterol view from the notebook, abridged, with callouts."""
+def medication_card():
+    """The medication request view from the notebook, abridged, with callouts."""
     fs, lh = 12, 1.32
-    b = [code(0, 2, 600, CHOLESTEROL, fs=fs, lh=lh)]
+    b = [code(0, 2, 600, MEDICATION, fs=fs, lh=lh)]
     marks = [
         (4, 5, "Keys for joining", "getResourceKey() and getReferenceKey()"),
-        (10, 12, "Unnest with forEach", "One row per Quantity value"),
-        (16, 18, "Filter with where", "LOINC 2093-3 above 240 mg/dL"),
+        (10, 12, "Unnest with forEach", "SNOMED CT codings that have a code"),
+        (13, 14, "AMT code and display", "Joined to the ConceptMap in SQL"),
     ]
     for n, (r0, r1, title, desc) in enumerate(marks, 1):
-        y0 = code_baseline(2, r0, fs, lh) - 13
-        y1 = code_baseline(2, r1, fs, lh) + 5
+        y0 = code_baseline(2, r0, fs, lh) - 12
+        y1 = code_baseline(2, r1, fs, lh) + 3
         b.append(rect(6, y0, 588, y1 - y0, "none", TEAL, 2, 4))
         cy = (y0 + y1) / 2
         b.append(line(596, cy, 640, cy, TEAL, 2, arrow=None))
@@ -459,7 +468,7 @@ def cholesterol_card():
         text(
             650,
             36,
-            "cholesterol.write.saveAsTable(",
+            "medication_requests.write.saveAsTable(",
             12,
             "start",
             family="JetBrains Mono",
@@ -467,185 +476,210 @@ def cholesterol_card():
     )
     b.append(
         text(
-            650, 52, '  "...hyperlipidemia_view")', 12, "start", family="JetBrains Mono"
+            650,
+            52,
+            '  "...medication_request_view")',
+            12,
+            "start",
+            family="JetBrains Mono",
         )
     )
     return svg(940, 340, b)
 
 
-def timeline():
-    """Latest observation before diagnosis, on two real patients."""
+def days_to_first():
+    """Days from the first MI to the first prescription of each class, for one real patient."""
     b = []
-    x0, x1 = 120, 920
-    y0, y1 = 1990, 2024
+    x0, x1 = 190, 920
+    d0, d1 = -120, 400
 
-    def tx(year):
-        return x0 + (year - y0) / (y1 - y0) * (x1 - x0)
+    def tx(day):
+        return x0 + (day - d0) / (d1 - d0) * (x1 - x0)
 
-    for yr in range(1990, 2025, 5):
-        b.append(text(tx(yr), 150, str(yr), 12, fill=MUTED))
-    pts = [
-        ("Patient 6a79…", 50, 2022.03, [(2019.96, "30.47", True)]),
-        (
-            "Patient 2220…",
-            112,
-            1993.57,
-            [(1999.45, "", False), (2000.35, "", False), (2001.1, "30.06", False)],
-        ),
+    b.append(text(x0 - 12, 168, "days:", 12, "end", fill=MUTED))
+    for d in (-90, 0, 90, 180, 270, 360):
+        b.append(text(tx(d), 168, str(d), 12, fill=MUTED))
+    b.append(line(tx(0), 16, tx(0), 150, RED, 2.5, arrow=None))
+    b.append(text(tx(0) - 6, 14, "first MI", 12, "end", 700, RED))
+    for day, label in ((30, "30 days"), (365, "365 days")):
+        b.append(line(tx(day), 16, tx(day), 150, TEAL, 1.6, "5 4", None))
+        b.append(text(tx(day) + 6, 14, label, 12, "start", 700, TEAL))
+    lanes = [
+        ("Antiplatelet", [(0, True)]),
+        ("Statin", [(0, True)]),
+        ("Beta-blocker", [(0, True)]),
+        ("ACE inhibitor or ARB", [(-84, False), (287, True)]),
     ]
-    for label, y, onset, obs in pts:
+    for i, (label, points) in enumerate(lanes):
+        y = 36 + i * 32
         b.append(text(0, y + 5, label, 14, "start", 700))
         b.append(line(x0, y, x1, y, "#C8C8C8", 2, arrow=None))
-        b.append(line(tx(onset), y - 26, tx(onset), y + 18, RED, 2.5, arrow=None))
-        for when, val, kept in obs:
+        for day, kept in points:
             b.append(
                 circle(
-                    tx(when), y, 8, MINT if kept else "#fff", TEAL if kept else GREY, 2
+                    tx(day), y, 8, MINT if kept else "#fff", TEAL if kept else GREY, 2
                 )
             )
-            if val:
-                b.append(
-                    text(
-                        tx(when) + (-16 if kept else 16),
-                        y - 14,
-                        f"BMI {val}"
-                        if kept
-                        else "3 readings with BMI > 30, all after diagnosis",
-                        12,
-                        "end" if kept else "start",
-                        700 if kept else 400,
-                        INK if kept else MUTED,
-                    )
-                )
-    b.append(text(tx(2022.03) + 6, 22, "diagnosis", 12, "start", 700, RED))
-    b.append(text(tx(1993.57) + 6, 84, "diagnosis", 12, "start", 700, RED))
+            if kept:
+                # Labels sit left of the dot on day 0, clear of the 30 day line.
+                dx, anchor = (-14, "end") if day < 30 else (14, "start")
+                b.append(text(tx(day) + dx, y - 8, f"day {day}", 12, anchor, 700, INK))
+            else:
+                b.append(text(tx(day), y - 12, "ignored", 12, fill=MUTED))
     sql = [
-        "ROW_NUMBER() OVER (",
-        "  PARTITION BY h.patient_id",
-        "  ORDER BY h.date DESC) AS rn",
-        "...",
-        "WHERE pd.prostate_cancer_onset IS NULL",
-        "   OR h.date < pd.prostate_cancer_onset",
+        "SELECT i.patient_id, c.drug_class,",
+        "       MIN(DATEDIFF(c.authored_date,",
+        "                    i.index_date)) AS days",
+        "FROM index_mi i JOIN classified_request c",
+        "  ON c.patient_id = i.patient_id",
+        " AND c.authored_date >= i.index_date",
     ]
-    b.append(code(0, 168, 420, sql, "Rank observations before diagnosis", 13, 1.35))
+    b.append(code(0, 186, 440, sql, "First prescription on or after the MI", 12, 1.3))
     steps = [
-        (BLUE, "Rank: newest first, before onset"),
-        (BLUE, "Keep rn = 1 per patient"),
-        (MINT, "LEFT JOIN onto 800 patients"),
+        (BLUE, "Join requests to the map"),
+        (BLUE, "Keep those on or after the MI"),
+        (MINT, "Earliest per class, in days"),
     ]
     for i, (fill, s) in enumerate(steps):
-        y = 172 + i * 54
-        b.append(box(470, y, 260, 40, fill, [s], 14))
+        y = 186 + i * 48
+        b.append(box(470, y, 260, 36, fill, [s], 14))
         if i < 2:
-            b.append(line(600, y + 41, 600, y + 52, sw=1.6))
-    b.append(rect(760, 172, 175, 148, "#fff", TEAL, 2, 10))
+            b.append(line(600, y + 37, 600, y + 46, sw=1.6))
+    b.append(rect(760, 186, 175, 130, "#fff", TEAL, 2, 10))
     b.append(
         lines(
             847,
-            246,
-            [
-                "6 patients with",
-                "prostate cancer:",
-                "1 has a high BMI",
-                "before diagnosis,",
-                "0 high cholesterol",
-            ],
+            251,
+            ["Within 30 days:", "3 of 4 classes", "", "Within 365 days:", "all 4"],
             14,
         )
     )
     return svg(940, 335, b)
 
 
-TX_FHIRPATH = [
-    'where=[{"path": "code.memberOf(',
-    "  'http://snomed.info/sct?fhir_vs=ecl/<< 126906006')\"}]",
-]
+def results_chart():
+    """The notebook's comparison with Halvorsen et al. 2016, with the headline numbers."""
+    shot, _, _, _ = screenshot("mi-treated-vs-halvorsen", 0, 2, 760, 338)
+    b = [shot]
+    b.append(
+        lines(
+            865,
+            170,
+            [
+                "274 patients",
+                "with an MI",
+                "",
+                "64 (23%) were",
+                "prescribed",
+                "all four",
+                "",
+                "Not like for like:",
+                "365 days, not",
+                "discharge",
+            ],
+            14,
+        )
+    )
+    return svg(940, 342, b)
 
-TX_PYTHON = [
-    "from pathling import member_of, to_snomed_coding, \\",
-    "    to_ecl_value_set",
-    "dx.where(member_of(to_snomed_coding(dx.sct_id),",
-    '                   to_ecl_value_set("<< 126906006")))',
-]
 
-
-def terminology():
-    """From one hard-coded code to a value set, in FHIRPath or Python."""
-    b = [text(0, 18, "<< 126906006 (self and descendants)", 15, "start", 700, MUTED)]
-    b.append(box(0, 30, 330, 46, PINK, ["126906006 Neoplasm of prostate"], 14, 700))
-    kids = [
-        ("399068003 Malignant neoplasm of prostate", "#fff"),
-        ("92691004 Carcinoma in situ of prostate", "#fff"),
-        ("... 45 concepts in total", "#fff"),
+def concept_map():
+    """AMT products related to drug classes by the ConceptMap, joined in SQL."""
+    b = [text(0, 16, "product_to_class (selected rows)", 15, "start", 700, MUTED)]
+    aspirin = "Aspirin 325 mg + codeine … tablet"
+    b.append(
+        table(
+            0,
+            26,
+            [
+                ("source_display", 290),
+                ("target_code", 110),
+                ("target_display", 270),
+                ("relationship", 115),
+            ],
+            [
+                ("Atenolol 100 mg tablet", "373254001", "Beta blocker", "related-to"),
+                (
+                    "Atenolol 100 mg tablet",
+                    "372586001",
+                    "Antihypertensive agent",
+                    "related-to",
+                ),
+                (aspirin, "771452004", "Platelet aggregation inhibitor", "related-to"),
+                (aspirin, "404642006", "Opioid receptor agonist", "related-to"),
+            ],
+            CYAN,
+            13,
+            28,
+            mono_cols=(1,),
+        )
+    )
+    b.append(highlight(2, 56, 781, 24))
+    b.append(highlight(2, 112, 781, 24))
+    b.append(rect(2, 140, 781, 24, "none", RED, 2.5, 6))
+    b.append(
+        lines(
+            862,
+            108,
+            [
+                "Also an opioid.",
+                "Without these",
+                "products,",
+                "265 patients on",
+                "an antiplatelet",
+                "become 245",
+            ],
+            13,
+        )
+    )
+    python = [
+        "pc = PathlingContext.create(",
+        '    terminology_mode="local",',
+        "    terminology_storage_path=TERMINOLOGY_STORE)",
+        "product_to_class = pc.concept_map(",
+        "    PRODUCT_TO_CLASS, max_mappings=1_000_000)",
     ]
-    for i, (s, fill) in enumerate(kids):
-        y = 96 + i * 52
-        b.append(path_elbow(20, 76, y + 20))
-        b.append(box(40, y, 290, 40, fill, [s], 13))
-    b.append(rect(0, 254, 330, 80, "#fff", TEAL, 2, 10))
+    b.append(code(0, 184, 440, python, "Python: the map as a data frame", 12.5, 1.4))
+    sql = [
+        "JOIN product_to_class m",
+        "  ON m.source_code = r.code",
+        " AND m.relationship = 'related-to'",
+        "JOIN drug_class d",
+        "  ON d.class_code = m.target_code",
+    ]
+    b.append(code(470, 184, 465, sql, "SQL: join to it like any table", 12.5, 1.4))
     b.append(
-        lines(
-            165,
-            294,
-            [
-                "In Synthea AU: 126906006 and 92691004,",
-                "6 patients each (the same 6). Not:",
-                "315268008 Suspected prostate cancer",
-            ],
+        text(
+            470,
+            340,
+            "Read from a local terminology store on S3, built once by "
+            "notebooks/terminology/import_amt_classification",
             13,
+            fill=MUTED,
+            italic=True,
         )
     )
-    b.append(code(370, 2, 565, TX_FHIRPATH, "FHIRPath, inside the view", 13))
-    b.append(code(370, 112, 565, TX_PYTHON, "Python, on a view's output column", 13))
-    b.append(rect(370, 268, 565, 66, CYAN, rx=10))
-    b.append(
-        lines(
-            652,
-            301,
-            [
-                "Pathling asks a FHIR terminology server (default tx.ontoserver.csiro.au)",
-                "or a local terminology store. Terminology fundamentals: James's sessions.",
-            ],
-            13,
-        )
-    )
-    return svg(940, 340, b)
-
-
-def path_elbow(x, y_top, y):
-    """An elbow connector from a parent's trunk to a child box."""
-    return line(x, y_top, x, y, GREY, 1.6, arrow=None) + line(x, y, 38, y, GREY, 1.6)
-
-
-def steps_panel(steps, x, y, w, fs=15, gap=50, fill=YELLOW):
-    """Numbered step boxes stacked vertically."""
-    out = []
-    for i, rows in enumerate(steps):
-        yy = y + i * gap
-        out.append(rect(x, yy, w, gap - 10, fill, rx=8))
-        out.append(callout(i + 1, x + 22, yy + (gap - 10) / 2, 13))
-        out.append(lines(x + 46, yy + (gap - 10) / 2, rows, fs, anchor="start"))
-    return "".join(out)
+    return svg(940, 345, b)
 
 
 def demo():
     """What I show live."""
     steps = [
-        ["Open notebooks/synthea/create_prostate_cancer_views"],
+        ["Open notebooks/synthea/create_mi_secondary_prevention_views"],
         ["Attach to Open FHIR Training Cluster (not Serverless)"],
-        ["Walk through the cholesterol view: keys, forEach, where"],
-        ["Run it and cholesterol.show(10, truncate=False)"],
-        ["Open sql/synthea/combine_prostate_cancer_views.sql"],
-        ["SQL editor: run the SELECT on prostate_cancer_risk_factors"],
+        ["Walk through the medication view: keys, ofType, forEach"],
+        ["Run the setup cells, then the medication view and show"],
+        ["Show concept_map() and product_to_class.show(5)"],
+        ["SQL editor: summary query with follow_up_days = 365"],
     ]
     b = [steps_panel(steps, 0, 4, 600, 15, 54)]
     b.append(rect(630, 4, 305, 314, "#F7F7F7", rx=10))
     b.append(text(648, 34, "What to look for", 16, "start", 700))
     look = [
         ["The view returns a Spark data frame"],
-        ["id and patient_id hold keys like", "Observation/... and Patient/..."],
-        ["334 rows above 240 mg/dL in", "hyperlipidemia_view (106 patients)"],
-        ["Final table: 800 rows, 6 with", "prostate cancer"],
+        ["id and patient_id hold keys like", "MedicationRequest/... and Patient/..."],
+        ["229,058 coded requests;", "925,540 mappings in the map"],
+        ["Summary: 274 patients, 64 of", "them on all four classes"],
     ]
     y = 72
     for rows in look:
@@ -660,23 +694,28 @@ def demo():
 def your_turn():
     """What attendees do for the rest of the block."""
     steps = [
-        ["File > Clone create_prostate_cancer_views to your home folder"],
-        ["Write a new view, e.g. HbA1c (LOINC 4548-4) above 6.5 %"],
-        ['saveAsTable("jane_citizen.hba1c_view") in your own schema'],
-        ["Add a latest_hba1c CTE to a copy of the risk factor query"],
+        ["File > Clone the notebook to your home folder"],
+        ["Set VIEWS_SCHEMA to your own schema, e.g. jane_citizen"],
+        ["Write an LDL cholesterol view (LOINC 18262-6) and save it"],
+        ["SQL editor: LDL before the MI vs after the first statin"],
     ]
     b = [steps_panel(steps, 0, 4, 560, 14, 56)]
     hint = [
-        "where(code.coding.exists(",
+        "code.coding.exists(",
         "  system = 'http://loinc.org'",
-        "  and code = '4548-4'))",
-        ".value.ofType(Quantity)",
-        ".where(code = '%').value > 6.5",
+        "  and code = '18262-6')",
+        "",
+        "value.ofType(Quantity).value",
     ]
-    b.append(code(590, 4, 345, hint, "Hint: the where path", 13, 1.4))
+    b.append(code(590, 4, 345, hint, "Hint: the where and value paths", 13, 1.4))
     b.append(
         text(
-            590, 190, "253 readings, 22 patients in Synthea AU", 13, "start", fill=MUTED
+            590,
+            190,
+            "25,302 readings in mg/dL, 4,215 patients",
+            13,
+            "start",
+            fill=MUTED,
         )
     )
     b.append(rect(0, 238, 935, 92, PEACH, rx=10))
@@ -685,17 +724,17 @@ def your_turn():
         text(
             18,
             292,
-            "Replace code = '126906006' with code.memberOf('http://snomed.info/sct?fhir_vs=ecl/<< 126906006')",
-            13,
+            "Set follow_up_days to 30: how do the figures compare with Halvorsen's at discharge?",
+            14,
             "start",
-            family="JetBrains Mono",
         )
     )
     b.append(
         text(
             18,
             316,
-            "Or try systolic blood pressure (LOINC 8480-6) > 140 mm[Hg]: it sits in Observation.component",
+            "Leave out products the map also relates to 404642006 |Opioid receptor agonist|: "
+            "expect 245, not 265",
             14,
             "start",
         )
@@ -704,32 +743,42 @@ def your_turn():
 
 
 def backup_results():
-    """The risk factor query and its six rows, annotated."""
-    q, qw, qh, qp = screenshot(
-        "sql-prostate-results", 0, 0, 680, crop=(243, 118, 700, 70)
-    )
-    r, rw, rh, rp = screenshot(
-        "sql-prostate-results", 0, 92, 680, crop=(243, 578, 935, 272)
+    """The summary query, its parameter and its five rows, annotated."""
+    q, _, qh, _ = screenshot("sql-mi-results", 0, 0, 600, crop=(243, 92, 760, 130))
+    r, _, _, rp = screenshot(
+        "sql-mi-results", 0, qh + 12, 600, crop=(243, 478, 700, 258)
     )
     b = [q, r]
-    (x0, y0), (x1, y1) = rp(822, 656), rp(956, 682)
-    b.append(highlight(x0, y0, x1 - x0, y1 - y0))
-    b.append(callout(2, x1 + 18, (y0 + y1) / 2))
-    (x0, y0), (x1, y1) = rp(308, 822), rp(362, 848)
-    b.append(highlight(x0, y0, x1 - x0, y1 - y0))
-    b.append(callout(3, (x0 + x1) / 2, y0 - 16))
     b.append(callout(1, 20, 36))
+    (x0, y0), (x1, y1) = rp(270, 499), rp(435, 533)
+    b.append(highlight(x0, y0, x1 - x0, y1 - y0))
+    # Right of the Add parameter button, level with the box.
+    b.append(callout(2, rp(600, 516)[0], (y0 + y1) / 2))
+    (x0, y0), (x1, y1) = rp(548, 605), rp(662, 731)
+    b.append(highlight(x0, y0, x1 - x0, y1 - y0))
+    b.append(callout(3, x1 + 18, y0 + 12))
     notes = [
-        ("The query reads the", "combined view in the", "shared schema"),
-        ("One patient has a BMI", "above 30 before", "diagnosis"),
-        ("6 rows: the patients", "with prostate cancer", ""),
+        ("The summary query from", "the SQL file, reading the", "shared schema"),
+        ("follow_up_days: 365", "(left empty, every count", "is zero)"),
+        ("Patients treated within", "the window; 64 had", "all four"),
     ]
     for i, rows in enumerate(notes):
         ty = 20 + i * 100
-        b.append(callout(i + 1, 718, ty + 10))
+        b.append(callout(i + 1, 648, ty + 10))
         for j, s in enumerate(rows):
-            b.append(text(742, ty + 15 + j * 20, s, 14, "start"))
-    return svg(940, 300, b)
+            b.append(text(672, ty + 15 + j * 20, s, 14, "start"))
+    return svg(940, 340, b)
+
+
+def steps_panel(steps, x, y, w, fs=15, gap=50, fill=YELLOW):
+    """Numbered step boxes stacked vertically."""
+    out = []
+    for i, rows in enumerate(steps):
+        yy = y + i * gap
+        out.append(rect(x, yy, w, gap - 10, fill, rx=8))
+        out.append(callout(i + 1, x + 22, yy + (gap - 10) / 2, 13))
+        out.append(lines(x + 46, yy + (gap - 10) / 2, rows, fs, anchor="start"))
+    return "".join(out)
 
 
 def backup_clone():
@@ -747,73 +796,81 @@ def backup_clone():
         ["Open the notebook, then the File menu"],
         ["Clone... to your home folder"],
         ["Attach the clone to", "Open FHIR Training Cluster"],
-        ["Write tables to your schema,", "e.g. jane_citizen.hba1c_view"],
+        ["Set VIEWS_SCHEMA to your", "own schema, e.g. jane_citizen"],
     ]
     b.append(steps_panel(steps, 510, 4, 425, 15, 80, BLUE))
     return svg(940, 335, b)
 
 
 def backup_show():
-    """What the cholesterol view looks like as a table."""
-    b = [code(0, 4, 935, ["cholesterol.show(10, truncate=False)"], "Notebook cell", 14)]
+    """What the medication request view looks like as a table."""
+    query = [
+        "SELECT patient_id, authored_on, status, code, display",
+        "FROM synthea_mi_secondary_prevention_views.medication_request_view",
+        "WHERE patient_id = 'Patient/da17b438-…' AND authored_on >= '2025-11-30'",
+    ]
+    b = [code(0, 4, 935, query, "SQL editor", 13)]
+    patient = "Patient/da17b438-…"
     rows = [
         (
-            "Observation/872ec130-…",
-            "Patient/872ec130-…",
-            "2026-10-13T13:24:35+10:00",
-            "2093-3",
-            "mg/dL",
-            "246.2",
+            patient,
+            "2025-11-30T01:52:00+10:00",
+            "completed",
+            "61930011000036108",
+            "Aspirin 325 mg + codeine…",
         ),
         (
-            "Observation/15c308cf-…",
-            "Patient/15c308cf-…",
-            "2026-10-12T15:09:10+10:00",
-            "2093-3",
-            "mg/dL",
-            "305.0",
+            patient,
+            "2025-11-30T03:13:25+10:00",
+            "completed",
+            "32641000036100",
+            "Ticagrelor 90 mg tablet",
         ),
         (
-            "Observation/15c308cf-…",
-            "Patient/15c308cf-…",
-            "2026-10-12T15:09:10+10:00",
-            "2093-3",
-            "mg/dL",
-            "299.3",
+            patient,
+            "2025-11-30T03:43:25+10:00",
+            "active",
+            "1031691000168105",
+            "Atenolol 100 mg tablet",
         ),
         (
-            "Observation/0fe2d5e4-…",
-            "Patient/0fe2d5e4-…",
-            "2026-10-06T00:21:11+10:00",
-            "2093-3",
-            "mg/dL",
-            "316.2",
+            patient,
+            "2025-11-30T03:43:25+10:00",
+            "active",
+            "22783011000036107",
+            "Atorvastatin 10 mg tablet",
+        ),
+        (
+            patient,
+            "2026-09-13T01:43:58+10:00",
+            "active",
+            "23488011000036103",
+            "Lisinopril 10 mg tablet",
         ),
     ]
     b.append(
         table(
             0,
-            92,
+            114,
             [
-                ("id", 210),
-                ("patient_id", 185),
-                ("date", 250),
-                ("code", 80),
-                ("unit", 80),
-                ("value", 130),
+                ("patient_id", 175),
+                ("authored_on", 235),
+                ("status", 100),
+                ("code", 175),
+                ("display", 250),
             ],
             rows,
             YELLOW,
             13,
-            34,
-            mono_cols=(0, 1, 2),
+            30,
+            mono_cols=(0, 1, 3),
         )
     )
     b.append(
         text(
             0,
-            300,
-            "Rows from the saved hyperlipidemia_view (newest first); values rounded to 1 decimal place.",
+            316,
+            "5 of the 12 rows returned: the patient from the timeline slide. IDs truncated here.",
             14,
             "start",
             fill=MUTED,
@@ -823,15 +880,15 @@ def backup_show():
     b.append(
         text(
             0,
-            324,
-            "334 rows for 106 patients. IDs truncated here.",
+            338,
+            "229,058 rows in all: every MedicationRequest with an AMT code.",
             14,
             "start",
             fill=MUTED,
             italic=True,
         )
     )
-    return svg(940, 335, b)
+    return svg(940, 345, b)
 
 
 DECK = {
@@ -842,10 +899,11 @@ DECK = {
             f"Friday 9:30 · {EVENT}",
             "Good morning. This block is about the middle of the analytics pipeline: turning FHIR "
             "resources into tables you can analyse. I'll cover SQL on FHIR ViewDefinitions, the "
-            "small amount of FHIRPath you need to write them, and how terminology can make a view "
-            "smarter than a single hard-coded code. Then we'll work through the prostate cancer "
-            "risk factor exercise in the workspace. I'll talk for about twenty minutes, show you "
-            "the notebook and the SQL live, and then the rest of the block is yours.",
+            "small amount of FHIRPath you need to write them, and how terminology lets you "
+            "classify the codes in a view without writing them all into a query. Then we'll work "
+            "through the secondary prevention after myocardial infarction exercise in the "
+            "workspace. I'll talk for about twenty minutes, show you the notebook and the SQL live, "
+            "and then the rest of the block is yours.",
         ),
         diagram(
             "From trees to tables",
@@ -880,9 +938,9 @@ DECK = {
             "fhirpath",
             fhirpath_table(),
             "You don't need all of FHIRPath to write useful views. where filters a collection, "
-            "for example to the SNOMED CT coding of a condition. exists tests whether anything "
-            "matches, which is how the exercise picks out total cholesterol by its LOINC code. "
-            "ofType picks one type out of a choice element like value or effective. first takes "
+            "for example to the SNOMED CT codings of a condition. exists tests whether anything "
+            "is there, which is how the medication view leaves out codings that have no code. "
+            "ofType picks one type out of a choice element like medication or onset. first takes "
             "the first item when you only want one. And the two key functions, getResourceKey and "
             "getReferenceKey, come from the SQL on FHIR spec itself: they give you the keys you "
             "need to join views later. Every example here except first comes from the views we "
@@ -894,12 +952,14 @@ DECK = {
             "keys-join",
             keys_join(),
             "A ViewDefinition only ever looks at one resource type, so it can't join. Instead, "
-            "each view emits keys. The patient view has getResourceKey as its id. The BMI view has "
-            "subject dot getReferenceKey as its patient_id, which returns the same value for the "
-            "same patient. Then plain SQL does the join. These are real rows from the workspace: "
-            "one patient with one high BMI reading, another with three. Keeping views simple and "
-            "pushing joins, ranking and aggregation into SQL is a deliberate design choice. It "
-            "keeps views portable and lets each engine do what it is good at.",
+            "each view emits keys. The patient view has getResourceKey as its id. The myocardial "
+            "infarction view has subject dot getReferenceKey as its patient_id, which returns the "
+            "same value for the same patient. Then plain SQL does the join. These are real rows "
+            "from the workspace. One patient has a single MI. The other has two Conditions on the "
+            "same day, a general MI and a STEMI recorded minutes apart, which is why the SQL later "
+            "takes each patient's first. Keeping views simple and pushing joins, ranking and "
+            "aggregation into SQL is a deliberate design choice. It keeps views portable and lets "
+            "each engine do what it is good at.",
         ),
         diagram(
             "Three layers",
@@ -924,96 +984,126 @@ DECK = {
             "ballot adds two profiles on the FHIR Library resource: SQLView, a named query other "
             "queries can use as a table, and SQLQuery, a shareable, parameterised query that "
             "declares the views it depends on. It also adds terminology in SQL: a query can "
-            "declare a ValueSet or ConceptMap and join to it as a table. And there are standard "
-            "operations to run and export. This is ballot content, so details may change.",
+            "declare a ValueSet or ConceptMap and join to it as a table. Pathling 10 already does "
+            "this, and this morning's exercise uses it. And there are standard operations to run "
+            "and export. This is ballot content, so details may change.",
         ),
         section(
-            "Exercise: prostate cancer risk factors",
-            "Let's put this into practice. The exercise asks a simple question of the Synthea "
-            "data: for patients with prostate cancer, what did we know about their cholesterol "
-            "and body mass index before they were diagnosed? It isn't a serious epidemiological "
-            "study - the data is synthetic - but it uses every idea we've just covered: views with "
-            "keys, filters on LOINC and SNOMED CT codes, and SQL that joins and ranks the results. "
-            "The notebook and SQL file are both in the repository folder in the workspace.",
+            "Exercise: secondary prevention after myocardial infarction",
+            "Let's put this into practice. After a heart attack, guidelines recommend four classes "
+            "of medicine: an antiplatelet, a statin, a beta-blocker, and an ACE inhibitor or ARB. "
+            "A Norwegian registry study by Halvorsen and colleagues found 91, 90, 82 and 60 per "
+            "cent of patients discharged on each. The exercise asks the same question of the "
+            "Synthea data. It isn't a serious study - the data is synthetic - but it uses every "
+            "idea we've just covered: views with keys, SNOMED CT and AMT codes, terminology in SQL "
+            "with a ConceptMap, and SQL that works across time. The notebook and SQL file are both "
+            "in the repository folder in the workspace.",
         ),
         diagram(
-            "Four views, one query",
-            "Pathling views in a notebook, then one SQL file joins them",
-            "four-views",
-            four_views(),
-            "The notebook defines four views with Pathling. A patient demographics view with "
-            "birth date, postal codes and deceased date. Two Observation views: total cholesterol, "
-            "LOINC 2093-3, above 240 milligrams per decilitre, and body mass index, LOINC 39156-5, "
-            "above 30. And a Condition view for SNOMED CT 126906006, neoplasm of prostate. Each is "
-            "saved as a table in the synthea_prostate_cancer_views schema. Then one SQL file "
-            "combines them into a single table with one row per patient: 800 rows, 6 of them with "
-            "prostate cancer.",
+            "Three views and a map, one query",
+            "Pathling views and a ConceptMap table in a notebook, then one SQL file joins them",
+            "views-and-map",
+            views_and_map(),
+            "The notebook defines three views with Pathling. Patients, with gender, birth date and "
+            "date of death. Myocardial infarctions: a Condition view for three SNOMED CT codes - "
+            "MI, STEMI and NSTEMI. And medication requests, with the AMT code of each medicine. "
+            "The fourth input isn't a view: it's the AMT product to classification ConceptMap, "
+            "which Pathling presents as a table of 925,540 mappings. Each is saved as a table in "
+            "the synthea_mi_secondary_prevention_views schema. Then one SQL file joins them into a "
+            "view with one row per patient who had an MI: 274 rows, with the number of days to "
+            "the first prescription of each class.",
         ),
         diagram(
-            "The cholesterol view in Pathling",
+            "The medication request view in Pathling",
             "data.view() takes a ViewDefinition as Python and returns a Spark data frame",
-            "cholesterol-code",
-            cholesterol_card(),
-            "Here is the cholesterol view from the notebook, with the descriptions removed so it "
-            "fits. data.view takes the resource type, a select and a where - the same elements as "
-            "the JSON, written as Python dictionaries. First, the keys: getResourceKey for the "
-            "observation and getReferenceKey for the patient. Second, forEach over the Quantity "
-            "value gives us unit and value columns. Third, the where: keep observations with a "
-            "LOINC 2093-3 coding whose value in milligrams per decilitre is above 240. The result "
-            "is a Spark data frame, so the last step is saveAsTable.",
+            "medication-code",
+            medication_card(),
+            "Here is the medication request view from the notebook, with the descriptions removed "
+            "so it fits. data.view takes the resource type and a select - the same elements as the "
+            "JSON, written as Python dictionaries. First, the keys: getResourceKey for the request "
+            "and getReferenceKey for the patient. Second, the forEach. medication is a choice "
+            "element, so ofType picks the CodeableConcept, and the where keeps SNOMED CT codings "
+            "that have a code - AMT uses the SNOMED CT system. Some requests in the data have a "
+            "display but no code; they can't be classified, so they're left out. Third, the code "
+            "and display columns, which the SQL joins to the ConceptMap. The result is a Spark "
+            "data frame, so the last step is saveAsTable.",
         ),
         diagram(
-            "Latest reading before diagnosis",
-            "Temporal logic lives in SQL: rank, keep one row, join back to every patient",
-            "temporal",
-            timeline(),
-            "The risk factor has to come before the diagnosis. These two patients are real rows "
-            "from the workspace. The first had a BMI of 30.47 about two years before their "
-            "diagnosis, so it counts. The second had three high BMI readings, all years after "
-            "diagnosis, so none count. The SQL ranks each patient's readings newest first, keeping "
-            "only those before onset, takes rank one, and left joins onto all 800 patients. Of the "
-            "6 with prostate cancer, one has a high BMI beforehand, and none has high cholesterol "
-            "beforehand.",
+            "Classify medicines with a ConceptMap",
+            "Terminology in SQL: the map is a table you join to",
+            "concept-map",
+            concept_map(),
+            "Here's the terminology part. The ConceptMap relates each AMT product to the classes "
+            "of substance it contains, using SNOMED CT concepts as the classes. Atenolol 100 "
+            "milligram is related to beta blocker, and to broader classes like antihypertensive "
+            "agent. In Python, concept_map returns the map as a table with the columns that the "
+            "SQL on FHIR specification defines. It's read from a local terminology store on S3, so "
+            "no terminology server is involved. In SQL, it's a join like any other, to a short list "
+            "of the class codes we care about. One thing to watch: aspirin with codeine is related "
+            "to platelet aggregation inhibitor, because it contains aspirin, as well as to opioid "
+            "receptor agonist. The exercise uses the map as it stands, so it counts as an "
+            "antiplatelet. Leave out products the map also relates to opioids, and the number of "
+            "patients on an antiplatelet within a year falls from 265 to 245. James's sessions "
+            "cover the terminology fundamentals.",
         ),
         diagram(
-            "Terminology makes views smarter",
-            "Match a value set of concepts, not one hard-coded code",
-            "terminology",
-            terminology(),
-            "The condition view matches exactly one SNOMED CT code. But clinical data is coded at "
-            "different levels of detail. The ECL expression double less-than 126906006 means "
-            "neoplasm of prostate and all its descendants - 45 concepts today. In Synthea, the "
-            "same 6 patients also have carcinoma in situ of prostate, which this would catch, and "
-            "it correctly leaves out suspected prostate cancer. You can do this in FHIRPath with "
-            "memberOf inside the view, or in Python with member_of on a column. I ran both on "
-            "Pathling 10. James's sessions cover the terminology fundamentals.",
+            "Days to the first prescription",
+            "Temporal logic lives in SQL: the window is applied afterwards, as a parameter",
+            "days-to-first",
+            days_to_first(),
+            "Each patient's index date is their first MI. This is a real patient from the "
+            "workspace. On the day of the MI they were prescribed an antiplatelet, a statin and a "
+            "beta-blocker, so those are day zero. They'd had lisinopril, an ACE inhibitor, 84 days "
+            "before the MI; that one doesn't count, because only prescriptions on or after the MI "
+            "do. The next lisinopril was at day 287. So with a 30 day window this patient has "
+            "three of the four classes, and with 365 days, all four. The view keeps the number of "
+            "days rather than a yes or no, so the summary query can apply any window as a "
+            "parameter.",
+        ),
+        diagram(
+            "What the exercise finds",
+            "Synthea AU within 365 days of the first MI, against Halvorsen et al. 2016 at discharge",
+            "results",
+            results_chart(),
+            "This is the main chart from the notebook. The coloured bars are the share of our 274 "
+            "synthetic patients prescribed each class within 365 days of their first MI; the grey "
+            "bars are Halvorsen's figures at discharge. Antiplatelets, statins and beta-blockers "
+            "are at or above the registry figures. ACE inhibitors and ARBs are well below, at 28 "
+            "per cent. 64 patients, 23 per cent, had all four. It isn't a like for like "
+            "comparison: a year of follow-up rather than discharge, and 16 of the patients died "
+            "within the year. The notebook has more charts: time to treatment, combinations and "
+            "age groups.",
         ),
         diagram(
             "Demo",
-            "Views in the notebook, then the combined table in the SQL editor",
+            "Views in the notebook, then the summary in the SQL editor",
             "demo",
             demo(),
             "Live demo. One: in Workspace, Repos, open-fhir-training, open notebooks, synthea, "
-            "create_prostate_cancer_views. Two: check the compute dropdown shows Open FHIR "
-            "Training Cluster, not Serverless. Three: scroll to the hyperlipidemia view and point "
-            "out the keys, the forEach and the where. Four: run the setup cells and the cholesterol "
-            "cell, then the show cell - don't run saveAsTable. Five: open "
-            "sql/synthea/combine_prostate_cancer_views.sql and walk through the CTEs. Six: in the "
-            "SQL editor on the Serverless Starter Warehouse, run the SELECT for rows where "
-            "prostate_cancer_onset is not null - six rows.",
+            "create_mi_secondary_prevention_views. Two: check the compute dropdown shows Open FHIR "
+            "Training Cluster, not Serverless. Three: scroll to the medication request view and "
+            "point out the keys, ofType and the forEach. Four: run the setup and read cells, then "
+            "the medication view cell and its show cell - don't run saveAsTable. Five: run the "
+            "concept_map cell and show the first rows of the map. Six: open "
+            "sql/synthea/combine_mi_secondary_prevention_views.sql and walk through the CTEs, then "
+            "in the SQL editor on the Serverless Starter Warehouse run the summary query with "
+            "follow_up_days set to 365 - five rows.",
         ),
         diagram(
             "Your turn",
-            "Add a risk factor of your own, in your own schema",
+            "Add a view of your own, in your own schema",
             "your-turn",
             your_turn(),
             "Now it's over to you. Clone the notebook into your home folder - you can't edit the "
-            "shared copy. Write a new view: HbA1c, LOINC 4548-4, is a good first one because it "
-            "has the same shape as the cholesterol view. The unit code is percent, and there are "
-            "253 readings above 6.5 for 22 patients. Save it to your own schema, then copy the "
-            "risk factor query and add a latest HbA1c before diagnosis. If you finish, swap the "
-            "single SNOMED CT code for a memberOf filter, or try systolic blood pressure, which is "
-            "a component of the blood pressure panel. We're all here to help.",
+            "shared copy - and set VIEWS_SCHEMA to your own schema. Write a new view: LDL "
+            "cholesterol, LOINC 18262-6, is a good one, because statins are meant to lower it. It "
+            "has the same shape as any Observation with a Quantity value; there are 25,302 "
+            "readings for 4,215 patients. Save it to your schema, then in the SQL editor join it to "
+            "the shared mi_secondary_prevention view, and compare each patient's LDL before their "
+            "MI with their LDL after their first statin. In the clone, run only the setup cells "
+            "and your own: the Combine section reads the SQL file from the repository folder, so "
+            "it won't find it from your home folder. If you finish, try the stretch tasks. We're "
+            "all here to help.",
         ),
         section(
             "Demo walkthrough (backup)",
@@ -1024,16 +1114,16 @@ DECK = {
             "can come back to them later in the slides we share after the connectathon.",
         ),
         diagram(
-            "The risk factor table",
+            "The summary query",
             "SQL editor on the Serverless Starter Warehouse",
             "backup-results",
             backup_results(),
-            "This is the final step of the demo. The query selects four columns from "
-            "prostate_cancer_risk_factors in the shared schema, filtered to patients with a "
-            "prostate cancer onset date. One, the query itself. Two, the BMI column: one patient "
-            "has a BMI of 30.47 recorded before diagnosis, and the rest are null. The cholesterol "
-            "column is null for all six, because none had a total cholesterol above 240 before "
-            "diagnosis. Three, six rows - the six patients with prostate cancer in this dataset.",
+            "This is the final step of the demo: the summary query from the SQL file, pasted into "
+            "the SQL editor. One, the query reads the combined view in the shared schema. Its "
+            "parameter, follow_up_days, appears as a box under the editor. Two, set it to 365 - if "
+            "you leave it empty, every count is zero. Three, five rows: within a year, 265 "
+            "patients had an antiplatelet, 252 a statin, 239 a beta-blocker and 78 an ACE "
+            "inhibitor or ARB, and 64 had all four.",
         ),
         diagram(
             "Clone before you change",
@@ -1043,21 +1133,22 @@ DECK = {
             "Before you change anything, clone the notebook. One, open it and click the File "
             "menu at the top left. Two, choose Clone and pick your home folder. Three, make sure "
             "your clone is attached to the Open FHIR Training Cluster, because Pathling isn't "
-            "installed on Serverless. Four, when you save a view, use your own schema - create it "
-            "first with CREATE SCHEMA IF NOT EXISTS and your name - rather than the shared "
-            "synthea_prostate_cancer_views schema.",
+            "installed on Serverless. Four, set VIEWS_SCHEMA in the first code cell to your own "
+            "schema, such as your name, rather than the shared synthea_mi_secondary_prevention_views "
+            "schema. The setup cell creates it for you.",
         ),
         diagram(
-            "What the cholesterol view returns",
-            "One row per observation, with keys for joining",
+            "What the medication request view returns",
+            "One row per coded medication request, with keys for joining",
             "backup-show",
             backup_show(),
-            "If the cluster isn't cooperating, this is what the cholesterol view gives you. The "
-            "rows come from the saved hyperlipidemia view table, newest first. The id column is "
-            "the observation key and patient_id the patient key, both in the form type slash id. "
-            "Every row has the LOINC code 2093-3, the unit mg/dL and a value above 240. Across "
-            "the dataset there are 334 such observations for 106 patients. Notice that one "
-            "patient has two readings at the same time - real data has these quirks too.",
+            "If the cluster isn't cooperating, this is what the medication request view gives you. "
+            "These rows are for the patient on the timeline slide, from the saved table. "
+            "patient_id is the patient key, in the form type slash id, ready to join. The code is "
+            "the AMT code, which is what the SQL looks up in the ConceptMap. Notice the first row: "
+            "aspirin with codeine, on the day of the MI. The status column shows that some "
+            "requests were completed and others are still active. Across the dataset there are "
+            "229,058 rows, one for every MedicationRequest with an AMT code.",
         ),
         closing(
             "Questions?",
