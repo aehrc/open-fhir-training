@@ -1106,7 +1106,8 @@ DECK = {
             "all here to help.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "These slides are a fallback in case the live demo doesn't work - for example if the "
             "network or the cluster is slow. They show the same steps as screenshots and real "
             "output from the workspace, so you can follow along and still do the exercise "

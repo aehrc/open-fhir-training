@@ -962,7 +962,8 @@ DECK = {
             "interests you and explore its columns.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "If the live demo doesn't work, I'll walk through these screenshots instead. They "
             "show the same steps: the import notebook, its output, the synthea schema in the "
             "catalog, and the sample data in the patient table. They were captured from the "

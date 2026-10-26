@@ -1235,7 +1235,8 @@ DECK = {
             "tables, put them in your own schema.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "If the live demo doesn't cooperate, here's what you would have seen. The next two "
             "slides show the summary query in the SQL editor, with its result, and then the row "
             "counts of each view and the output of the Your turn query. They're also a useful "

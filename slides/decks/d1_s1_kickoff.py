@@ -820,7 +820,8 @@ DECK = {
             "doesn't work.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "These slides are a fallback in case the live demo doesn't cooperate - the wifi, the "
             "cluster, or me. They walk through the same tour with annotated screenshots: Catalog "
             "Explorer and the synthea schema, the patient table's sample data, and the shared "
@@ -828,10 +829,11 @@ DECK = {
             "get lost in the workspace and want to retrace the steps on your own.",
         ),
         diagram(
-            "Backup: the data in Catalog Explorer",
+            "The data in Catalog Explorer",
             "hive_metastore > synthea holds one table per FHIR resource type",
             "backup-catalog",
             backup_catalog(),
+            "Backup slide. "
             "This is Catalog Explorer. Click Catalog in the left-hand menu, then expand "
             "hive_metastore under Legacy. You'll see a schema for each dataset: mimic_iv_demo and "
             "mimic_iv_views for the intensive care data, and synthea for the synthetic Queensland "
@@ -841,10 +843,11 @@ DECK = {
             "read-only.",
         ),
         diagram(
-            "Backup: inside the patient table",
+            "Inside the patient table",
             "Sample Data shows the encoded resource, one row per Patient",
             "backup-patient",
             backup_patient(),
+            "Backup slide. "
             "Click patient, then the Sample Data tab. Each row is one Patient resource. The id column "
             "is the resource's logical id. id_versioned is the same id prefixed with the resource "
             "type, the same shape you see in references. Then meta, which is a struct: Databricks shows "
@@ -853,10 +856,11 @@ DECK = {
             "That's the encoded form that SQL on FHIR views work from.",
         ),
         diagram(
-            "Backup: the shared cluster",
+            "The shared cluster",
             "One all-purpose cluster runs every notebook in the workspace",
             "backup-compute",
             backup_compute(),
+            "Backup slide. "
             "If you want to see the cluster itself, click Compute in the left-hand menu and stay on "
             "the All-purpose compute tab. There's one cluster, Open FHIR Training Cluster, and the "
             "green dot means it's running. It's on Databricks Runtime 17.3, with 32 GB of memory and "

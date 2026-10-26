@@ -1102,7 +1102,8 @@ DECK = {
             "Patient with AU Core Patient.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "If the live demo doesn't cooperate, here are the same steps as screenshots, so you "
             "can follow along on your own laptop. The first shows the notebook and where to attach "
             "it, the second compares the flat extract with the FHIR table in Catalog Explorer, and "

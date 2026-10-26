@@ -873,7 +873,8 @@ DECK = {
             "required fields. James, Dion, Duncan and I will be around the room to help.",
         ),
         section(
-            "Demo walkthrough (backup)",
+            "Demo walkthrough",
+            "Backup slides, for when the live demo fails. "
             "These slides walk through the demo with screenshots, in case the live environment "
             "isn't cooperating, or for anyone who wants to repeat the steps later. They show the "
             "same SQL editor and the same two queries from this week's exercises: the MI secondary "
