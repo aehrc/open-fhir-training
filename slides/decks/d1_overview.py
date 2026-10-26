@@ -59,7 +59,7 @@ def adventures():
             PEACH,
             "Queensland Health context",
             "Duncan Pullen",
-            ["local data, local", "problems to solve"],
+            ["how QH data and systems work", "which questions matter locally"],
         ),
     ]
     pos = [(10, 10), (500, 10), (10, 185), (500, 185)]

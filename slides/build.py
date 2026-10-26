@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["resvg-py==0.5.0", "segno==1.6.6"]
+# dependencies = ["resvg-py==0.5.0", "segno==1.6.6", "fonttools==4.67.0"]
 # ///
 """Build the Track 3 decks with DeckCraft.
 
