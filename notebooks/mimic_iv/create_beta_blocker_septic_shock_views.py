@@ -277,7 +277,7 @@ diagnoses.show(5, truncate=False)
 # MAGIC %md
 # MAGIC ## Antibiotic view
 # MAGIC
-# MAGIC One row per administration of a medicine in the ICU's antibiotic categories. Medicines given in the ICU are recorded by the bedside system with a category, so rather than listing every antibiotic, the `where` clause selects administrations in the two antibiotic categories. The categories also hold antifungals and antivirals, and a separate row for the fluid each antibiotic is diluted in (such as `Dextrose 5%`). Only the times are used, and every diluent row is given alongside its antibiotic, so neither affects the result. Medicines given on the wards are recorded in a different system without these categories, so antibiotics started before the ICU admission are not seen here.
+# MAGIC One row per administration of a medicine in the ICU's antibiotic categories. Medicines given in the ICU are recorded by the bedside system with a category, so rather than listing every antibiotic, the `where` clause selects administrations in the two antibiotic categories. The categories also hold antifungals and antivirals, and a separate row for the fluid each antibiotic is diluted in (such as `Dextrose 5%`). In the demo data, leaving these out would not change the result. Medicines given on the wards are recorded in a different system without these categories, so antibiotics started before the ICU admission are not seen here.
 # MAGIC
 # MAGIC Infusions have an `effectivePeriod` and one-off doses an `effectiveDateTime`. The union operator `|` takes whichever is present.
 
@@ -595,7 +595,11 @@ vasoactives.show(5, truncate=False)
 # MAGIC - The ICU bedside system codes intravenous doses with `d_items` item IDs (`mimic-medication-icu`).
 # MAGIC - The hospital's electronic medication administration record (eMAR) codes most doses with the pharmacy's formulary code (`mimic-medication-formulary-drug-cd`), and some with the medicine's name (`mimic-medication-name`). Oral metoprolol, the most common beta-blocker, is recorded only here. `TOPR` is Toprol XL, a brand of metoprolol succinate.
 # MAGIC
-# MAGIC The lists below hold every matching code in the [MIMIC-IV on FHIR code systems](https://kind-lab.github.io/mimic-fhir/), following the list in [the thesis this study is taken from](https://github.com/fhnaumann/master_thesis_pipeline/blob/main/langgraph-orchestration/dataset/case_002/notes.md). The trial's placebo is recorded under names such as `Esmolol Study Control (0.9% NaCl)`, which are left out. The `forEach` keeps only the codings that match one of the three lists.
+# MAGIC The names are every esmolol, metoprolol and labetalol name in the [MIMIC-IV on FHIR code systems](https://kind-lab.github.io/mimic-fhir/), following the list in [the thesis this study is taken from](https://github.com/fhnaumann/master_thesis_pipeline/blob/main/langgraph-orchestration/dataset/case_002/notes.md). The trial's placebo is recorded under names such as `Esmolol Study Control (0.9% NaCl)`, which are left out.
+# MAGIC
+# MAGIC Formulary codes have no display text, so they cannot be chosen by name. Choosing them by prefix is a trap: `METO10` and `METO10I` share the `METO` prefix with metoprolol, but the NDC codes of the medicines dispensed under them show that they are metoclopramide, an anti-emetic. The list below holds the codes that the demo data confirms through the drug name or NDC code of the medication request, plus codes that cannot be confirmed from the demo but whose form matches a beta-blocker product, such as `ESMO2PM` (an esmolol premix), `METOSUSP` (metoprolol suspension) and `LABE600/200` (a labetalol infusion). `ESMOB100` (the saline base of the esmolol infusion) and the similarly named `ESMOBASE` are left out, as are `METO` codes in strengths and forms that metoprolol is not made in.
+# MAGIC
+# MAGIC The `forEach` keeps only the codings that match one of the three lists.
 
 # COMMAND ----------
 
@@ -609,8 +613,6 @@ BETA_BLOCKER_FORMULARY_CODES = [
     "ESMO2.5PM",
     "ESMO2IND",
     "ESMO2PM",
-    "ESMOB100",
-    "ESMOBASE",
     "ESMOIND",
     "LABE100",
     "LABE100I",
@@ -618,17 +620,10 @@ BETA_BLOCKER_FORMULARY_CODES = [
     "LABE200",
     "LABE600/200",
     "LABE600/200NS",
-    "METO10",
-    "METO10I",
-    "METO10L",
-    "METO10PB",
     "METO12.5HT",
-    "METO1L",
     "METO25",
     "METO37.5",
-    "METO5",
     "METO50",
-    "METO50I",
     "METO5I",
     "METOSUSP",
     "METOSUSP10L",
@@ -644,6 +639,7 @@ BETA_BLOCKER_NAMES = [
     "Esmolol Study Drug",
     "Esmolol study drug",
     "esmolol study drug",
+    "Labe",
     "Labet",
     "Labetalol",
     "laBETalol",
