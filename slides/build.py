@@ -202,9 +202,16 @@ def build(module_name):
         )
     deck_dir = BUILD / deck["file"]
     shutil.rmtree(deck_dir, ignore_errors=True)
-    commands = []
+    # The template carries empty sections from the Pathling pitch deck.
+    commands = [cmd("section.removeAll")]
     for i, slide in enumerate(slides):
         commands += slide_commands(deck_dir, i, slide)
+    parts = [(i, s["part"]) for i, s in enumerate(slides) if s.get("part")]
+    if parts:
+        for i, name in parts:
+            commands.append(cmd("section.add", {"name": name, "at": i}))
+        commands.append(cmd("section.add", {"name": "Close", "at": len(slides) - 1}))
+        commands.append(cmd("section.rename", {"index": 0, "name": "Title"}))
     OUT.mkdir(exist_ok=True)
     out = OUT / f"{deck['file']}.pptx"
     args = ["deckcraft-cli", "run", "--in", str(TEMPLATE)]

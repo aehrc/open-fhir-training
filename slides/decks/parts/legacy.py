@@ -1,4 +1,4 @@
-"""Day 1, 2:00 Track 3 slab: tactical FHIR amid legacy and proprietary systems.
+"""Track 3 analytics part: tactical FHIR amid legacy and proprietary systems.
 
 Author: John Grimes
 """
@@ -21,7 +21,6 @@ from kit import (
     box,
     callout,
     circle,
-    closing,
     code,
     diagram,
     hcurve,
@@ -35,11 +34,8 @@ from kit import (
     table,
     text,
     text_width,
-    title_slide,
     vcurve,
 )
-
-from decks._shared import EVENT, PATHLING_URL, PRESENTER, REPO_URL, SOF_URL
 
 
 def chip(x, y, s, fill="#fff", fs=12):
@@ -192,7 +188,7 @@ def patterns():
         (
             YELLOW,
             "Extract and map",
-            "CSV or SQL extract -> NDJSON · today",
+            "CSV or SQL extract -> NDJSON · this exercise",
             "CSV, SQL extracts",
             2,
             ["You can get extracts now;", "batch analytics and research"],
@@ -924,238 +920,222 @@ def backup_clone():
     return svg(940, 334, b)
 
 
-DECK = {
-    "file": "track-3-d1-2-fhir-amid-legacy",
-    "slides": [
-        title_slide(
-            "FHIR amid legacy and proprietary systems",
-            f"Track 3 · Thursday 2:00 · {EVENT}",
-            "This session is about the data you actually have. Most clinical systems in a hospital "
-            "were not built to speak FHIR, and many won't for years. I want to show that you can "
-            "still use FHIR for analytics today, by treating it as the model you map into at the "
-            "edge of your analytics platform. We'll look at the patterns for getting there, some "
-            "tactics, and then a hands-on exercise that turns a flat CSV extract into FHIR "
-            "resources, including the problems that exercise runs into.",
-        ),
-        diagram(
-            "The reality: data arrives in many shapes",
-            "Typical hospital system archetypes and the formats they actually emit",
-            "reality",
-            reality(),
-            "Here is a generic picture of where clinical data lives. An EMR on a proprietary "
-            "database, a laboratory system, radiology, patient administration, a long tail of "
-            "departmental and niche systems, an integration engine carrying HL7 version 2 feeds "
-            "between them, a data warehouse with nightly extracts, and a great deal of documents "
-            "and free text. Under each system are the formats it typically produces: SQL extracts, "
-            "HL7 v2 messages, CSV, DICOM and PDF, and only occasionally FHIR. Most of this data "
-            "won't arrive as FHIR any time soon, but that doesn't mean we have to wait before we "
-            "can use FHIR for analytics.",
-        ),
-        diagram(
-            "Don't wait for a FHIR server",
-            "Use FHIR as the analytic interchange model at the edge of your analytics platform",
-            "edge",
-            edge(),
-            "The approach is to leave the source systems as they are. At the edge of your analytics "
-            "platform, map each source into FHIR resources once. Store them as NDJSON and as "
-            "tables, here Delta tables in Databricks. Then everything downstream - SQL on FHIR "
-            "views, terminology, dashboards, research cohorts, machine learning features - is "
-            "written against one model rather than against each source. Adding a new source means "
-            "writing one more mapping, not rewriting every report. You don't need a FHIR server "
-            "for any of this; FHIR is the data model, not the transport.",
-        ),
-        diagram(
-            "Five ways in",
-            "Patterns for getting FHIR from systems that don't produce it",
-            "patterns",
-            patterns(),
-            "There are five common patterns. One: extract and map - take a CSV or SQL extract and "
-            "transform it into FHIR. That's today's exercise. Two: convert HL7 version 2 messages "
-            "to FHIR in the integration engine; Track 2 stream 2B is working on exactly this. "
-            "Three: put a FHIR facade over an existing database, when data has to stay where it "
-            "is. Four: Bulk Data export, where a vendor supports it - that's the next session. "
-            "Five: turn free text into coded FHIR with NLP, which is Dion's strand. The effort "
-            "dots are my rough judgement, not a measurement. Most organisations end up using "
-            "several of these at once.",
-        ),
-        diagram(
-            "Why bother: one analytic contract",
-            "The same view runs over FHIR from any source, so analysis outlives any one system",
-            "contract",
-            contract(),
-            "The main benefit of mapping is that the analysis no longer depends on the source. Our "
-            "workspace has two Patient tables: one Synthea generated directly as FHIR, "
-            "and one we mapped from the CSV extract. The same view definition - id, gender, birth "
-            "date - runs over either of them and gives the same columns. Terminology bindings to "
-            "SNOMED CT-AU, LOINC and AMT make the codes mean the same thing across sources. You can "
-            "adopt this one resource type at a time, your queries travel to other sites and "
-            "vendors, and you inherit AU Core and the community tooling.",
-        ),
-        bullets(
-            "Tactics that work",
-            "Practical rules for mapping legacy data into FHIR for analytics",
-            [
-                "Start from one question",
-                "Map only what you need",
-                "Keep source ids and provenance",
-                "Bind local codes via ConceptMaps",
-                "Validate against AU Core",
-                "Check referential integrity",
-                "Store NDJSON and Delta/Parquet",
-            ],
-            "Some tactics. Start from one question, and let it decide which resources and which "
-            "elements you map - you don't need the whole of FHIR on day one. Keep the source "
-            "identifiers and record where each resource came from, so you can trace a number back. "
-            "Bind local codes to SNOMED CT-AU, LOINC or AMT with ConceptMaps, so the mapping is "
-            "data rather than code; GLU-F here is an invented local code. Validate against AU Core "
-            "where you can, check that references resolve, and keep NDJSON for exchange next to "
-            "Delta or Parquet for querying.",
-            name="tactics",
-            drawing=tactics(),
-            split=0.46,
-        ),
-        section(
-            "Exercise: CSV to FHIR",
-            "Now for the exercise. It takes the Synthea CSV export, which stands in for a legacy "
-            "flat extract, and turns three of its tables into FHIR resources. The code is "
-            "deliberately simple, using plain Spark functions, so you can see every decision the "
-            "mapping makes. A few of those decisions turn out to be wrong, and we'll look at those "
-            "afterwards.",
-        ),
-        diagram(
-            "From flat to nested",
-            "A row of synthea_csv.patients and the Patient resource the notebook makes from it",
-            "flat-to-nested",
-            flat_to_nested(),
-            "On the left is the CSV patients table: one string column per field, 1,143 rows. Row "
-            "four is highlighted. On the right is the Patient the notebook makes from that row. Id "
-            "becomes the resource id. SSN, driver's licence and passport - three separate columns - "
-            "become entries in one identifier array, each with a system. GENDER is M or F, which "
-            "maps to the FHIR codes male and female. BIRTHDATE becomes birthDate, and DEATHDATE "
-            "becomes deceasedDateTime, but only when it has a value. Note this extract is US "
-            "data: social security numbers, a Massachusetts address.",
-        ),
-        diagram(
-            "The notebook as a pipeline",
-            "transform_csv_to_fhir: map, serialise, check, store, then encode with Pathling",
-            "pipeline",
-            pipeline(),
-            "Here is the whole notebook. It reads three synthea_csv tables. It maps each one with "
-            "Spark struct, array and when functions, then serialises each row with to_json, giving "
-            "one FHIR resource per line - NDJSON. It validates by counting lines and parsing "
-            "sample resources, and it checks referential integrity with left anti joins, looking "
-            "for encounters without patients and immunisations without encounters. It saves the "
-            "JSON text to synthea_transformed. Finally Pathling's encoder reads the NDJSON into "
-            "typed, nested columns, and writes synthea_encoded. That last schema is the one you "
-            "can query with views.",
-        ),
-        diagram(
-            "The mapping in code",
-            "Abridged from the Patient cell and the Pathling cells of transform_csv_to_fhir",
-            "mapping-code",
-            mapping_code(),
-            "This is the real code, trimmed. The identifier array has one when clause per source "
-            "column, so a patient without a driver's licence gets a null in that position - we'll "
-            "come back to that. Gender is a chained when with an otherwise, which is a value set "
-            "mapping with a default. On the right, the Pathling part is short: create a context, "
-            "read the NDJSON as text, encode it as Patient, gather the three resource types into "
-            "one dataset, and write it as tables. The encoder does the hard work of turning JSON "
-            "into the full FHIR structure.",
-        ),
-        diagram(
-            "Pitfalls the exercise exposes",
-            "Each one is visible in the data the notebook produced",
-            "pitfalls",
-            pitfalls(),
-            "Every one of these shows up in our workspace. Immunisation ids join two UUIDs and a "
-            "code, giving 76 or 77 characters - FHIR ids allow 64. That's a known issue to fix. "
-            "Dates: birth dates have no time zone, while observations are UTC, so a naive date "
-            "comparison puts this baby's first measurement the day before birth. Unmapped "
-            "encounter classes like home and snf fall through to ambulatory. Vaccines use US CVX "
-            "codes, not AMT. And shape errors are silent: identifier type was built as a Coding, "
-            "not a CodeableConcept, so the encoder dropped it for every patient.",
-        ),
-        diagram(
-            "Demo",
-            "What I'll show in the workspace",
-            "demo",
-            demo(),
-            "Live, in Databricks. One: Workspace, Repos, John.Grimes, open-fhir-training, "
-            "notebooks, csv_to_fhir, and open transform_csv_to_fhir. Two: check the compute "
-            "dropdown says Open FHIR Training Cluster, not Serverless. Three: scroll to the Patient "
-            "select and walk through identifier, gender and address. Four: the Encounter cell - "
-            "the class mapping and its otherwise - and the Immunization id. Five: the referential "
-            "integrity cell. I won't run anything that writes. Six: open Catalog, show "
-            "synthea_csv.patients Sample Data, then synthea.patient Overview, to compare flat and "
-            "nested.",
-        ),
-        diagram(
-            "Your turn",
-            "Map one more CSV table into FHIR, in your own copy and your own schema",
-            "your-turn",
-            your_turn(),
-            "For the rest of the block, clone the notebook into your home folder - never edit the "
-            "shared one. Create a personal schema and change the output path and table names to "
-            "point at it. Then map one more table: conditions to Condition with SNOMED CT codes, or "
-            "observations to Observation with LOINC. The code on the right is a starting point for "
-            "conditions; it hashes four columns into a 64-character id, which avoids the id length "
-            "problem. Encode the result with Pathling and query it. If you finish, compare your "
-            "Patient with AU Core Patient.",
-        ),
-        section(
-            "Demo walkthrough",
-            "Backup slides, in case the live demo fails. They show the same steps as screenshots, "
-            "so you can follow along on your own laptop. The first shows the notebook and where to "
-            "attach it, the second compares the flat extract with the FHIR table in Catalog "
-            "Explorer, and the third shows how to clone the notebook so you can change it safely.",
-        ),
-        diagram(
-            "The CSV to FHIR notebook",
-            "notebooks > csv_to_fhir > transform_csv_to_fhir, attached to the training cluster",
-            "backup-notebook",
-            backup_notebook(),
-            "This is the notebook as you'll find it. One: the tab shows transform_csv_to_fhir, "
-            "opened from the open-fhir-training Git folder - the banner says so. Two: the compute "
-            "selector shows Open FHIR Training Cluster; Pathling is installed there, not on "
-            "Serverless. Three: please don't press Run all in the shared copy, because later cells "
-            "write NDJSON files and shared tables. Four: the introduction lists the three resource "
-            "types the notebook creates. Read down from here cell by cell.",
-        ),
-        diagram(
-            "Flat versus nested",
-            "The same patients in the CSV extract and as FHIR, in Catalog Explorer",
-            "backup-compare",
-            backup_compare(),
-            "In Catalog Explorer, open hive_metastore, synthea_csv, patients, and the Sample Data "
-            "tab. One: every field is its own string column - Id, BIRTHDATE, SSN and so on. Then "
-            "open synthea, patient, and the Overview tab. Two: here the columns follow the FHIR "
-            "structure - meta is a struct, meta.profile is an array of strings. That is the shape "
-            "your mapping has to produce, and the shape the Pathling encoder writes into "
-            "synthea_encoded.",
-        ),
-        diagram(
-            "Cloning the notebook",
-            "Work in your own copy, writing to your own schema",
-            "backup-clone",
-            backup_clone(),
-            "To make your own copy: one, open the File menu in the notebook toolbar. Two, choose "
-            "Clone, and save it in your home folder. Three, in the clone, change output_path and "
-            "every schema and table name to your personal schema - for example jane_citizen - so "
-            "you never overwrite synthea_transformed or synthea_encoded. Four, attach the clone to "
-            "Open FHIR Training Cluster. Then you can run it, change it and extend it freely.",
-        ),
-        closing(
-            "Questions?",
-            PRESENTER,
-            "That's the legacy session. The short version: you don't need to wait for FHIR - map "
-            "what you have into it at the edge of your platform, and check your mapping as "
-            "carefully as your analysis. The exercises are in the repository. Next block, we look "
-            "at getting data out of systems that do speak FHIR, with Bulk Data and Pathling.",
-            [
-                (REPO_URL, "Exercises"),
-                (SOF_URL, "sql-on-fhir.org"),
-                (PATHLING_URL, "pathling.csiro.au"),
-            ],
-        ),
-    ],
-}
+SLIDES = [
+    section(
+        "FHIR amid legacy and proprietary systems",
+        "This section is about the data you actually have. Most clinical systems in a hospital "
+        "were not built to speak FHIR, and many won't for years. I want to show that you can "
+        "still use FHIR for analytics today, by treating it as the model you map into at the "
+        "edge of your analytics platform. We'll look at the patterns for getting there, some "
+        "tactics, and then a hands-on exercise that turns a flat CSV extract into FHIR "
+        "resources, including the problems that exercise runs into.",
+        part="Legacy systems",
+    ),
+    diagram(
+        "The reality: data arrives in many shapes",
+        "Typical hospital system archetypes and the formats they actually emit",
+        "reality",
+        reality(),
+        "Here is a generic picture of where clinical data lives. An EMR on a proprietary "
+        "database, a laboratory system, radiology, patient administration, a long tail of "
+        "departmental and niche systems, an integration engine carrying HL7 version 2 feeds "
+        "between them, a data warehouse with nightly extracts, and a great deal of documents "
+        "and free text. Under each system are the formats it typically produces: SQL extracts, "
+        "HL7 v2 messages, CSV, DICOM and PDF, and only occasionally FHIR. Most of this data "
+        "won't arrive as FHIR any time soon, but that doesn't mean we have to wait before we "
+        "can use FHIR for analytics.",
+    ),
+    diagram(
+        "Don't wait for a FHIR server",
+        "Use FHIR as the analytic interchange model at the edge of your analytics platform",
+        "edge",
+        edge(),
+        "The approach is to leave the source systems as they are. At the edge of your analytics "
+        "platform, map each source into FHIR resources once. Store them as NDJSON and as "
+        "tables, here Delta tables in Databricks. Then everything downstream - SQL on FHIR "
+        "views, terminology, dashboards, research cohorts, machine learning features - is "
+        "written against one model rather than against each source. Adding a new source means "
+        "writing one more mapping, not rewriting every report. You don't need a FHIR server "
+        "for any of this; FHIR is the data model, not the transport.",
+    ),
+    diagram(
+        "Five ways in",
+        "Patterns for getting FHIR from systems that don't produce it",
+        "patterns",
+        patterns(),
+        "There are five common patterns. One: extract and map - take a CSV or SQL extract and "
+        "transform it into FHIR. That's the exercise in this section. Two: convert HL7 version 2 messages "
+        "to FHIR in the integration engine; Track 2 stream 2B is working on exactly this. "
+        "Three: put a FHIR facade over an existing database, when data has to stay where it "
+        "is. Four: Bulk Data export, where a vendor supports it - that's the next section. "
+        "Five: turn free text into coded FHIR with NLP, which is Dion's strand. The effort "
+        "dots are my rough judgement, not a measurement. Most organisations end up using "
+        "several of these at once.",
+    ),
+    diagram(
+        "Why bother: one analytic contract",
+        "The same view runs over FHIR from any source, so analysis outlives any one system",
+        "contract",
+        contract(),
+        "The main benefit of mapping is that the analysis no longer depends on the source. Our "
+        "workspace has two Patient tables: one Synthea generated directly as FHIR, "
+        "and one we mapped from the CSV extract. The same view definition - id, gender, birth "
+        "date - runs over either of them and gives the same columns. Terminology bindings to "
+        "SNOMED CT-AU, LOINC and AMT make the codes mean the same thing across sources. You can "
+        "adopt this one resource type at a time, your queries travel to other sites and "
+        "vendors, and you inherit AU Core and the community tooling.",
+    ),
+    bullets(
+        "Tactics that work",
+        "Practical rules for mapping legacy data into FHIR for analytics",
+        [
+            "Start from one question",
+            "Map only what you need",
+            "Keep source ids and provenance",
+            "Bind local codes via ConceptMaps",
+            "Validate against AU Core",
+            "Check referential integrity",
+            "Store NDJSON and Delta/Parquet",
+        ],
+        "Some tactics. Start from one question, and let it decide which resources and which "
+        "elements you map - you don't need the whole of FHIR on day one. Keep the source "
+        "identifiers and record where each resource came from, so you can trace a number back. "
+        "Bind local codes to SNOMED CT-AU, LOINC or AMT with ConceptMaps, so the mapping is "
+        "data rather than code; GLU-F here is an invented local code. Validate against AU Core "
+        "where you can, check that references resolve, and keep NDJSON for exchange next to "
+        "Delta or Parquet for querying.",
+        name="tactics",
+        drawing=tactics(),
+        split=0.46,
+    ),
+    section(
+        "Exercise: CSV to FHIR",
+        "Now for the exercise. It takes the Synthea CSV export, which stands in for a legacy "
+        "flat extract, and turns three of its tables into FHIR resources. The code is "
+        "deliberately simple, using plain Spark functions, so you can see every decision the "
+        "mapping makes. A few of those decisions turn out to be wrong, and we'll look at those "
+        "afterwards.",
+    ),
+    diagram(
+        "From flat to nested",
+        "A row of synthea_csv.patients and the Patient resource the notebook makes from it",
+        "flat-to-nested",
+        flat_to_nested(),
+        "On the left is the CSV patients table: one string column per field, 1,143 rows. Row "
+        "four is highlighted. On the right is the Patient the notebook makes from that row. Id "
+        "becomes the resource id. SSN, driver's licence and passport - three separate columns - "
+        "become entries in one identifier array, each with a system. GENDER is M or F, which "
+        "maps to the FHIR codes male and female. BIRTHDATE becomes birthDate, and DEATHDATE "
+        "becomes deceasedDateTime, but only when it has a value. Note this extract is US "
+        "data: social security numbers, a Massachusetts address.",
+    ),
+    diagram(
+        "The notebook as a pipeline",
+        "transform_csv_to_fhir: map, serialise, check, store, then encode with Pathling",
+        "pipeline",
+        pipeline(),
+        "Here is the whole notebook. It reads three synthea_csv tables. It maps each one with "
+        "Spark struct, array and when functions, then serialises each row with to_json, giving "
+        "one FHIR resource per line - NDJSON. It validates by counting lines and parsing "
+        "sample resources, and it checks referential integrity with left anti joins, looking "
+        "for encounters without patients and immunisations without encounters. It saves the "
+        "JSON text to synthea_transformed. Finally Pathling's encoder reads the NDJSON into "
+        "typed, nested columns, and writes synthea_encoded. That last schema is the one you "
+        "can query with views.",
+    ),
+    diagram(
+        "The mapping in code",
+        "Abridged from the Patient cell and the Pathling cells of transform_csv_to_fhir",
+        "mapping-code",
+        mapping_code(),
+        "This is the real code, trimmed. The identifier array has one when clause per source "
+        "column, so a patient without a driver's licence gets a null in that position - we'll "
+        "come back to that. Gender is a chained when with an otherwise, which is a value set "
+        "mapping with a default. On the right, the Pathling part is short: create a context, "
+        "read the NDJSON as text, encode it as Patient, gather the three resource types into "
+        "one dataset, and write it as tables. The encoder does the hard work of turning JSON "
+        "into the full FHIR structure.",
+    ),
+    diagram(
+        "Pitfalls the exercise exposes",
+        "Each one is visible in the data the notebook produced",
+        "pitfalls",
+        pitfalls(),
+        "Every one of these shows up in our workspace. Immunisation ids join two UUIDs and a "
+        "code, giving 76 or 77 characters - FHIR ids allow 64. That's a known issue to fix. "
+        "Dates: birth dates have no time zone, while observations are UTC, so a naive date "
+        "comparison puts this baby's first measurement the day before birth. Unmapped "
+        "encounter classes like home and snf fall through to ambulatory. Vaccines use US CVX "
+        "codes, not AMT. And shape errors are silent: identifier type was built as a Coding, "
+        "not a CodeableConcept, so the encoder dropped it for every patient.",
+    ),
+    diagram(
+        "Demo",
+        "What I'll show in the workspace",
+        "demo",
+        demo(),
+        "Live, in Databricks. One: Workspace, Repos, John.Grimes, open-fhir-training, "
+        "notebooks, csv_to_fhir, and open transform_csv_to_fhir. Two: check the compute "
+        "dropdown says Open FHIR Training Cluster, not Serverless. Three: scroll to the Patient "
+        "select and walk through identifier, gender and address. Four: the Encounter cell - "
+        "the class mapping and its otherwise - and the Immunization id. Five: the referential "
+        "integrity cell. I won't run anything that writes. Six: open Catalog, show "
+        "synthea_csv.patients Sample Data, then synthea.patient Overview, to compare flat and "
+        "nested.",
+    ),
+    diagram(
+        "Your turn",
+        "Map one more CSV table into FHIR, in your own copy and your own schema",
+        "your-turn",
+        your_turn(),
+        "Now it's your turn. Clone the notebook into your home folder - never edit the "
+        "shared one. Create a personal schema and change the output path and table names to "
+        "point at it. Then map one more table: conditions to Condition with SNOMED CT codes, or "
+        "observations to Observation with LOINC. The code on the right is a starting point for "
+        "conditions; it hashes four columns into a 64-character id, which avoids the id length "
+        "problem. Encode the result with Pathling and query it. If you finish, compare your "
+        "Patient with AU Core Patient.",
+    ),
+    section(
+        "Demo walkthrough",
+        "Backup slides, in case the live demo fails. They show the same steps as screenshots, "
+        "so you can follow along on your own laptop. The first shows the notebook and where to "
+        "attach it, the second compares the flat extract with the FHIR table in Catalog "
+        "Explorer, and the third shows how to clone the notebook so you can change it safely.",
+    ),
+    diagram(
+        "The CSV to FHIR notebook",
+        "notebooks > csv_to_fhir > transform_csv_to_fhir, attached to the training cluster",
+        "backup-notebook",
+        backup_notebook(),
+        "This is the notebook as you'll find it. One: the tab shows transform_csv_to_fhir, "
+        "opened from the open-fhir-training Git folder - the banner says so. Two: the compute "
+        "selector shows Open FHIR Training Cluster; Pathling is installed there, not on "
+        "Serverless. Three: please don't press Run all in the shared copy, because later cells "
+        "write NDJSON files and shared tables. Four: the introduction lists the three resource "
+        "types the notebook creates. Read down from here cell by cell.",
+    ),
+    diagram(
+        "Flat versus nested",
+        "The same patients in the CSV extract and as FHIR, in Catalog Explorer",
+        "backup-compare",
+        backup_compare(),
+        "In Catalog Explorer, open hive_metastore, synthea_csv, patients, and the Sample Data "
+        "tab. One: every field is its own string column - Id, BIRTHDATE, SSN and so on. Then "
+        "open synthea, patient, and the Overview tab. Two: here the columns follow the FHIR "
+        "structure - meta is a struct, meta.profile is an array of strings. That is the shape "
+        "your mapping has to produce, and the shape the Pathling encoder writes into "
+        "synthea_encoded.",
+    ),
+    diagram(
+        "Cloning the notebook",
+        "Work in your own copy, writing to your own schema",
+        "backup-clone",
+        backup_clone(),
+        "To make your own copy: one, open the File menu in the notebook toolbar. Two, choose "
+        "Clone, and save it in your home folder. Three, in the clone, change output_path and "
+        "every schema and table name to your personal schema - for example jane_citizen - so "
+        "you never overwrite synthea_transformed or synthea_encoded. Four, attach the clone to "
+        "Open FHIR Training Cluster. Then you can run it, change it and extend it freely.",
+    ),
+]

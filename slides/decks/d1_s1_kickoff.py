@@ -4,7 +4,6 @@ from kit import (
     AMBER,
     BLUE,
     CYAN,
-    GREY,
     INK,
     LAVENDER,
     MINT,
@@ -39,7 +38,7 @@ from decks._shared import (
     LINKS,
     PRESENTER,
     WORKSPACE_URL,
-    schedule,
+    topics,
     standards_map,
 )
 
@@ -77,24 +76,7 @@ def cross(x, y, r=11):
 
 
 def rhythm():
-    """The shape of a Track 3 block: context, demo, then hands-on time."""
-    b = [text(10, 24, "Every block", 17, "start", 700)]
-    segs = [
-        (BLUE, 200, ["~20 min", "context (slides)"]),
-        (LAVENDER, 150, ["~10 min", "live demo"]),
-        (
-            MINT,
-            570,
-            ["the rest of the block", "hands-on: exercises or your own question"],
-        ),
-    ]
-    x = 10
-    for fill, w, rows in segs:
-        b.append(box(x, 40, w, 70, fill, rows, 15))
-        x += w
-    b.append(line(10, 128, 930, 128, GREY, 1.4))
-    b.append(text(10, 148, "11:30 or 2:00 or ...", 14, "start", fill=MUTED))
-    b.append(text(930, 148, "60 or 90 minutes later", 14, "end", fill=MUTED))
+    """The shape of each topic: context, demo, then hands-on time."""
     cards = [
         (
             BLUE,
@@ -102,18 +84,29 @@ def rhythm():
             ["A standard or a technique,", "and where it fits on the map"],
         ),
         (LAVENDER, "Demo", ["Live in the Databricks", "workspace, step by step"]),
-        (MINT, "Hands-on", ["John, James, Dion and", "Duncan are on hand to help"]),
+        (
+            MINT,
+            "Hands-on",
+            [
+                "Exercises or your own question;",
+                "John, James, Dion and Duncan",
+                "are on hand to help",
+            ],
+        ),
     ]
+    b = []
     for i, (fill, title, rows) in enumerate(cards):
-        x = 10 + i * 312
-        b.append(rect(x, 172, 296, 112, fill, rx=10))
-        b.append(text(x + 26, 202, title, 17, "start", 700))
+        x = 10 + i * 316
+        b.append(rect(x, 30, 288, 220, fill, rx=12))
+        b.append(text(x + 26, 76, title, 20, "start", 700))
         for j, r in enumerate(rows):
-            b.append(text(x + 26, 232 + j * 24, r, 15, "start"))
+            b.append(text(x + 26, 124 + j * 28, r, 15, "start"))
+        if i < len(cards) - 1:
+            b.append(line(x + 291, 140, x + 313, 140, sw=2))
     b.append(
         text(
             470,
-            322,
+            300,
             "Friday 3:30: show and tell in the main room - note what you try as you go",
             15,
             fill=MUTED,
@@ -333,52 +326,46 @@ def fhir_as_data():
 
 
 def six_standards():
-    """The six standards: what each is, when to use it, and which block covers it."""
+    """The six standards: what each is and when to use it."""
     rows = [
         (
             LAVENDER,
             "SQL on FHIR",
             "ViewDefinitions: FHIR resources to tables",
             "Building analytic tables",
-            "Fri 9:30",
         ),
         (
             BLUE,
             "Bulk Data Access",
             "$export of a population as NDJSON files",
             "Getting data out of a server",
-            "Thu 3:30",
         ),
         (
             PEACH,
             "SMART App Launch",
             "OAuth 2.0 for apps; Backend Services",
             "Authorising apps, bulk export",
-            "Thu 3:30 · Fri 1:30",
         ),
         (
             PEACH,
             "CDS Hooks",
             "EHR calls a service, gets cards back",
             "Advice in the clinical workflow",
-            "Fri 1:30",
         ),
         (
             PEACH,
             "CQL",
             "Readable language for clinical logic",
             "Measures and decision rules",
-            "Fri 1:30",
         ),
         (
             MINT,
             "OMOP CDM",
             "Research data model and vocabularies",
             "Joining research networks",
-            "Fri 1:30",
         ),
     ]
-    cols = [("Standard", 186), ("What it is", 330), ("Use it for", 254), ("Block", 166)]
+    cols = [("Standard", 216), ("What it is", 400), ("Use it for", 320)]
     x0, y0, rh = 2, 2, 46
     b = [rect(x0, y0, 936, rh * 7, "#fff", rx=8)]
     b.append(rect(x0, y0, 936, rh, "#F0F0F0", rx=8))
@@ -392,8 +379,6 @@ def six_standards():
         b.append(line(x0, y, x0 + 936, y, "#D0D0D0", 1, arrow=None))
         x = x0
         for i, ((_, cw), s) in enumerate(zip(cols, cells)):
-            weight = 700 if i in (0, 3) else 400
-            fill_ = TEAL if i == 3 else INK
             b.append(
                 text(
                     x + (cw / 2 if i == 0 else 14),
@@ -401,8 +386,8 @@ def six_standards():
                     s,
                     15,
                     "middle" if i == 0 else "start",
-                    weight,
-                    fill_,
+                    700 if i == 0 else 400,
+                    INK,
                 )
             )
             x += cw
@@ -410,53 +395,53 @@ def six_standards():
 
 
 def exercises_map():
-    """The five exercises, the concepts each teaches, and the block it supports."""
+    """The five exercises, the concepts each teaches, and the section it goes with."""
     rows = [
         (
             YELLOW,
             "CSV to FHIR",
             "map a legacy extract to Patient, Encounter, Immunization",
-            "Thu 2:00",
+            "Legacy systems",
         ),
         (
             CYAN,
             "Synthea import",
             "NDJSON in bulk data style, Pathling encoders, tables",
-            "Thu 11:30 · 3:30",
+            "Bulk Data",
         ),
         (
             CYAN,
             "MI secondary prevention",
             "SQL on FHIR views, a ConceptMap in SQL, time windows",
-            "Fri 9:30",
+            "SQL on FHIR",
         ),
         (
             PINK,
             "MIMIC-IV import",
             "file name mapping, extensions, de-identified ICU data",
-            "Thu 3:30",
+            "Bulk Data",
         ),
         (
             PINK,
             "Septic shock study",
             "beta-blocker cohort: eight views, timed criteria, SOFA in SQL",
-            "Fri 11:00",
+            "Septic shock",
         ),
     ]
     b = [
         text(130, 16, "Exercise", 15, weight=700, fill=MUTED),
-        text(568, 16, "What it teaches", 15, weight=700, fill=MUTED),
-        text(866, 16, "Block", 15, weight=700, fill=MUTED),
+        text(530, 16, "What it teaches", 15, weight=700, fill=MUTED),
+        text(862, 16, "Section", 15, weight=700, fill=MUTED),
     ]
-    for i, (fill, name, concepts, block) in enumerate(rows):
+    for i, (fill, name, concepts, part) in enumerate(rows):
         y = 30 + i * 60
         b.append(box(10, y, 240, 48, fill, [f"{i + 1}. {name}"], 15, 700))
         b.append(line(252, y + 24, 282, y + 24))
-        b.append(rect(286, y, 506, 48, "#fff", rx=8))
+        b.append(rect(286, y, 488, 48, "#fff", rx=8))
         b.append(text(302, y + 29, concepts, 15, "start"))
-        b.append(line(794, y + 24, 806, y + 24))
+        b.append(line(776, y + 24, 788, y + 24))
         b.append(
-            box(810, y + 4, 122, 40, "#fff", [block], 14, 700, TEAL, stroke=TEAL, rx=20)
+            box(792, y + 4, 140, 40, "#fff", [part], 14, 700, TEAL, stroke=TEAL, rx=20)
         )
     b.append(
         text(
@@ -506,7 +491,7 @@ def demo_steps():
 
 
 def your_turn():
-    """What attendees do in the rest of the block, with the SQL to try."""
+    """What attendees do in the hands-on time, with the SQL to try."""
     steps = [
         ("Sign in", "from your invitation email"),
         ("Open README.md", "in open-fhir-training"),
@@ -649,36 +634,34 @@ DECK = {
             "Kick-off: the environment and the standards map",
             f"Track 3 kick-off · {EVENT}",
             "Welcome to the Track 3 room. I'm John Grimes from CSIRO's Australian e-Health Research "
-            "Centre, and I look after the analytics strand of this track. In this first block I'll "
+            "Centre, and I look after the analytics strand of this track. In this kick-off I'll "
             "get everyone into the Databricks workspace, show you where to find the notebooks and go "
             "through a few ground rules. Then I'll give an overview of the standards we'll keep "
-            "coming back to over the two days, and the exercises that go with them. After a short "
-            "tour of the workspace, the rest of the block is yours.",
+            "coming back to over the two days, and the exercises that go with them.",
         ),
         diagram(
-            "How this track runs",
-            "Six blocks over two days - this is the first",
-            "schedule",
-            schedule(now=0),
-            "Here are the six Track 3 blocks. Each one opens with a short talk from me on one topic. "
-            "Today, after this kick-off, we look at using FHIR alongside legacy and proprietary "
-            "systems, then at getting data out with Bulk Data and Pathling. Tomorrow morning is SQL "
-            "on FHIR and terminology, then a real-world study of beta-blockers in septic shock, and in the "
-            "afternoon the standards that close the loop: CQL, CDS Hooks, SMART and OMOP. James, "
-            "Dion and Duncan run their own strands in this room as well, so you can move between "
-            "them.",
+            "What the analytics strand covers",
+            "Six topics, each tied to a stage of the standards map",
+            "topics",
+            topics(),
+            "These are the six topics in the analytics strand. After this kick-off we look at using "
+            "FHIR alongside legacy and proprietary systems, then at getting data out with Bulk Data "
+            "and Pathling. Then SQL on FHIR and terminology, a real-world study of beta-blockers in "
+            "septic shock, and the standards that close the loop: CQL, CDS Hooks, SMART and OMOP. "
+            "There's no fixed time for each one. We'll go at the pace of the room, and you can pick "
+            "up any exercise whenever you like. James, Dion and Duncan run their own strands in this "
+            "room as well, so you can move between them.",
         ),
         diagram(
-            "The rhythm of a block",
-            "About 30 minutes of context and a demo, then the time is yours",
+            "How each topic runs",
+            "Some context and a demo, then the time is yours",
             "rhythm",
             rhythm(),
-            "Every block has the same shape. About twenty minutes of slides, taken slowly, then about "
-            "ten minutes of live demonstration in the workspace. After that the time is yours: work "
-            "through the exercises, or bring your own question. Some blocks are an hour and some an "
-            "hour and a half, so the hands-on part varies. James, Dion, Duncan and I will be walking "
-            "around, so put your hand up whenever you're stuck. On Friday afternoon there's a show "
-            "and tell in the main room, so keep a note of what you try and what you learn.",
+            "Each topic has the same shape. Some slides, taken slowly, then a live demonstration in "
+            "the workspace. After that the time is yours: work through the exercises, or bring your "
+            "own question. James, Dion, Duncan and I will be walking around, so put your hand up "
+            "whenever you're stuck. On Friday afternoon there's a show and tell in the main room, so "
+            "keep a note of what you try and what you learn.",
         ),
         diagram(
             "Get set up",
@@ -736,15 +719,15 @@ DECK = {
             "That's the practical part done. If your invitation hasn't arrived yet, don't worry - "
             "keep listening and we'll sort it out during the hands-on time. Now let's step back from "
             "the workspace and look at the standards that matter for analytics with FHIR data, and "
-            "how they fit together. I'll keep this high level today; each of the later blocks goes "
-            "into one part of the map in more depth, with an exercise to match.",
+            "how they fit together. I'll keep this high level for now; each of the later topics "
+            "goes into one part of the map in more depth, with an exercise to match.",
         ),
         diagram(
             "The standards map",
             "Four stages from data to decisions, and the standards in each",
             "standards-map",
             standards_map(),
-            "I'll use this map in every block. On the left, getting the data: bulk export from a FHIR "
+            "I'll come back to this map throughout the track. On the left, getting the data: bulk export from a FHIR "
             "server, authorised with SMART Backend Services, or mapping the extracts you already "
             "have. Next, shaping it into tables you can analyse, with SQL on FHIR views, FHIRPath and "
             "terminology. Then analysis, with whatever tools you prefer, and OMOP if you're part of "
@@ -762,12 +745,12 @@ DECK = {
             "objects with its own list of given names. On the right is the same resource type as a "
             "table in Databricks. Pathling has encoded every element, so meta becomes a struct column "
             "and profile an array. Nothing is lost, but this isn't the shape an analyst wants. SQL on "
-            "FHIR views are how we flatten it into plain rows and columns, and that's tomorrow "
-            "morning's block.",
+            "FHIR views are how we flatten it into plain rows and columns, which we'll cover in the "
+            "SQL on FHIR section.",
         ),
         diagram(
             "Six standards at a glance",
-            "What each one is, what you'd use it for, and the block that covers it",
+            "What each one is and what you'd use it for",
             "six-standards",
             six_standards(),
             "Six standards come up across the track. SQL on FHIR defines views that turn resources "
@@ -780,17 +763,17 @@ DECK = {
         ),
         diagram(
             "The exercises",
-            "Five exercises in the repository, each tied to a block",
+            "Five exercises in the repository, each tied to a section",
             "exercises",
             exercises_map(),
             "These are the five exercises in the repository. CSV to FHIR maps a flat legacy extract "
-            "into FHIR resources, and goes with this afternoon's block on legacy systems. The two "
-            "import notebooks read NDJSON files with Pathling and store them as tables; you'll run "
-            "part of the Synthea one today. The MI secondary prevention exercise builds SQL on FHIR "
-            "views, classifies medicines with a ConceptMap and joins them in SQL, for tomorrow "
-            "morning. The septic shock study selects the cohort of a published study of "
-            "beta-blockers from de-identified intensive care data, for tomorrow's late morning "
-            "block. You don't need to do them in order.",
+            "into FHIR resources, and goes with the section on legacy systems. The two import "
+            "notebooks read NDJSON files with Pathling and store them as tables; you'll run part of "
+            "the Synthea one shortly. The MI secondary prevention exercise builds SQL on FHIR "
+            "views, classifies medicines with a ConceptMap and joins them in SQL, and goes with the "
+            "SQL on FHIR section. The septic shock study selects the cohort of a published study of "
+            "beta-blockers from de-identified intensive care data, and has a section of its own. "
+            "You don't need to do them in order.",
         ),
         diagram(
             "Demo",
@@ -823,8 +806,8 @@ DECK = {
             "Demo walkthrough",
             "Backup slides, in case the live demo fails. They walk through the same tour with "
             "annotated screenshots: Catalog Explorer and the synthea schema, the patient table's "
-            "sample data, and the shared cluster on the Compute page. They're also useful later in "
-            "the block if you get lost in the workspace and want to retrace the steps.",
+            "sample data, and the shared cluster on the Compute page. They're also useful later if "
+            "you get lost in the workspace and want to retrace the steps.",
         ),
         diagram(
             "The data in Catalog Explorer",
@@ -869,11 +852,10 @@ DECK = {
         closing(
             "Let's get started",
             PRESENTER,
-            "That's the kick-off. For the rest of this block: get signed in, open the README, run "
-            "the first few cells of the Synthea import, and try the query in the SQL editor. The "
-            "access form and the exercise repository are linked here if you need them again. James, "
-            "Dion, Duncan and I are around the room - put your hand up and we'll come to you. After "
-            "lunch we'll look at using FHIR alongside the legacy systems you already have.",
+            "That's the kick-off. Now get signed in, open the README, run the first few cells of "
+            "the Synthea import, and try the query in the SQL editor. The access form and the "
+            "exercise repository are linked here if you need them again. James, Dion, Duncan and I "
+            "are around the room - put your hand up and we'll come to you.",
             LINKS[:2],
         ),
     ],

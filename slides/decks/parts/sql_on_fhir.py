@@ -1,4 +1,4 @@
-"""Day 2, 9:30 block: SQL on FHIR views, Pathling and terminology, with the MI secondary prevention exercise.
+"""Track 3 analytics part: SQL on FHIR views, Pathling and terminology, with the MI secondary prevention exercise.
 
 Author: John Grimes
 """
@@ -20,7 +20,6 @@ from kit import (
     box,
     callout,
     circle,
-    closing,
     code,
     diagram,
     hcurve,
@@ -34,11 +33,8 @@ from kit import (
     svg,
     table,
     text,
-    title_slide,
     vcurve,
 )
-
-from decks._shared import EVENT, PATHLING_URL, PRESENTER, REPO_URL, SOF_URL
 
 
 def code_baseline(y, i, fs, lh, head=0):
@@ -692,7 +688,7 @@ def demo():
 
 
 def your_turn():
-    """What attendees do for the rest of the block."""
+    """What attendees do in the hands-on time."""
     steps = [
         ["File > Clone the notebook to your home folder"],
         ["Set VIEWS_SCHEMA to your own schema, e.g. jane_citizen"],
@@ -891,279 +887,262 @@ def backup_show():
     return svg(940, 345, b)
 
 
-DECK = {
-    "file": "track-3-d2-4-sql-on-fhir",
-    "slides": [
-        title_slide(
-            "SQL on FHIR, Pathling views and terminology",
-            f"Friday 9:30 · {EVENT}",
-            "Good morning. This block is about the middle of the analytics pipeline: turning FHIR "
-            "resources into tables you can analyse. I'll cover SQL on FHIR ViewDefinitions, the "
-            "small amount of FHIRPath you need to write them, and how terminology lets you "
-            "classify the codes in a view without writing them all into a query. Then we'll work "
-            "through the secondary prevention after myocardial infarction exercise in the "
-            "workspace. I'll talk for about twenty minutes, show you the notebook and the SQL live, "
-            "and then the rest of the block is yours.",
-        ),
-        diagram(
-            "From trees to tables",
-            "FHIR resources are nested and repeating; most analytic tools expect flat tables",
-            "tree-to-table",
-            tree_to_table(),
-            "This is the problem that SQL on FHIR addresses. A FHIR Patient is a tree: this patient has two "
-            "names and two addresses, and each of those has its own structure. Analysts, "
-            "statisticians and dashboard tools want flat tables with one value per cell. If you "
-            "flatten everything naively you get two names times two addresses, so four rows for "
-            "one patient, and every count you do afterwards is wrong. The solution is to decide the "
-            "grain of each table up front: one row per patient here, one row per address there. "
-            "A ViewDefinition is a way of recording that decision.",
-        ),
-        diagram(
-            "Anatomy of a ViewDefinition",
-            "A FHIR logical model: one resource type in, one table out",
-            "anatomy",
-            anatomy(),
-            "This is a complete ViewDefinition. It names one resource type, Patient. The select "
-            "holds columns, and every column is a name plus a FHIRPath expression. forEach and "
-            "forEachOrNull unroll a repeating element into one row per item - forEach behaves "
-            "like an inner join, forEachOrNull like a left outer join, so patients without a home "
-            "address still get a row. A constant is a value you can reuse in paths as percent "
-            "home. And where filters the resources that make it into the view at all - here, male "
-            "patients only. Because it is JSON, you can version it, share it and run it on "
-            "different engines.",
-        ),
-        diagram(
-            "The FHIRPath you need",
-            "A handful of functions covers most views",
-            "fhirpath",
-            fhirpath_table(),
-            "You don't need all of FHIRPath to write useful views. where filters a collection, "
-            "for example to the SNOMED CT codings of a condition. exists tests whether anything "
-            "is there, which is how the medication view leaves out codings that have no code. "
-            "ofType picks one type out of a choice element like medication or onset. first takes "
-            "the first item when you only want one. And the two key functions, getResourceKey and "
-            "getReferenceKey, come from the SQL on FHIR spec itself: they give you the keys you "
-            "need to join views later. Every example here except first comes from the views we "
-            "will run today.",
-        ),
-        diagram(
-            "Views don't join - they emit keys",
-            "Each view carries a key; SQL joins them on id = patient_id",
-            "keys-join",
-            keys_join(),
-            "A ViewDefinition only ever looks at one resource type, so it can't join. Instead, "
-            "each view emits keys. The patient view has getResourceKey as its id. The myocardial "
-            "infarction view has subject dot getReferenceKey as its patient_id, which returns the "
-            "same value for the same patient. Then plain SQL does the join. These are real rows "
-            "from the workspace. One patient has a single MI. The other has two Conditions on the "
-            "same day, a general MI and a STEMI recorded minutes apart, which is why the SQL later "
-            "takes each patient's first. Keeping views simple and pushing joins, ranking and "
-            "aggregation into SQL is a deliberate design choice. It keeps views portable and lets "
-            "each engine do what it is good at.",
-        ),
-        diagram(
-            "Three layers",
-            "The SQL on FHIR spec separates data, views and analytics",
-            "layers",
-            layers(),
-            "The spec describes three layers. At the bottom is the data, in whatever form you "
-            "have it: NDJSON files from a bulk export, a FHIR server, or tables in a lakehouse. In "
-            "the middle is the view layer: ViewDefinitions, executed by a view runner. Pathling is "
-            "one runner, on Spark; there are others on DuckDB, BigQuery, JavaScript and more. On "
-            "top is analytics, in whatever tool you prefer. Because the middle layer is standardised, "
-            "the same views can be run on any of these engines. In today's exercise the data is Delta "
-            "tables in Databricks, Pathling runs the views, and Databricks SQL does the analysis.",
-        ),
-        diagram(
-            "What's next in the spec",
-            "SQL on FHIR 3.0.0-ballot: SQL as FHIR resources, and terminology in SQL",
-            "whats-next",
-            whats_next(),
-            "SQL on FHIR version 3 is out for ballot. Today a ViewDefinition gets you to tables, "
-            "but the SQL that joins them lives in files like the one we'll use this morning. The "
-            "ballot adds two profiles on the FHIR Library resource: SQLView, a named query other "
-            "queries can use as a table, and SQLQuery, a shareable, parameterised query that "
-            "declares the views it depends on. It also adds terminology in SQL: a query can "
-            "declare a ValueSet or ConceptMap and join to it as a table. Pathling 10 already does "
-            "this, and this morning's exercise uses it. And there are standard operations to run "
-            "and export. This is ballot content, so details may change.",
-        ),
-        section(
-            "Exercise: secondary prevention after myocardial infarction",
-            "Now for the exercise. After a heart attack, guidelines recommend four classes "
-            "of medicine: an antiplatelet, a statin, a beta-blocker, and an ACE inhibitor or ARB. "
-            "A Norwegian registry study by Halvorsen and colleagues found 91, 90, 82 and 60 per "
-            "cent of patients discharged on each. The exercise asks the same question of the "
-            "Synthea data. It isn't a serious study - the data is synthetic - but it uses every "
-            "idea we've just covered: views with keys, SNOMED CT and AMT codes, terminology in SQL "
-            "with a ConceptMap, and SQL that works across time. The notebook and SQL file are both "
-            "in the repository folder in the workspace.",
-        ),
-        diagram(
-            "Three views and a map, one query",
-            "Pathling views and a ConceptMap table in a notebook, then one SQL file joins them",
-            "views-and-map",
-            views_and_map(),
-            "The notebook defines three views with Pathling. Patients, with gender, birth date and "
-            "date of death. Myocardial infarctions: a Condition view for three SNOMED CT codes - "
-            "MI, STEMI and NSTEMI. And medication requests, with the AMT code of each medicine. "
-            "The fourth input isn't a view: it's the AMT product to classification ConceptMap, "
-            "which Pathling presents as a table of 925,540 mappings. Each is saved as a table in "
-            "the synthea_mi_secondary_prevention_views schema. Then one SQL file joins them into a "
-            "view with one row per patient who had an MI: 274 rows, with the number of days to "
-            "the first prescription of each class.",
-        ),
-        diagram(
-            "The medication request view in Pathling",
-            "data.view() takes a ViewDefinition as Python and returns a Spark data frame",
-            "medication-code",
-            medication_card(),
-            "Here is the medication request view from the notebook, with the descriptions removed "
-            "so it fits. data.view takes the resource type and a select - the same elements as the "
-            "JSON, written as Python dictionaries. First, the keys: getResourceKey for the request "
-            "and getReferenceKey for the patient. Second, the forEach. medication is a choice "
-            "element, so ofType picks the CodeableConcept, and the where keeps SNOMED CT codings "
-            "that have a code - AMT uses the SNOMED CT system. Some requests in the data have a "
-            "display but no code; they can't be classified, so they're left out. Third, the code "
-            "and display columns, which the SQL joins to the ConceptMap. The result is a Spark "
-            "data frame, so the last step is saveAsTable.",
-        ),
-        diagram(
-            "Classify medicines with a ConceptMap",
-            "Terminology in SQL: the map is a table you join to",
-            "concept-map",
-            concept_map(),
-            "Next, we use terminology to classify the medicines. The ConceptMap relates each AMT "
-            "product to the classes "
-            "of substance it contains, using SNOMED CT concepts as the classes. Atenolol 100 "
-            "milligram is related to beta blocker, and to broader classes like antihypertensive "
-            "agent. In Python, concept_map returns the map as a table with the columns that the "
-            "SQL on FHIR specification defines. It's read from a local terminology store on S3, so "
-            "no terminology server is involved. In SQL, it's a join like any other, to a short list "
-            "of the class codes we care about. Note that aspirin with codeine is related "
-            "to platelet aggregation inhibitor, because it contains aspirin, as well as to opioid "
-            "receptor agonist. The exercise uses the map as it stands, so it counts as an "
-            "antiplatelet. Leave out products the map also relates to opioids, and the number of "
-            "patients on an antiplatelet within a year falls from 265 to 245. James's sessions "
-            "cover the terminology fundamentals.",
-        ),
-        diagram(
-            "Days to the first prescription",
-            "Temporal logic lives in SQL: the window is applied afterwards, as a parameter",
-            "days-to-first",
-            days_to_first(),
-            "Each patient's index date is their first MI. This is a real patient from the "
-            "workspace. On the day of the MI they were prescribed an antiplatelet, a statin and a "
-            "beta-blocker, so those are day zero. They'd had lisinopril, an ACE inhibitor, 84 days "
-            "before the MI; that one doesn't count, because only prescriptions on or after the MI "
-            "do. The next lisinopril was at day 287. So with a 30 day window this patient has "
-            "three of the four classes, and with 365 days, all four. The view keeps the number of "
-            "days rather than a yes or no, so the summary query can apply any window as a "
-            "parameter.",
-        ),
-        diagram(
-            "What the exercise finds",
-            "Synthea AU within 365 days of the first MI, against Halvorsen et al. 2016 at discharge",
-            "results",
-            results_chart(),
-            "This is the main chart from the notebook. The coloured bars are the share of our 274 "
-            "synthetic patients prescribed each class within 365 days of their first MI; the grey "
-            "bars are Halvorsen's figures at discharge. Antiplatelets, statins and beta-blockers "
-            "are at or above the registry figures. ACE inhibitors and ARBs are well below, at 28 "
-            "per cent. 64 patients, 23 per cent, had all four. It isn't a like for like "
-            "comparison: a year of follow-up rather than discharge, and 16 of the patients died "
-            "within the year. The notebook has more charts: time to treatment, combinations and "
-            "age groups.",
-        ),
-        diagram(
-            "Demo",
-            "Views in the notebook, then the summary in the SQL editor",
-            "demo",
-            demo(),
-            "Live demo. One: in Workspace, Repos, open-fhir-training, open notebooks, synthea, "
-            "create_mi_secondary_prevention_views. Two: check the compute dropdown shows Open FHIR "
-            "Training Cluster, not Serverless. Three: scroll to the medication request view and "
-            "point out the keys, ofType and the forEach. Four: run the setup and read cells, then "
-            "the medication view cell and its show cell - don't run saveAsTable. Five: run the "
-            "concept_map cell and show the first rows of the map. Six: open "
-            "sql/synthea/combine_mi_secondary_prevention_views.sql and walk through the CTEs, then "
-            "in the SQL editor on the Serverless Starter Warehouse run the summary query with "
-            "follow_up_days set to 365 - five rows.",
-        ),
-        diagram(
-            "Your turn",
-            "Add a view of your own, in your own schema",
-            "your-turn",
-            your_turn(),
-            "Now it's over to you. Clone the notebook into your home folder - you can't edit the "
-            "shared copy - and set VIEWS_SCHEMA to your own schema. Write a new view: LDL "
-            "cholesterol, LOINC 18262-6, is a good one, because statins are meant to lower it. It "
-            "has the same shape as any Observation with a Quantity value; there are 25,302 "
-            "readings for 4,215 patients. Save it to your schema, then in the SQL editor join it to "
-            "the shared mi_secondary_prevention view, and compare each patient's LDL before their "
-            "MI with their LDL after their first statin. In the clone, run only the setup cells "
-            "and your own: the Combine section reads the SQL file from the repository folder, so "
-            "it won't find it from your home folder. If you finish, try the stretch tasks. We're "
-            "all here to help.",
-        ),
-        section(
-            "Demo walkthrough",
-            "Backup slides, in case the live demo fails - for example if the network or the cluster "
-            "is slow. They show the same steps as screenshots and real output from the workspace, so "
-            "you can follow along and still do the exercise afterwards. If the demo works, I'll skip "
-            "past them to questions, and you can come back to them later in the slides we share after "
-            "the connectathon.",
-        ),
-        diagram(
-            "The summary query",
-            "SQL editor on the Serverless Starter Warehouse",
-            "backup-results",
-            backup_results(),
-            "This is the final step of the demo: the summary query from the SQL file, pasted into "
-            "the SQL editor. One, the query reads the combined view in the shared schema. Its "
-            "parameter, follow_up_days, appears as a box under the editor. Two, set it to 365 - if "
-            "you leave it empty, every count is zero. Three, five rows: within a year, 265 "
-            "patients had an antiplatelet, 252 a statin, 239 a beta-blocker and 78 an ACE "
-            "inhibitor or ARB, and 64 had all four.",
-        ),
-        diagram(
-            "Clone before you change",
-            "The repository notebooks are read-only for attendees",
-            "backup-clone",
-            backup_clone(),
-            "Before you change anything, clone the notebook. One, open it and click the File "
-            "menu at the top left. Two, choose Clone and pick your home folder. Three, make sure "
-            "your clone is attached to the Open FHIR Training Cluster, because Pathling isn't "
-            "installed on Serverless. Four, set VIEWS_SCHEMA in the first code cell to your own "
-            "schema, such as your name, rather than the shared synthea_mi_secondary_prevention_views "
-            "schema. The setup cell creates it for you.",
-        ),
-        diagram(
-            "What the medication request view returns",
-            "One row per coded medication request, with keys for joining",
-            "backup-show",
-            backup_show(),
-            "If the cluster isn't cooperating, this is what the medication request view gives you. "
-            "These rows are for the patient on the timeline slide, from the saved table. "
-            "patient_id is the patient key, in the form type slash id, ready to join. The code is "
-            "the AMT code, which is what the SQL looks up in the ConceptMap. Notice the first row: "
-            "aspirin with codeine, on the day of the MI. The status column shows that some "
-            "requests were completed and others are still active. Across the dataset there are "
-            "229,058 rows, one for every MedicationRequest with an AMT code.",
-        ),
-        closing(
-            "Questions?",
-            PRESENTER,
-            "That's the context for this block. The SQL on FHIR spec and the Pathling "
-            "documentation are linked here, along with the exercises repository, so scan whichever "
-            "you need. I'm happy to take a couple of questions now, and the rest as we go. Ask me, "
-            "James, Dion or Duncan if you get stuck - we'll be walking around the room. And keep "
-            "notes on what you try, because this afternoon's show and tell is a good place to share it.",
-            [
-                (REPO_URL, "Exercises"),
-                (SOF_URL, "sql-on-fhir.org"),
-                (PATHLING_URL, "pathling.csiro.au"),
-            ],
-        ),
-    ],
-}
+SLIDES = [
+    section(
+        "SQL on FHIR, Pathling views and terminology",
+        "This section is about the middle of the analytics pipeline: turning FHIR "
+        "resources into tables you can analyse. I'll cover SQL on FHIR ViewDefinitions, the "
+        "small amount of FHIRPath you need to write them, and how terminology lets you "
+        "classify the codes in a view without writing them all into a query. Then we'll work "
+        "through the secondary prevention after myocardial infarction exercise in the "
+        "workspace. I'll show you the notebook and the SQL live, and then the rest of the "
+        "time is yours.",
+        part="SQL on FHIR",
+    ),
+    diagram(
+        "From trees to tables",
+        "FHIR resources are nested and repeating; most analytic tools expect flat tables",
+        "tree-to-table",
+        tree_to_table(),
+        "This is the problem that SQL on FHIR addresses. A FHIR Patient is a tree: this patient has two "
+        "names and two addresses, and each of those has its own structure. Analysts, "
+        "statisticians and dashboard tools want flat tables with one value per cell. If you "
+        "flatten everything naively you get two names times two addresses, so four rows for "
+        "one patient, and every count you do afterwards is wrong. The solution is to decide the "
+        "grain of each table up front: one row per patient here, one row per address there. "
+        "A ViewDefinition is a way of recording that decision.",
+    ),
+    diagram(
+        "Anatomy of a ViewDefinition",
+        "A FHIR logical model: one resource type in, one table out",
+        "anatomy",
+        anatomy(),
+        "This is a complete ViewDefinition. It names one resource type, Patient. The select "
+        "holds columns, and every column is a name plus a FHIRPath expression. forEach and "
+        "forEachOrNull unroll a repeating element into one row per item - forEach behaves "
+        "like an inner join, forEachOrNull like a left outer join, so patients without a home "
+        "address still get a row. A constant is a value you can reuse in paths as percent "
+        "home. And where filters the resources that make it into the view at all - here, male "
+        "patients only. Because it is JSON, you can version it, share it and run it on "
+        "different engines.",
+    ),
+    diagram(
+        "The FHIRPath you need",
+        "A handful of functions covers most views",
+        "fhirpath",
+        fhirpath_table(),
+        "You don't need all of FHIRPath to write useful views. where filters a collection, "
+        "for example to the SNOMED CT codings of a condition. exists tests whether anything "
+        "is there, which is how the medication view leaves out codings that have no code. "
+        "ofType picks one type out of a choice element like medication or onset. first takes "
+        "the first item when you only want one. And the two key functions, getResourceKey and "
+        "getReferenceKey, come from the SQL on FHIR spec itself: they give you the keys you "
+        "need to join views later. Every example here except first comes from the views in "
+        "the exercise.",
+    ),
+    diagram(
+        "Views don't join - they emit keys",
+        "Each view carries a key; SQL joins them on id = patient_id",
+        "keys-join",
+        keys_join(),
+        "A ViewDefinition only ever looks at one resource type, so it can't join. Instead, "
+        "each view emits keys. The patient view has getResourceKey as its id. The myocardial "
+        "infarction view has subject dot getReferenceKey as its patient_id, which returns the "
+        "same value for the same patient. Then plain SQL does the join. These are real rows "
+        "from the workspace. One patient has a single MI. The other has two Conditions on the "
+        "same day, a general MI and a STEMI recorded minutes apart, which is why the SQL later "
+        "takes each patient's first. Keeping views simple and pushing joins, ranking and "
+        "aggregation into SQL is a deliberate design choice. It keeps views portable and lets "
+        "each engine do what it is good at.",
+    ),
+    diagram(
+        "Three layers",
+        "The SQL on FHIR spec separates data, views and analytics",
+        "layers",
+        layers(),
+        "The spec describes three layers. At the bottom is the data, in whatever form you "
+        "have it: NDJSON files from a bulk export, a FHIR server, or tables in a lakehouse. In "
+        "the middle is the view layer: ViewDefinitions, executed by a view runner. Pathling is "
+        "one runner, on Spark; there are others on DuckDB, BigQuery, JavaScript and more. On "
+        "top is analytics, in whatever tool you prefer. Because the middle layer is standardised, "
+        "the same views can be run on any of these engines. In the exercise the data is Delta "
+        "tables in Databricks, Pathling runs the views, and Databricks SQL does the analysis.",
+    ),
+    diagram(
+        "What's next in the spec",
+        "SQL on FHIR 3.0.0-ballot: SQL as FHIR resources, and terminology in SQL",
+        "whats-next",
+        whats_next(),
+        "SQL on FHIR version 3 is out for ballot. Today a ViewDefinition gets you to tables, "
+        "but the SQL that joins them lives in files like the one in the exercise. The "
+        "ballot adds two profiles on the FHIR Library resource: SQLView, a named query other "
+        "queries can use as a table, and SQLQuery, a shareable, parameterised query that "
+        "declares the views it depends on. It also adds terminology in SQL: a query can "
+        "declare a ValueSet or ConceptMap and join to it as a table. Pathling 10 already does "
+        "this, and the exercise uses it. And there are standard operations to run "
+        "and export. This is ballot content, so details may change.",
+    ),
+    section(
+        "Exercise: secondary prevention after myocardial infarction",
+        "Now for the exercise. After a heart attack, guidelines recommend four classes "
+        "of medicine: an antiplatelet, a statin, a beta-blocker, and an ACE inhibitor or ARB. "
+        "A Norwegian registry study by Halvorsen and colleagues found 91, 90, 82 and 60 per "
+        "cent of patients discharged on each. The exercise asks the same question of the "
+        "Synthea data. It isn't a serious study - the data is synthetic - but it uses every "
+        "idea we've just covered: views with keys, SNOMED CT and AMT codes, terminology in SQL "
+        "with a ConceptMap, and SQL that works across time. The notebook and SQL file are both "
+        "in the repository folder in the workspace.",
+    ),
+    diagram(
+        "Three views and a map, one query",
+        "Pathling views and a ConceptMap table in a notebook, then one SQL file joins them",
+        "views-and-map",
+        views_and_map(),
+        "The notebook defines three views with Pathling. Patients, with gender, birth date and "
+        "date of death. Myocardial infarctions: a Condition view for three SNOMED CT codes - "
+        "MI, STEMI and NSTEMI. And medication requests, with the AMT code of each medicine. "
+        "The fourth input isn't a view: it's the AMT product to classification ConceptMap, "
+        "which Pathling presents as a table of 925,540 mappings. Each is saved as a table in "
+        "the synthea_mi_secondary_prevention_views schema. Then one SQL file joins them into a "
+        "view with one row per patient who had an MI: 274 rows, with the number of days to "
+        "the first prescription of each class.",
+    ),
+    diagram(
+        "The medication request view in Pathling",
+        "data.view() takes a ViewDefinition as Python and returns a Spark data frame",
+        "medication-code",
+        medication_card(),
+        "Here is the medication request view from the notebook, with the descriptions removed "
+        "so it fits. data.view takes the resource type and a select - the same elements as the "
+        "JSON, written as Python dictionaries. First, the keys: getResourceKey for the request "
+        "and getReferenceKey for the patient. Second, the forEach. medication is a choice "
+        "element, so ofType picks the CodeableConcept, and the where keeps SNOMED CT codings "
+        "that have a code - AMT uses the SNOMED CT system. Some requests in the data have a "
+        "display but no code; they can't be classified, so they're left out. Third, the code "
+        "and display columns, which the SQL joins to the ConceptMap. The result is a Spark "
+        "data frame, so the last step is saveAsTable.",
+    ),
+    diagram(
+        "Classify medicines with a ConceptMap",
+        "Terminology in SQL: the map is a table you join to",
+        "concept-map",
+        concept_map(),
+        "Next, we use terminology to classify the medicines. The ConceptMap relates each AMT "
+        "product to the classes "
+        "of substance it contains, using SNOMED CT concepts as the classes. Atenolol 100 "
+        "milligram is related to beta blocker, and to broader classes like antihypertensive "
+        "agent. In Python, concept_map returns the map as a table with the columns that the "
+        "SQL on FHIR specification defines. It's read from a local terminology store on S3, so "
+        "no terminology server is involved. In SQL, it's a join like any other, to a short list "
+        "of the class codes we care about. Note that aspirin with codeine is related "
+        "to platelet aggregation inhibitor, because it contains aspirin, as well as to opioid "
+        "receptor agonist. The exercise uses the map as it stands, so it counts as an "
+        "antiplatelet. Leave out products the map also relates to opioids, and the number of "
+        "patients on an antiplatelet within a year falls from 265 to 245. James's sessions "
+        "cover the terminology fundamentals.",
+    ),
+    diagram(
+        "Days to the first prescription",
+        "Temporal logic lives in SQL: the window is applied afterwards, as a parameter",
+        "days-to-first",
+        days_to_first(),
+        "Each patient's index date is their first MI. This is a real patient from the "
+        "workspace. On the day of the MI they were prescribed an antiplatelet, a statin and a "
+        "beta-blocker, so those are day zero. They'd had lisinopril, an ACE inhibitor, 84 days "
+        "before the MI; that one doesn't count, because only prescriptions on or after the MI "
+        "do. The next lisinopril was at day 287. So with a 30 day window this patient has "
+        "three of the four classes, and with 365 days, all four. The view keeps the number of "
+        "days rather than a yes or no, so the summary query can apply any window as a "
+        "parameter.",
+    ),
+    diagram(
+        "What the exercise finds",
+        "Synthea AU within 365 days of the first MI, against Halvorsen et al. 2016 at discharge",
+        "results",
+        results_chart(),
+        "This is the main chart from the notebook. The coloured bars are the share of our 274 "
+        "synthetic patients prescribed each class within 365 days of their first MI; the grey "
+        "bars are Halvorsen's figures at discharge. Antiplatelets, statins and beta-blockers "
+        "are at or above the registry figures. ACE inhibitors and ARBs are well below, at 28 "
+        "per cent. 64 patients, 23 per cent, had all four. It isn't a like for like "
+        "comparison: a year of follow-up rather than discharge, and 16 of the patients died "
+        "within the year. The notebook has more charts: time to treatment, combinations and "
+        "age groups.",
+    ),
+    diagram(
+        "Demo",
+        "Views in the notebook, then the summary in the SQL editor",
+        "demo",
+        demo(),
+        "Live demo. One: in Workspace, Repos, open-fhir-training, open notebooks, synthea, "
+        "create_mi_secondary_prevention_views. Two: check the compute dropdown shows Open FHIR "
+        "Training Cluster, not Serverless. Three: scroll to the medication request view and "
+        "point out the keys, ofType and the forEach. Four: run the setup and read cells, then "
+        "the medication view cell and its show cell - don't run saveAsTable. Five: run the "
+        "concept_map cell and show the first rows of the map. Six: open "
+        "sql/synthea/combine_mi_secondary_prevention_views.sql and walk through the CTEs, then "
+        "in the SQL editor on the Serverless Starter Warehouse run the summary query with "
+        "follow_up_days set to 365 - five rows.",
+    ),
+    diagram(
+        "Your turn",
+        "Add a view of your own, in your own schema",
+        "your-turn",
+        your_turn(),
+        "Now it's over to you. Clone the notebook into your home folder - you can't edit the "
+        "shared copy - and set VIEWS_SCHEMA to your own schema. Write a new view: LDL "
+        "cholesterol, LOINC 18262-6, is a good one, because statins are meant to lower it. It "
+        "has the same shape as any Observation with a Quantity value; there are 25,302 "
+        "readings for 4,215 patients. Save it to your schema, then in the SQL editor join it to "
+        "the shared mi_secondary_prevention view, and compare each patient's LDL before their "
+        "MI with their LDL after their first statin. In the clone, run only the setup cells "
+        "and your own: the Combine section reads the SQL file from the repository folder, so "
+        "it won't find it from your home folder. If you finish, try the stretch tasks. We're "
+        "all here to help.",
+    ),
+    section(
+        "Demo walkthrough",
+        "Backup slides, in case the live demo fails - for example if the network or the cluster "
+        "is slow. They show the same steps as screenshots and real output from the workspace, so "
+        "you can follow along and still do the exercise afterwards. If the demo works, I'll skip "
+        "past them, and you can come back to them later in the slides we share after the "
+        "connectathon.",
+    ),
+    diagram(
+        "The summary query",
+        "SQL editor on the Serverless Starter Warehouse",
+        "backup-results",
+        backup_results(),
+        "This is the final step of the demo: the summary query from the SQL file, pasted into "
+        "the SQL editor. One, the query reads the combined view in the shared schema. Its "
+        "parameter, follow_up_days, appears as a box under the editor. Two, set it to 365 - if "
+        "you leave it empty, every count is zero. Three, five rows: within a year, 265 "
+        "patients had an antiplatelet, 252 a statin, 239 a beta-blocker and 78 an ACE "
+        "inhibitor or ARB, and 64 had all four.",
+    ),
+    diagram(
+        "Clone before you change",
+        "The repository notebooks are read-only for attendees",
+        "backup-clone",
+        backup_clone(),
+        "Before you change anything, clone the notebook. One, open it and click the File "
+        "menu at the top left. Two, choose Clone and pick your home folder. Three, make sure "
+        "your clone is attached to the Open FHIR Training Cluster, because Pathling isn't "
+        "installed on Serverless. Four, set VIEWS_SCHEMA in the first code cell to your own "
+        "schema, such as your name, rather than the shared synthea_mi_secondary_prevention_views "
+        "schema. The setup cell creates it for you.",
+    ),
+    diagram(
+        "What the medication request view returns",
+        "One row per coded medication request, with keys for joining",
+        "backup-show",
+        backup_show(),
+        "If the cluster isn't cooperating, this is what the medication request view gives you. "
+        "These rows are for the patient on the timeline slide, from the saved table. "
+        "patient_id is the patient key, in the form type slash id, ready to join. The code is "
+        "the AMT code, which is what the SQL looks up in the ConceptMap. Notice the first row: "
+        "aspirin with codeine, on the day of the MI. The status column shows that some "
+        "requests were completed and others are still active. Across the dataset there are "
+        "229,058 rows, one for every MedicationRequest with an AMT code.",
+    ),
+]

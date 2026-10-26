@@ -28,8 +28,8 @@ from decks._shared import (
     PRESENTER,
     TRACK,
     environment,
-    schedule,
     standards_map,
+    topics,
 )
 
 
@@ -156,12 +156,14 @@ DECK = {
             "with someone.",
         ),
         diagram(
-            "Track 3 over two days",
-            "Each block opens with 30 minutes of context and a demo, then hands-on time",
-            "schedule",
-            schedule(),
-            "Each Track 3 block starts with about 30 minutes from me: some context on a standard "
-            "or a technique, then a live demonstration in the workspace. The rest of each block is "
+            "The analytics topics",
+            "Each opens with some context and a demo, then hands-on time",
+            "topics",
+            topics(),
+            "The analytics strand covers six topics, from the environment and the standards map "
+            "through to CQL, CDS Hooks, SMART and OMOP. Each one starts with some context from me "
+            "on a standard or a technique, then a live demonstration in the workspace. There's no "
+            "fixed time for each topic; we'll go at the pace of the room. The rest of the time is "
             "yours, working on the exercises or your own questions, with James, Dion, Duncan and "
             "me on hand. On Friday afternoon each group gets a few minutes in the main room for "
             "show and tell, so keep track of what you try and what you learn.",

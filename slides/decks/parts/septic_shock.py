@@ -1,4 +1,4 @@
-"""Day 2, 11:00 block: reproducing a study of beta-blockers in septic shock on MIMIC-IV FHIR data.
+"""Track 3 analytics part: reproducing a study of beta-blockers in septic shock on MIMIC-IV FHIR data.
 
 Author: John Grimes
 """
@@ -19,7 +19,6 @@ from kit import (
     YELLOW,
     box,
     circle,
-    closing,
     code,
     callout,
     diagram,
@@ -32,10 +31,8 @@ from kit import (
     svg,
     table,
     text,
-    title_slide,
 )
 
-from decks._shared import EVENT, PATHLING_URL, PRESENTER, REPO_URL, SOF_URL
 
 CITATION = (
     "Zhang L et al. Effectiveness of β-blockers in improving 28-day mortality in "
@@ -1054,233 +1051,214 @@ def expected_outputs():
     return svg(940, 345, b)
 
 
-DECK = {
-    "file": "track-3-d2-5-septic-shock-study",
-    "slides": [
-        title_slide(
-            "A real-world study on FHIR: beta-blockers in septic shock",
-            f"Day 2, 11:00 · {EVENT}",
-            "This block is a worked example of a real research question, answered on FHIR data. "
-            "We'll take a published study of beta-blockers in septic shock, rebuild its cohort "
-            "from the MIMIC-IV demo data on FHIR, using SQL on FHIR views and Spark SQL, and "
-            "look at what the shape of the data does to the analysis. About twenty minutes of "
-            "slides, a short demo, and then the rest of the block is yours to extend it.",
-        ),
-        diagram(
-            "The clinical question",
-            "Does a beta-blocker early in septic shock change 28-day mortality?",
-            "clinical-question",
-            clinical_question(),
-            "Septic shock is sepsis that needs vasopressors, usually norepinephrine, to keep the "
-            "blood pressure up. Many patients stay tachycardic after fluid resuscitation. "
-            "Beta-blockers slow the heart and protect it from catecholamine stress, but they "
-            "also lower cardiac output, so their use is controversial. In 2024 Zhang and "
-            "colleagues looked at 4,860 patients with septic shock in the full MIMIC-IV "
-            "database. After propensity score matching, 28-day mortality was 21.5 percent in "
-            "patients given a beta-blocker within 48 hours of starting vasopressors, and 27.1 "
-            "percent in those who were not. Our question is whether we can select the same "
-            "cohort from FHIR data.",
-        ),
-        diagram(
-            "The data: MIMIC-IV demo on FHIR",
-            "100 de-identified ICU patients from PhysioNet, already loaded into the workspace",
-            "the-data",
-            the_data(),
-            "MIMIC-IV is a de-identified intensive care dataset used widely in research, and it's "
-            "the database Zhang et al. used. PhysioNet publishes an open demo of 100 patients, "
-            "converted to FHIR. We imported the NDJSON files with Pathling - there's one file per "
-            "MIMIC profile, so the import maps file names to resource types - and wrote one table "
-            "per resource type. This study leans on MedicationAdministration: 56,535 of them, "
-            "beside 813,540 Observations. Note the codes: MIMIC uses its own item ids, so 221906 "
-            "is norepinephrine in the ICU medication code system, and you need the MIMIC "
-            "dictionary to know that.",
-        ),
-        diagram(
-            "Study design",
-            "Most criteria are about when one event happened relative to another",
-            "study-design",
-            study_design(),
-            "This is the timing of each criterion. A suspected infection, following Sepsis-3, is "
-            "an antibiotic and a microbiology culture close together: the culture within 24 hours "
-            "after the antibiotic, or the antibiotic within 72 hours after the culture. Its onset "
-            "is the earlier of the two. Sepsis is a SOFA score of 2 or more, from the worst "
-            "values in the 48 hours before to 24 hours after that onset. Septic shock is "
-            "norepinephrine or vasopressin started within 48 hours of the onset of sepsis, and "
-            "the first start is the baseline. A beta-blocker in the 48 hours after the baseline "
-            "puts a patient in the treatment group, and the outcome is death within 28 days. On "
-            "top of that: first ICU stay, adults, at least 48 hours in the ICU, and no "
-            "contraindication.",
-        ),
-        diagram(
-            "Views, then one patient-level view",
-            "SQL on FHIR flattens six resource types; plain SQL does the study logic",
-            "views",
-            views(),
-            "The work is split into layers. Eight SQL on FHIR views, run by Pathling in the "
-            "create_beta_blocker_septic_shock_views notebook, turn nested FHIR into flat tables: "
-            "patients, ICU stays, diagnoses, antibiotics, microbiology specimens, the "
-            "observations behind the SOFA score, vasoactive infusions and beta-blocker doses. They "
-            "contain no study logic. A SQL file then builds one view with a row per patient and a "
-            "column per criterion, as a chain of common table expressions. The summary query "
-            "counts deaths by group. These row counts are from the workspace today.",
-        ),
-        diagram(
-            "FHIRPath does the selecting",
-            "The antibiotic view: join keys, a choice type, and a category instead of a code list",
-            "fhirpath",
-            fhirpath(),
-            "Here's one view in full. One: getReferenceKey on the subject gives a key that "
-            "matches getResourceKey on the Patient, so views join on it. Two: effective is a "
-            "choice type. An infusion has a Period and a bolus has a dateTime; ofType picks each, "
-            "and the union operator takes whichever is present. Three: rather than listing every "
-            "antibiotic, the where clause selects administrations in the ICU's two antibiotic "
-            "categories. The categories also include the diluent rows, like dextrose 5 percent, "
-            "which doesn't change the result here. Antibiotics given on the ward have no "
-            "category, so they aren't seen.",
-        ),
-        diagram(
-            "One medicine, two records",
-            "Beta-blockers are charted in the ICU and in the hospital's eMAR, in different code systems",
-            "two-records",
-            two_records(),
-            "MIMIC records medicines in two systems, and FHIR keeps the code system of each. The "
-            "ICU bedside system codes intravenous doses with item ids. The hospital's electronic "
-            "medication administration record uses the pharmacy's formulary codes, and sometimes "
-            "the medicine's name. Oral metoprolol, the most common beta-blocker, is only in the "
-            "eMAR. Looking at the ICU record alone finds 30 patients; both records find 53. One "
-            "complication is that formulary codes have no display text. METO10 and METO10I look like "
-            "metoprolol, but the NDC codes they were dispensed under show that they are "
-            "metoclopramide, an anti-emetic. So the view lists confirmed codes, not prefixes.",
-        ),
-        diagram(
-            "Scoring SOFA in SQL",
-            "Six components from ten ICU items and the vasoactive infusions, each scored 0 to 4",
-            "sofa",
-            sofa(),
-            "The SOFA score drives the sepsis criterion. It has six components, and the table "
-            "shows the MIMIC items behind each and how many of the 100 patients have any value. "
-            "Bilirubin and blood gases are only measured when there's a reason, so a component "
-            "with no measurement scores zero. The SQL takes the worst value of each measurement "
-            "in the window around the suspected infection and scores it with a CASE expression, "
-            "like this one for the cardiovascular component. It is simplified: no urine output, "
-            "and the respiratory score doesn't check for ventilation. Every patient in the cohort "
-            "scores 4 for cardiovascular, because the vasopressors that make them eligible also "
-            "score.",
-        ),
-        diagram(
-            "Each criterion is a column",
-            "The patient-level view makes the attrition at every step visible",
-            "attrition",
-            attrition(),
-            "The combine SQL file builds one common table expression per step and then selects "
-            "one row per patient, with each criterion as a column. in_cohort is true when they "
-            "all hold. That makes the attrition easy to see: all 100 patients are adults, about "
-            "half are out on the 48-hour ICU stay, 41 have a suspected infection, 39 meet "
-            "Sepsis-3, 17 have septic shock, and 7 of those are excluded for a contraindication, "
-            "mostly acute heart failure. That leaves 10 patients: 2 with a beta-blocker and 8 "
-            "without. If a number looks wrong, you can filter on any column and see why.",
-        ),
-        diagram(
-            "What happened to each patient",
-            "The 10 patients in days from the first vasopressor; groups are set by the first 48 hours",
-            "timeline",
-            timeline(),
-            "Each row is one patient, aligned on the baseline. The bar is the ICU stay, the "
-            "orange dot is the onset of sepsis, the teal ticks are beta-blocker doses and a cross "
-            "is a death within 28 days. The shaded band is the 48-hour window that decides the "
-            "group. Two patients were given esmolol in that window. Four in the control group "
-            "were given beta-blockers later in their stay, and the first patient's doses carry on "
-            "after ICU discharge, from the eMAR. So the groups are defined by what happened in "
-            "the first 48 hours, not by whether someone was ever treated.",
-        ),
-        diagram(
-            "Did beta-blockers make a difference?",
-            "28-day mortality in the demo cohort, beside the published figures",
-            "results",
-            results(),
-            "Here is the summary query's result: one of two patients died in the beta-blocker "
-            "group, and three of eight in the control group. Please don't read anything into "
-            "these numbers. With two patients, one death is 50 points. The comparison is also "
-            "unadjusted, where Zhang et al. matched 619 pairs on age, sex, weight and severity "
-            "scores. What this shows is that the cohort definition runs end to end on FHIR, and "
-            "the same views and SQL would run unchanged on the full MIMIC-IV.",
-        ),
-        diagram(
-            "Demo",
-            "From a code list in a view to a result in three steps",
-            "demo",
-            demo_steps(),
-            "Here's what I'll show. One: open notebooks/mimic_iv/"
-            "create_beta_blocker_septic_shock_views in the Git folder, attached to the Open FHIR "
-            "Training Cluster. Scroll to the beta-blocker view, show the three code lists, one per "
-            "code system, and the chart of patients by record. I won't rewrite the shared tables. "
-            "Two: open sql/mimic_iv/combine_beta_blocker_septic_shock_views.sql and walk through "
-            "the common table expressions, from first ICU stay to the beta-blocker window. Three: "
-            "open the SQL editor on the Serverless Starter Warehouse, paste the summary query from "
-            "the bottom of that file, run it, and read out the two rows.",
-        ),
-        diagram(
-            "Your turn",
-            "Recount the groups with a different treatment window",
-            "your-turn",
-            your_turn(),
-            "For the rest of the block, take this query as a starting point. It runs as is in the "
-            "SQL editor with the hive_metastore catalog. It joins the cohort to every "
-            "beta-blocker dose in the 48 hours after the baseline and counts patients and deaths "
-            "by group. Run it, then change the interval on the highlighted line to 24 hours and "
-            "to 7 days, and watch patients change group. Then think about why the study fixes the "
-            "window from the baseline: a patient who dies early has less time to be given a "
-            "beta-blocker, so a longer window starts to sort patients by how long they lived. If "
-            "you want more, add a heart disease subgroup from diagnosis_view. If you create "
-            "tables, put them in your own schema.",
-        ),
-        section(
-            "Demo walkthrough",
-            "Backup slides, in case the live demo fails. The next two slides show the summary query "
-            "in the SQL editor, with its result, and then the row counts of each view and the output "
-            "of the Your turn query. They're also a useful reference later in the block: if your own "
-            "numbers differ from these, check that you're reading the shared "
-            "mimic_iv_beta_blocker_views tables.",
-        ),
-        diagram(
-            "The summary query",
-            "SQL editor on the Serverless Starter Warehouse, 28-day mortality by group",
-            "summary-screenshot",
-            summary_screenshot(),
-            "This is the SQL editor with the Serverless Starter Warehouse attached. One: the Run "
-            "all button. Two: the query reads the patient-level view and keeps the rows where "
-            "in_cohort is true, grouped by the beta_blocker column. Three: the result - two "
-            "patients in the beta-blocker group with one death, 50 percent, and eight in the "
-            "control group with three deaths, 37.5 percent.",
-        ),
-        diagram(
-            "Expected outputs",
-            "Row counts and query results to check your work against",
-            "expected-outputs",
-            expected_outputs(),
-            "On the left are the row counts of the eight views and the patient-level view, with "
-            "the 10 patients where in_cohort is true. On the right is the Your turn query with "
-            "four windows, shown as deaths over patients. At 48 hours it matches the summary. At "
-            "24 hours one patient moves to the control group; at 7 days five patients are "
-            "treated, and at 28 days six. With 100 patients this is as far as we can go. The pipeline "
-            "works and the choice of window clearly affects the groups, but answering the question "
-            "would need the full dataset.",
-        ),
-        closing(
-            "Questions?",
-            PRESENTER,
-            "That's the septic shock study. We took a published question, rebuilt its cohort from "
-            "FHIR with SQL on FHIR views and plain SQL. Most of the difficulty was in the timing of "
-            "events and the way medicines are recorded, rather than in the SQL itself. The notebook "
-            "and SQL are in the "
-            "open-fhir-training repository, and the SQL on FHIR and Pathling sites have the "
-            "specification and the documentation. Grab me or one of the other leads if you get "
-            "stuck on the window query.",
-            [
-                (REPO_URL, "Exercises"),
-                (SOF_URL, "sql-on-fhir.org"),
-                (PATHLING_URL, "pathling.csiro.au"),
-            ],
-        ),
-    ],
-}
+SLIDES = [
+    section(
+        "A real-world study on FHIR: beta-blockers in septic shock",
+        "This section is a worked example of a real research question, answered on FHIR data. "
+        "We'll take a published study of beta-blockers in septic shock, rebuild its cohort "
+        "from the MIMIC-IV demo data on FHIR, using SQL on FHIR views and Spark SQL, and "
+        "look at what the shape of the data does to the analysis. Some slides, a short demo, "
+        "and then the rest of the time is yours to extend it.",
+        part="Septic shock study",
+    ),
+    diagram(
+        "The clinical question",
+        "Does a beta-blocker early in septic shock change 28-day mortality?",
+        "clinical-question",
+        clinical_question(),
+        "Septic shock is sepsis that needs vasopressors, usually norepinephrine, to keep the "
+        "blood pressure up. Many patients stay tachycardic after fluid resuscitation. "
+        "Beta-blockers slow the heart and protect it from catecholamine stress, but they "
+        "also lower cardiac output, so their use is controversial. In 2024 Zhang and "
+        "colleagues looked at 4,860 patients with septic shock in the full MIMIC-IV "
+        "database. After propensity score matching, 28-day mortality was 21.5 percent in "
+        "patients given a beta-blocker within 48 hours of starting vasopressors, and 27.1 "
+        "percent in those who were not. Our question is whether we can select the same "
+        "cohort from FHIR data.",
+    ),
+    diagram(
+        "The data: MIMIC-IV demo on FHIR",
+        "100 de-identified ICU patients from PhysioNet, already loaded into the workspace",
+        "the-data",
+        the_data(),
+        "MIMIC-IV is a de-identified intensive care dataset used widely in research, and it's "
+        "the database Zhang et al. used. PhysioNet publishes an open demo of 100 patients, "
+        "converted to FHIR. We imported the NDJSON files with Pathling - there's one file per "
+        "MIMIC profile, so the import maps file names to resource types - and wrote one table "
+        "per resource type. This study leans on MedicationAdministration: 56,535 of them, "
+        "beside 813,540 Observations. Note the codes: MIMIC uses its own item ids, so 221906 "
+        "is norepinephrine in the ICU medication code system, and you need the MIMIC "
+        "dictionary to know that.",
+    ),
+    diagram(
+        "Study design",
+        "Most criteria are about when one event happened relative to another",
+        "study-design",
+        study_design(),
+        "This is the timing of each criterion. A suspected infection, following Sepsis-3, is "
+        "an antibiotic and a microbiology culture close together: the culture within 24 hours "
+        "after the antibiotic, or the antibiotic within 72 hours after the culture. Its onset "
+        "is the earlier of the two. Sepsis is a SOFA score of 2 or more, from the worst "
+        "values in the 48 hours before to 24 hours after that onset. Septic shock is "
+        "norepinephrine or vasopressin started within 48 hours of the onset of sepsis, and "
+        "the first start is the baseline. A beta-blocker in the 48 hours after the baseline "
+        "puts a patient in the treatment group, and the outcome is death within 28 days. On "
+        "top of that: first ICU stay, adults, at least 48 hours in the ICU, and no "
+        "contraindication.",
+    ),
+    diagram(
+        "Views, then one patient-level view",
+        "SQL on FHIR flattens six resource types; plain SQL does the study logic",
+        "views",
+        views(),
+        "The work is split into layers. Eight SQL on FHIR views, run by Pathling in the "
+        "create_beta_blocker_septic_shock_views notebook, turn nested FHIR into flat tables: "
+        "patients, ICU stays, diagnoses, antibiotics, microbiology specimens, the "
+        "observations behind the SOFA score, vasoactive infusions and beta-blocker doses. They "
+        "contain no study logic. A SQL file then builds one view with a row per patient and a "
+        "column per criterion, as a chain of common table expressions. The summary query "
+        "counts deaths by group. These row counts are from the workspace.",
+    ),
+    diagram(
+        "FHIRPath does the selecting",
+        "The antibiotic view: join keys, a choice type, and a category instead of a code list",
+        "fhirpath",
+        fhirpath(),
+        "Here's one view in full. One: getReferenceKey on the subject gives a key that "
+        "matches getResourceKey on the Patient, so views join on it. Two: effective is a "
+        "choice type. An infusion has a Period and a bolus has a dateTime; ofType picks each, "
+        "and the union operator takes whichever is present. Three: rather than listing every "
+        "antibiotic, the where clause selects administrations in the ICU's two antibiotic "
+        "categories. The categories also include the diluent rows, like dextrose 5 percent, "
+        "which doesn't change the result here. Antibiotics given on the ward have no "
+        "category, so they aren't seen.",
+    ),
+    diagram(
+        "One medicine, two records",
+        "Beta-blockers are charted in the ICU and in the hospital's eMAR, in different code systems",
+        "two-records",
+        two_records(),
+        "MIMIC records medicines in two systems, and FHIR keeps the code system of each. The "
+        "ICU bedside system codes intravenous doses with item ids. The hospital's electronic "
+        "medication administration record uses the pharmacy's formulary codes, and sometimes "
+        "the medicine's name. Oral metoprolol, the most common beta-blocker, is only in the "
+        "eMAR. Looking at the ICU record alone finds 30 patients; both records find 53. One "
+        "complication is that formulary codes have no display text. METO10 and METO10I look like "
+        "metoprolol, but the NDC codes they were dispensed under show that they are "
+        "metoclopramide, an anti-emetic. So the view lists confirmed codes, not prefixes.",
+    ),
+    diagram(
+        "Scoring SOFA in SQL",
+        "Six components from ten ICU items and the vasoactive infusions, each scored 0 to 4",
+        "sofa",
+        sofa(),
+        "The SOFA score drives the sepsis criterion. It has six components, and the table "
+        "shows the MIMIC items behind each and how many of the 100 patients have any value. "
+        "Bilirubin and blood gases are only measured when there's a reason, so a component "
+        "with no measurement scores zero. The SQL takes the worst value of each measurement "
+        "in the window around the suspected infection and scores it with a CASE expression, "
+        "like this one for the cardiovascular component. It is simplified: no urine output, "
+        "and the respiratory score doesn't check for ventilation. Every patient in the cohort "
+        "scores 4 for cardiovascular, because the vasopressors that make them eligible also "
+        "score.",
+    ),
+    diagram(
+        "Each criterion is a column",
+        "The patient-level view makes the attrition at every step visible",
+        "attrition",
+        attrition(),
+        "The combine SQL file builds one common table expression per step and then selects "
+        "one row per patient, with each criterion as a column. in_cohort is true when they "
+        "all hold. That makes the attrition easy to see: all 100 patients are adults, about "
+        "half are out on the 48-hour ICU stay, 41 have a suspected infection, 39 meet "
+        "Sepsis-3, 17 have septic shock, and 7 of those are excluded for a contraindication, "
+        "mostly acute heart failure. That leaves 10 patients: 2 with a beta-blocker and 8 "
+        "without. If a number looks wrong, you can filter on any column and see why.",
+    ),
+    diagram(
+        "What happened to each patient",
+        "The 10 patients in days from the first vasopressor; groups are set by the first 48 hours",
+        "timeline",
+        timeline(),
+        "Each row is one patient, aligned on the baseline. The bar is the ICU stay, the "
+        "orange dot is the onset of sepsis, the teal ticks are beta-blocker doses and a cross "
+        "is a death within 28 days. The shaded band is the 48-hour window that decides the "
+        "group. Two patients were given esmolol in that window. Four in the control group "
+        "were given beta-blockers later in their stay, and the first patient's doses carry on "
+        "after ICU discharge, from the eMAR. So the groups are defined by what happened in "
+        "the first 48 hours, not by whether someone was ever treated.",
+    ),
+    diagram(
+        "Did beta-blockers make a difference?",
+        "28-day mortality in the demo cohort, beside the published figures",
+        "results",
+        results(),
+        "Here is the summary query's result: one of two patients died in the beta-blocker "
+        "group, and three of eight in the control group. Please don't read anything into "
+        "these numbers. With two patients, one death is 50 points. The comparison is also "
+        "unadjusted, where Zhang et al. matched 619 pairs on age, sex, weight and severity "
+        "scores. What this shows is that the cohort definition runs end to end on FHIR, and "
+        "the same views and SQL would run unchanged on the full MIMIC-IV.",
+    ),
+    diagram(
+        "Demo",
+        "From a code list in a view to a result in three steps",
+        "demo",
+        demo_steps(),
+        "Here's what I'll show. One: open notebooks/mimic_iv/"
+        "create_beta_blocker_septic_shock_views in the Git folder, attached to the Open FHIR "
+        "Training Cluster. Scroll to the beta-blocker view, show the three code lists, one per "
+        "code system, and the chart of patients by record. I won't rewrite the shared tables. "
+        "Two: open sql/mimic_iv/combine_beta_blocker_septic_shock_views.sql and walk through "
+        "the common table expressions, from first ICU stay to the beta-blocker window. Three: "
+        "open the SQL editor on the Serverless Starter Warehouse, paste the summary query from "
+        "the bottom of that file, run it, and read out the two rows.",
+    ),
+    diagram(
+        "Your turn",
+        "Recount the groups with a different treatment window",
+        "your-turn",
+        your_turn(),
+        "Now take this query as a starting point. It runs as is in the "
+        "SQL editor with the hive_metastore catalog. It joins the cohort to every "
+        "beta-blocker dose in the 48 hours after the baseline and counts patients and deaths "
+        "by group. Run it, then change the interval on the highlighted line to 24 hours and "
+        "to 7 days, and watch patients change group. Then think about why the study fixes the "
+        "window from the baseline: a patient who dies early has less time to be given a "
+        "beta-blocker, so a longer window starts to sort patients by how long they lived. If "
+        "you want more, add a heart disease subgroup from diagnosis_view. If you create "
+        "tables, put them in your own schema.",
+    ),
+    section(
+        "Demo walkthrough",
+        "Backup slides, in case the live demo fails. The next two slides show the summary query "
+        "in the SQL editor, with its result, and then the row counts of each view and the output "
+        "of the Your turn query. They're also a useful reference later: if your own "
+        "numbers differ from these, check that you're reading the shared "
+        "mimic_iv_beta_blocker_views tables.",
+    ),
+    diagram(
+        "The summary query",
+        "SQL editor on the Serverless Starter Warehouse, 28-day mortality by group",
+        "summary-screenshot",
+        summary_screenshot(),
+        "This is the SQL editor with the Serverless Starter Warehouse attached. One: the Run "
+        "all button. Two: the query reads the patient-level view and keeps the rows where "
+        "in_cohort is true, grouped by the beta_blocker column. Three: the result - two "
+        "patients in the beta-blocker group with one death, 50 percent, and eight in the "
+        "control group with three deaths, 37.5 percent.",
+    ),
+    diagram(
+        "Expected outputs",
+        "Row counts and query results to check your work against",
+        "expected-outputs",
+        expected_outputs(),
+        "On the left are the row counts of the eight views and the patient-level view, with "
+        "the 10 patients where in_cohort is true. On the right is the Your turn query with "
+        "four windows, shown as deaths over patients. At 48 hours it matches the summary. At "
+        "24 hours one patient moves to the control group; at 7 days five patients are "
+        "treated, and at 28 days six. With 100 patients this is as far as we can go. The pipeline "
+        "works and the choice of window clearly affects the groups, but answering the question "
+        "would need the full dataset.",
+    ),
+]

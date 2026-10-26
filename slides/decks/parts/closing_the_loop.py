@@ -1,4 +1,4 @@
-"""Day 2, 1:30 block: CQL, CDS Hooks, SMART App Launch and OMOP, then show and tell prep.
+"""Track 3 analytics part: CQL, CDS Hooks, SMART App Launch and OMOP, then show and tell prep.
 
 Author: John Grimes
 """
@@ -17,7 +17,6 @@ from kit import (
     box,
     callout,
     circle,
-    closing,
     code,
     diagram,
     hcurve,
@@ -33,10 +32,9 @@ from kit import (
     svg,
     table,
     text,
-    title_slide,
 )
 
-from decks._shared import EVENT, LINKS, PRESENTER, standards_map
+from decks._shared import standards_map
 
 # Validated with the cql-to-elm translator at signature level Overloads (no errors
 # or warnings). The statin value set URL is illustrative.
@@ -534,16 +532,20 @@ def demo_steps():
 
 
 def your_turn():
-    """The rest of the afternoon, with a stretch task."""
+    """The hands-on time before show and tell, with a stretch task."""
     b = []
-    slots = [
-        (0, 150, BLUE, ["1:30", "this talk + demo"]),
-        (160, 300, MINT, ["2:00-3:00", "finish your work"]),
-        (470, 170, "#F0F0F0", ["3:00", "afternoon tea"]),
-        (650, 290, AMBER, ["3:30 main room", "show and tell"]),
-    ]
-    for x, w, fill, rows in slots:
-        b.append(box(x, 0, w, 60, fill, rows, 15, 400))
+    b.append(
+        box(
+            0,
+            0,
+            940,
+            60,
+            AMBER,
+            ["Show and tell: Friday 3:30, main room - about 3 minutes per group"],
+            16,
+            700,
+        )
+    )
     b.append(rect(0, 84, 460, 250, "#fff", rx=12))
     b.append(text(20, 116, "Now", 18, "start", 700))
     todo = [
@@ -682,244 +684,230 @@ def backup_chart():
     return svg(940, 342, b)
 
 
-DECK = {
-    "file": "track-3-d2-6-closing-the-loop",
-    "slides": [
-        title_slide(
-            "Closing the loop: CQL, CDS Hooks, SMART and OMOP",
-            f"Day 2, 1:30 · {EVENT}",
-            "This is the last block before show and tell. So far we've spent our time getting FHIR "
-            "data, shaping it with SQL on FHIR, and analysing it in Databricks. This session is "
-            "about what happens next: how an analytic finding becomes something a clinician sees "
-            "at the right moment, and how it feeds research across many sites. I'll cover four "
-            "standards briefly - CQL, CDS Hooks, SMART App Launch and OMOP - then we'll talk "
-            "about how show and tell works, and I'll show you how to turn a query into a chart "
-            "for your slide.",
-        ),
-        diagram(
-            "From insight to action",
-            "The last stage of the map: putting results back into the clinical workflow",
-            "standards-map-act",
-            standards_map(highlight="act"),
-            "Here is the map we've used all track. We've worked mostly in the middle two stages. "
-            "The fourth stage, act on it, is about using the results in clinical care, and there are "
-            "three standards to cover. CQL lets you write clinical logic once, in a form that can be "
-            "shared and executed. CDS Hooks delivers advice into the EHR at a point in the workflow. "
-            "SMART App Launch lets an app open inside the EHR with the patient already selected. I'll "
-            "also come back to OMOP from the analyse box, because it is how findings get pooled across "
-            "sites for research. These standards build on the data and views you've worked with this "
-            "week, rather than replacing them.",
-        ),
-        diagram(
-            "CQL: clinical logic you can share",
-            "HL7 CQL v1.5: readable logic over a FHIR data model, shared as FHIR Library resources",
-            "cql-anatomy",
-            cql_anatomy(),
-            "CQL is the Clinical Quality Language from HL7, now at version 1.5. It is designed to "
-            "be read by clinicians and informaticians, not just programmers. This library carries "
-            "a finding from this morning's exercise into the workflow: a myocardial infarction in "
-            "the last year with no statin prescribed since. The using and include lines bind it "
-            "to FHIR R4, with FHIRHelpers converting FHIR types to CQL types. The value sets are "
-            "the terminology. The MI one is an ECL expression, 22298006 and its descendants, which "
-            "takes in STEMI and NSTEMI; the statin one stands for the AMT products the ConceptMap "
-            "relates to HMG-CoA reductase inhibitor. The context line says every expression is "
-            "evaluated for one patient. The defines are named expressions you can reuse, and the "
-            "with clause relates statin requests to the MI. I ran this through the reference CQL "
-            "to ELM translator and it compiles cleanly. In practice the library is stored in a "
-            "FHIR Library resource.",
-        ),
-        diagram(
-            "Where CQL runs",
-            "The same logic powers quality measures and decision support",
-            "where-cql-runs",
-            where_cql_runs(),
-            "A CQL library rarely runs on its own. For quality measures, a Measure resource points "
-            "to the library and names which expressions define the populations. Calling "
-            "evaluate-measure gives you a MeasureReport with counts like numerator and "
-            "denominator. For decision support, a PlanDefinition references the library and "
-            "describes actions to take when conditions are true. Calling apply for a specific "
-            "patient returns a CarePlan with the actions that apply to them. This means that "
-            "the same definition of a statin gap can drive a measure across a clinic and an "
-            "alert for one patient, without being written twice.",
-        ),
-        diagram(
-            "SQL on FHIR and CQL",
-            "Population tables for analysts, patient-level logic for decisions",
-            "sof-vs-cql",
-            sof_vs_cql(),
-            "People often ask whether CQL competes with SQL on FHIR. I think of them as different "
-            "tools. SQL on FHIR views turn every patient's resources into tables, with a row per "
-            "patient or per reading, for analysts, dashboards and research. They run in batch on "
-            "Spark or a warehouse, as you've seen in Databricks. CQL works on one patient's "
-            "record at a time and returns a value - true or false, or a list - which is what a "
-            "decision support service needs. They share a lot: the same FHIR data, very similar "
-            "path expressions, and value sets. A good workflow uses views to find a pattern, then "
-            "CQL to act on it.",
-        ),
-        diagram(
-            "CDS Hooks: advice at the right moment",
-            "CDS Hooks v2.0: the EHR calls a service at a workflow event and shows the cards it returns",
-            "cds-hooks",
-            cds_hooks(),
-            "CDS Hooks is one way of getting this logic in front of a clinician. The EHR discovers "
-            "services at a well-known endpoint, then calls a service when something happens in the "
-            "workflow - "
-            "here, patient-view, when a chart is opened. The request carries context, such as the "
-            "patient id, and prefetched FHIR data the service asked for up front, so it doesn't "
-            "have to query back. The service evaluates its logic, perhaps our CQL, and returns "
-            "cards: information, suggested actions, or links. On the right is a minimal card. "
-            "Summary, indicator and source are required. A link of type smart tells the EHR to "
-            "launch a SMART app.",
-        ),
-        diagram(
-            "SMART App Launch: apps inside the EHR",
-            "SMART App Launch v2.2: OAuth 2.0 with launch context, so the app opens on the right patient",
-            "smart-launch",
-            smart_launch(),
-            "SMART App Launch is often used alongside CDS Hooks. In an EHR launch, the EHR opens the "
-            "app with the FHIR server address and a launch id. The app reads the server's SMART "
-            "configuration, "
-            "then asks the authorisation server for access, with scopes such as read access to "
-            "the patient's Observations. It exchanges a code for an access token, and the token "
-            "response says which patient is in context. Then it calls the FHIR API. Yesterday's "
-            "Spot FHIRs talk showed this in production: a SMART test result review app at "
-            "Queensland Children's Hospital, the first FHIR-based decision support deployment in "
-            "a Queensland HHS. Track 1 is building SMART apps this week.",
-        ),
-        diagram(
-            "OMOP: a common model for research",
-            "OHDSI OMOP CDM v5.4: person-centric tables and standardised vocabularies",
-            "omop-cdm",
-            omop_cdm(),
-            "Moving to research, OMOP is the Common Data Model from the OHDSI community, now at "
-            "version 5.4. Everything hangs off a person: visits, conditions, drug exposures, procedures, "
-            "measurements and observations. Every clinical code is mapped to a standard concept "
-            "in the OHDSI vocabularies, so the same query means the same thing at every site. "
-            "That is what makes federated network studies possible, with tools like ATLAS and "
-            "HADES. I see FHIR and OMOP as complementary. FHIR is built for exchange and "
-            "operations, with rich local detail. OMOP is built for comparing populations across "
-            "sites, and gives up some detail to get there.",
-        ),
-        diagram(
-            "From FHIR to OMOP",
-            "SQL on FHIR views make a natural first step of a FHIR to OMOP pipeline",
-            "fhir-to-omop",
-            fhir_to_omop(),
-            "If your data is already FHIR, the views you've written this week are a good first "
-            "step towards OMOP. You flatten resources into tables with SQL on FHIR, then map "
-            "codes and load OMOP tables. HL7's Vulcan accelerator has published a FHIR to OMOP "
-            "implementation guide, version 1.0.0, informative, targeting CDM 5.4, with mapping "
-            "patterns. Patient becomes person, Encounter becomes visit occurrence, Condition "
-            "becomes condition occurrence. Observation is more complicated: it goes to "
-            "measurement or observation depending on the domain of the mapped concept. And some "
-            "fields OMOP requires, like a drug exposure end date, may have to be derived.",
-        ),
-        diagram(
-            "One finding, end to end",
-            "A statin gap after MI, from this morning's exercise, carried through every standard",
-            "scenario",
-            scenario(),
-            "To bring this together, take a finding from this morning's exercise. In Databricks, 22 "
-            "of the 274 synthetic patients with an MI had no statin prescribed within a year. That "
-            "definition becomes a CQL expression in a shared library. A CDS service evaluates it "
-            "when a chart is opened and returns a warning card. The clinician opens a SMART app "
-            "from the card to see the medication history. Meanwhile, the same data, mapped to "
-            "OMOP condition occurrence and drug exposure rows, is pooled with other sites in a "
-            "network study. The results of that study raise new questions and feed back into the "
-            "logic, which closes the loop.",
-        ),
-        section(
-            "Show and tell",
-            "Now for the last part of the connectathon: show and tell. Every group across the "
-            "three tracks gets a chance to share what they did, in the main room after afternoon "
-            "tea. It doesn't need to be polished. The most useful presentations are honest about "
-            "what you tried, what worked and what didn't. So let's talk about how to make the most "
-            "of a few minutes, and then I'll show you a quick way to get a chart out of the "
-            "workspace for your slide.",
-        ),
-        diagram(
-            "Show and tell",
-            "Main room, 3:30-4:30: a few minutes per group, across all three tracks",
-            "show-and-tell",
-            show_and_tell(),
-            "Show and tell is in the main room at 3:30, after afternoon tea. Each group gets a "
-            "few minutes; plan on about three. A simple structure works well: the question you "
-            "asked, the data you used, what you did - which standards and tools - what you found, "
-            "and what you'd do next. Show a screenshot or a chart rather than a lot of text. "
-            "Please say what didn't work. That is often the most useful thing for the room, and "
-            "for us as organisers. Name the standards and tools, and keep to time.",
-        ),
-        diagram(
-            "Demo",
-            "From a query result to a chart for your show and tell slide",
-            "demo",
-            demo_steps(),
-            "Live demo. One: open the SQL Editor from the left navigation and attach the "
-            "Serverless Starter Warehouse. Two: paste the summary query from the septic shock "
-            "exercise, which counts patients and deaths within 28 days by treatment group, and "
-            "click Run all. Two rows appear, one per group. Three: click the plus next to the "
-            "Table tab and choose Visualization. Four: pick a bar chart, put treatment group on "
-            "the X axis and mortality percent on the Y axis. Five: save it, and take a screenshot "
-            "for your slide. I'll point out that there are only 10 patients, so this is a "
-            "picture, not a result.",
-        ),
-        diagram(
-            "Your turn",
-            "Finish, chart one result, and prepare 3 minutes for show and tell",
-            "your-turn",
-            your_turn(),
-            "The rest of this block is yours, until afternoon tea at 3. Finish the exercise or "
-            "the question you've been working on. Pick one result and chart it the way I just "
-            "showed. Then fill in the five prompts and decide who will speak. If you finish "
-            "early, here's a stretch task: write the CQL define or the CDS Hooks card that would "
-            "deliver your finding to a clinician. The card on the right is valid and has only the "
-            "required fields. James, Dion, Duncan and I will be around the room to help.",
-        ),
-        section(
-            "Demo walkthrough",
-            "Backup slides, in case the live demo fails. They walk through the demo with screenshots, "
-            "and are also useful for anyone who wants to repeat the steps later. They show the "
-            "same SQL editor and the same two queries from this week's exercises: the MI secondary "
-            "prevention summary and the septic shock mortality summary. Everything here works on "
-            "the Serverless Starter Warehouse, so you don't need the notebook cluster to make a "
-            "chart.",
-        ),
-        diagram(
-            "Results in the SQL editor",
-            "The MI secondary prevention summary, with the controls you need",
-            "backup-results",
-            backup_results(),
-            "This is the SQL editor after running the summary query from the MI secondary "
-            "prevention exercise, with follow_up_days set to 365. One: Run all executes on the "
-            "Serverless Starter Warehouse. Two: the plus next to the Table tab is how you add a "
-            "visualisation; it opens a new tab beside the table. Three: the result, one row per "
-            "drug class and one for all four - a bar chart of percent_treated by drug_class works "
-            "well. Four: the download button lets you take the result elsewhere if you'd rather "
-            "chart it in another tool.",
-        ),
-        diagram(
-            "From result to chart",
-            "The septic shock mortality summary as a bar chart",
-            "backup-chart",
-            backup_chart(),
-            "On the left is the summary result: two treatment groups with patient and death "
-            "counts and the percentage who died within 28 days. Click the plus, choose "
-            "Visualization, then a bar chart with treatment group on the X axis and mortality "
-            "percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
-            "rows: 50.0 and 37.5. Put the number of patients on the slide, because with 2 and 8 "
-            "patients one death moves a bar by 12.5 to 50 points. Present it as a demonstration "
-            "of the method, not a finding.",
-        ),
-        closing(
-            "Thank you",
-            PRESENTER,
-            "Thank you. CQL, CDS Hooks, SMART App Launch and OMOP are where analytics turns into "
-            "action and into research, and everything we've used this week is open, so you can "
-            "keep going after today. The links are here: workspace access, the exercises "
-            "repository, SQL on FHIR and Pathling. Workspace accounts are removed by 30 November. "
-            "If you have questions later, use the connectathon Zulip chat or email "
-            "fhir-training@csiro.au. I'll see you in the main room for show and tell at 3:30.",
-            LINKS,
-        ),
-    ],
-}
+SLIDES = [
+    section(
+        "Closing the loop: CQL, CDS Hooks, SMART and OMOP",
+        "This is the last section. So far we've spent our time getting FHIR "
+        "data, shaping it with SQL on FHIR, and analysing it in Databricks. This section is "
+        "about what happens next: how an analytic finding becomes something a clinician sees "
+        "at the right moment, and how it feeds research across many sites. I'll cover four "
+        "standards briefly - CQL, CDS Hooks, SMART App Launch and OMOP - then we'll talk "
+        "about how show and tell works, and I'll show you how to turn a query into a chart "
+        "for your slide.",
+        part="Closing the loop",
+    ),
+    diagram(
+        "From insight to action",
+        "The last stage of the map: putting results back into the clinical workflow",
+        "standards-map-act",
+        standards_map(highlight="act"),
+        "Here is the map we've used all track. We've worked mostly in the middle two stages. "
+        "The fourth stage, act on it, is about using the results in clinical care, and there are "
+        "three standards to cover. CQL lets you write clinical logic once, in a form that can be "
+        "shared and executed. CDS Hooks delivers advice into the EHR at a point in the workflow. "
+        "SMART App Launch lets an app open inside the EHR with the patient already selected. I'll "
+        "also come back to OMOP from the analyse box, because it is how findings get pooled across "
+        "sites for research. These standards build on the data and views you've worked with this "
+        "week, rather than replacing them.",
+    ),
+    diagram(
+        "CQL: clinical logic you can share",
+        "HL7 CQL v1.5: readable logic over a FHIR data model, shared as FHIR Library resources",
+        "cql-anatomy",
+        cql_anatomy(),
+        "CQL is the Clinical Quality Language from HL7, now at version 1.5. It is designed to "
+        "be read by clinicians and informaticians, not just programmers. This library carries "
+        "a finding from the MI secondary prevention exercise into the workflow: a myocardial infarction in "
+        "the last year with no statin prescribed since. The using and include lines bind it "
+        "to FHIR R4, with FHIRHelpers converting FHIR types to CQL types. The value sets are "
+        "the terminology. The MI one is an ECL expression, 22298006 and its descendants, which "
+        "takes in STEMI and NSTEMI; the statin one stands for the AMT products the ConceptMap "
+        "relates to HMG-CoA reductase inhibitor. The context line says every expression is "
+        "evaluated for one patient. The defines are named expressions you can reuse, and the "
+        "with clause relates statin requests to the MI. I ran this through the reference CQL "
+        "to ELM translator and it compiles cleanly. In practice the library is stored in a "
+        "FHIR Library resource.",
+    ),
+    diagram(
+        "Where CQL runs",
+        "The same logic powers quality measures and decision support",
+        "where-cql-runs",
+        where_cql_runs(),
+        "A CQL library rarely runs on its own. For quality measures, a Measure resource points "
+        "to the library and names which expressions define the populations. Calling "
+        "evaluate-measure gives you a MeasureReport with counts like numerator and "
+        "denominator. For decision support, a PlanDefinition references the library and "
+        "describes actions to take when conditions are true. Calling apply for a specific "
+        "patient returns a CarePlan with the actions that apply to them. This means that "
+        "the same definition of a statin gap can drive a measure across a clinic and an "
+        "alert for one patient, without being written twice.",
+    ),
+    diagram(
+        "SQL on FHIR and CQL",
+        "Population tables for analysts, patient-level logic for decisions",
+        "sof-vs-cql",
+        sof_vs_cql(),
+        "People often ask whether CQL competes with SQL on FHIR. I think of them as different "
+        "tools. SQL on FHIR views turn every patient's resources into tables, with a row per "
+        "patient or per reading, for analysts, dashboards and research. They run in batch on "
+        "Spark or a warehouse, as you've seen in Databricks. CQL works on one patient's "
+        "record at a time and returns a value - true or false, or a list - which is what a "
+        "decision support service needs. They share a lot: the same FHIR data, very similar "
+        "path expressions, and value sets. A good workflow uses views to find a pattern, then "
+        "CQL to act on it.",
+    ),
+    diagram(
+        "CDS Hooks: advice at the right moment",
+        "CDS Hooks v2.0: the EHR calls a service at a workflow event and shows the cards it returns",
+        "cds-hooks",
+        cds_hooks(),
+        "CDS Hooks is one way of getting this logic in front of a clinician. The EHR discovers "
+        "services at a well-known endpoint, then calls a service when something happens in the "
+        "workflow - "
+        "here, patient-view, when a chart is opened. The request carries context, such as the "
+        "patient id, and prefetched FHIR data the service asked for up front, so it doesn't "
+        "have to query back. The service evaluates its logic, perhaps our CQL, and returns "
+        "cards: information, suggested actions, or links. On the right is a minimal card. "
+        "Summary, indicator and source are required. A link of type smart tells the EHR to "
+        "launch a SMART app.",
+    ),
+    diagram(
+        "SMART App Launch: apps inside the EHR",
+        "SMART App Launch v2.2: OAuth 2.0 with launch context, so the app opens on the right patient",
+        "smart-launch",
+        smart_launch(),
+        "SMART App Launch is often used alongside CDS Hooks. In an EHR launch, the EHR opens the "
+        "app with the FHIR server address and a launch id. The app reads the server's SMART "
+        "configuration, "
+        "then asks the authorisation server for access, with scopes such as read access to "
+        "the patient's Observations. It exchanges a code for an access token, and the token "
+        "response says which patient is in context. Then it calls the FHIR API. The "
+        "Spot FHIRs talk showed this in production: a SMART test result review app at "
+        "Queensland Children's Hospital, the first FHIR-based decision support deployment in "
+        "a Queensland HHS. Track 1 is building SMART apps this week.",
+    ),
+    diagram(
+        "OMOP: a common model for research",
+        "OHDSI OMOP CDM v5.4: person-centric tables and standardised vocabularies",
+        "omop-cdm",
+        omop_cdm(),
+        "Moving to research, OMOP is the Common Data Model from the OHDSI community, now at "
+        "version 5.4. Everything hangs off a person: visits, conditions, drug exposures, procedures, "
+        "measurements and observations. Every clinical code is mapped to a standard concept "
+        "in the OHDSI vocabularies, so the same query means the same thing at every site. "
+        "That is what makes federated network studies possible, with tools like ATLAS and "
+        "HADES. I see FHIR and OMOP as complementary. FHIR is built for exchange and "
+        "operations, with rich local detail. OMOP is built for comparing populations across "
+        "sites, and gives up some detail to get there.",
+    ),
+    diagram(
+        "From FHIR to OMOP",
+        "SQL on FHIR views make a natural first step of a FHIR to OMOP pipeline",
+        "fhir-to-omop",
+        fhir_to_omop(),
+        "If your data is already FHIR, the views you've written this week are a good first "
+        "step towards OMOP. You flatten resources into tables with SQL on FHIR, then map "
+        "codes and load OMOP tables. HL7's Vulcan accelerator has published a FHIR to OMOP "
+        "implementation guide, version 1.0.0, informative, targeting CDM 5.4, with mapping "
+        "patterns. Patient becomes person, Encounter becomes visit occurrence, Condition "
+        "becomes condition occurrence. Observation is more complicated: it goes to "
+        "measurement or observation depending on the domain of the mapped concept. And some "
+        "fields OMOP requires, like a drug exposure end date, may have to be derived.",
+    ),
+    diagram(
+        "One finding, end to end",
+        "A statin gap after MI, from the MI exercise, carried through every standard",
+        "scenario",
+        scenario(),
+        "To bring this together, take a finding from the MI secondary prevention exercise. In Databricks, 22 "
+        "of the 274 synthetic patients with an MI had no statin prescribed within a year. That "
+        "definition becomes a CQL expression in a shared library. A CDS service evaluates it "
+        "when a chart is opened and returns a warning card. The clinician opens a SMART app "
+        "from the card to see the medication history. Meanwhile, the same data, mapped to "
+        "OMOP condition occurrence and drug exposure rows, is pooled with other sites in a "
+        "network study. The results of that study raise new questions and feed back into the "
+        "logic, which closes the loop.",
+    ),
+    section(
+        "Show and tell",
+        "Now for the last part of the connectathon: show and tell. Every group across the "
+        "three tracks gets a chance to share what they did, in the main room after afternoon "
+        "tea. It doesn't need to be polished. The most useful presentations are honest about "
+        "what you tried, what worked and what didn't. So let's talk about how to make the most "
+        "of a few minutes, and then I'll show you a quick way to get a chart out of the "
+        "workspace for your slide.",
+    ),
+    diagram(
+        "Show and tell",
+        "Main room, 3:30-4:30: a few minutes per group, across all three tracks",
+        "show-and-tell",
+        show_and_tell(),
+        "Show and tell is in the main room at 3:30, after afternoon tea. Each group gets a "
+        "few minutes; plan on about three. A simple structure works well: the question you "
+        "asked, the data you used, what you did - which standards and tools - what you found, "
+        "and what you'd do next. Show a screenshot or a chart rather than a lot of text. "
+        "Please say what didn't work. That is often the most useful thing for the room, and "
+        "for us as organisers. Name the standards and tools, and keep to time.",
+    ),
+    diagram(
+        "Demo",
+        "From a query result to a chart for your show and tell slide",
+        "demo",
+        demo_steps(),
+        "Live demo. One: open the SQL Editor from the left navigation and attach the "
+        "Serverless Starter Warehouse. Two: paste the summary query from the septic shock "
+        "exercise, which counts patients and deaths within 28 days by treatment group, and "
+        "click Run all. Two rows appear, one per group. Three: click the plus next to the "
+        "Table tab and choose Visualization. Four: pick a bar chart, put treatment group on "
+        "the X axis and mortality percent on the Y axis. Five: save it, and take a screenshot "
+        "for your slide. I'll point out that there are only 10 patients, so this is a "
+        "picture, not a result.",
+    ),
+    diagram(
+        "Your turn",
+        "Finish, chart one result, and prepare 3 minutes for show and tell",
+        "your-turn",
+        your_turn(),
+        "The rest of the time before show and tell is yours. Finish the exercise or "
+        "the question you've been working on. Pick one result and chart it the way I just "
+        "showed. Then fill in the five prompts and decide who will speak. If you finish "
+        "early, here's a stretch task: write the CQL define or the CDS Hooks card that would "
+        "deliver your finding to a clinician. The card on the right is valid and has only the "
+        "required fields. James, Dion, Duncan and I will be around the room to help.",
+    ),
+    section(
+        "Demo walkthrough",
+        "Backup slides, in case the live demo fails. They walk through the demo with screenshots, "
+        "and are also useful for anyone who wants to repeat the steps later. They show the "
+        "same SQL editor and the same two queries from this week's exercises: the MI secondary "
+        "prevention summary and the septic shock mortality summary. Everything here works on "
+        "the Serverless Starter Warehouse, so you don't need the notebook cluster to make a "
+        "chart.",
+    ),
+    diagram(
+        "Results in the SQL editor",
+        "The MI secondary prevention summary, with the controls you need",
+        "backup-results",
+        backup_results(),
+        "This is the SQL editor after running the summary query from the MI secondary "
+        "prevention exercise, with follow_up_days set to 365. One: Run all executes on the "
+        "Serverless Starter Warehouse. Two: the plus next to the Table tab is how you add a "
+        "visualisation; it opens a new tab beside the table. Three: the result, one row per "
+        "drug class and one for all four - a bar chart of percent_treated by drug_class works "
+        "well. Four: the download button lets you take the result elsewhere if you'd rather "
+        "chart it in another tool.",
+    ),
+    diagram(
+        "From result to chart",
+        "The septic shock mortality summary as a bar chart",
+        "backup-chart",
+        backup_chart(),
+        "On the left is the summary result: two treatment groups with patient and death "
+        "counts and the percentage who died within 28 days. Click the plus, choose "
+        "Visualization, then a bar chart with treatment group on the X axis and mortality "
+        "percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
+        "rows: 50.0 and 37.5. Put the number of patients on the slide, because with 2 and 8 "
+        "patients one death moves a bar by 12.5 to 50 points. Present it as a demonstration "
+        "of the method, not a finding.",
+    ),
+]

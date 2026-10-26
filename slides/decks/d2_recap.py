@@ -32,7 +32,7 @@ from kit import (
     title_slide,
 )
 
-from decks._shared import EVENT, FORM_URL, LINKS, PRESENTER, show_and_tell
+from decks._shared import EVENT, FORM_URL, LINKS, PRESENTER, show_and_tell, strands
 
 # One (team, question, progress) tuple per group, e.g.
 #   ("Metro North", "Do beta-blockers help in septic shock?", "Cohort built; comparing mortality"),
@@ -57,51 +57,11 @@ def wrap(s, width, max_lines=2):
     return [r if len(r) <= width else r[: width - 1] + "…" for r in out]
 
 
-def strands():
-    """What each Track 3 strand covered on Thursday."""
-    b = [rect(10, 10, 450, 320, BLUE, rx=12)]
-    b.append(text(30, 46, "Analytics", 20, "start", 700))
-    b.append(text(30, 72, "John Grimes", 15, "start", 400, MUTED))
-    slabs = [
-        ("11:30", ["Kick-off: the environment", "and the standards map"]),
-        ("2:00", ["FHIR amid legacy systems:", "mapping CSV to FHIR"]),
-        ("3:30", ["Getting data out: Bulk Data", "and Pathling"]),
-    ]
-    for i, (when, rows) in enumerate(slabs):
-        y = 96 + i * 76
-        b.append(rect(30, y, 410, 64, "#fff", rx=8))
-        b.append(text(48, y + 38, when, 16, "start", 700, TEAL))
-        b.append(text(112, y + 27, rows[0], 15, "start"))
-        b.append(text(112, y + 49, rows[1], 15, "start"))
-    others = [
-        (LAVENDER, "Terminology", "James Grant", "SNOMED CT-AU, AMT, Ontoserver, ECL"),
-        (
-            MINT,
-            "Text to structured data",
-            "Dion McMurtrie",
-            "Clinical notes to coded FHIR data",
-        ),
-        (
-            PEACH,
-            "Queensland Health context",
-            "Duncan Pullen",
-            "The Queensland Health perspective",
-        ),
-    ]
-    for i, (fill, title, lead, item) in enumerate(others):
-        y = 10 + i * 110
-        b.append(rect(480, y, 450, 100, fill, rx=12))
-        b.append(text(500, y + 32, title, 18, "start", 700))
-        b.append(text(910, y + 32, lead, 14, "end", 400, MUTED))
-        b.append(text(500, y + 70, item, 15, "start"))
-    return svg(940, 340, b)
-
-
 def analytics_path():
-    """The analytics path so far: two ways into FHIR tables on Thursday, then Friday's stages."""
+    """The analytics path: two ways into FHIR tables, then the stages that use them."""
     b = [
-        text(305, 30, "Thursday: get the data", 17, weight=700, fill=TEAL),
-        text(795, 30, "Friday: use it", 17, weight=700, fill=MUTED),
+        text(305, 30, "Get the data", 17, weight=700, fill=TEAL),
+        text(795, 30, "Then use it", 17, weight=700, fill=TEAL),
         box(10, 60, 180, 80, CYAN, ["Legacy extract", "synthea_csv"], 15),
         box(10, 190, 180, 80, BLUE, ["FHIR server", "Bulk Data $export"], 15),
         box(225, 60, 180, 80, "#fff", ["Map to FHIR", "Spark struct · to_json"], 14),
@@ -115,23 +75,21 @@ def analytics_path():
         line(525, 140, 525, 188),
         hcurve(610, 230, 658, 92),
     ]
-    friday = [
+    stages = [
         (LAVENDER, ["Shape: SQL on FHIR views", "FHIRPath · terminology"]),
         (MINT, ["Analyse: SQL · Python", "a real-world study"]),
         (PEACH, ["Act: CQL · CDS Hooks", "SMART apps · OMOP"]),
     ]
-    g = []
-    for i, (fill, rows) in enumerate(friday):
+    for i, (fill, rows) in enumerate(stages):
         y = 60 + i * 80
-        g.append(box(660, y, 270, 64, fill, rows, 15))
-        if i < len(friday) - 1:
-            g.append(line(795, y + 64, 795, y + 78))
-    b.append(f'<g opacity="0.45">{"".join(g)}</g>')
+        b.append(box(660, y, 270, 64, fill, rows, 15))
+        if i < len(stages) - 1:
+            b.append(line(795, y + 64, 795, y + 78))
     b.append(
         text(
             470,
             322,
-            "Two ways in, one set of FHIR tables - everything on Friday reuses them",
+            "Two ways in, one set of FHIR tables - everything after reuses them",
             15,
             fill=MUTED,
             italic=True,
@@ -177,36 +135,32 @@ def progress_table(entries):
 
 
 def friday():
-    """Friday's blocks on a timeline, with the recap highlighted."""
+    """Friday in Track 3 on a timeline, with the recap highlighted."""
     blocks = [
-        ("9:00", "Recap", ["Track leads", "summarise Day 1"], "Main room", YELLOW),
+        ("9:00", 220, "Recap", ["Track leads", "summarise Day 1"], "Main room", YELLOW),
         (
-            "9:30",
-            "SQL on FHIR",
-            ["Pathling views and", "terminology"],
+            "From 9:30",
+            440,
+            "Hands-on",
+            [
+                "Carry on through the analytics topics",
+                "from wherever your group has got to",
+            ],
             "Track 3 room",
             LAVENDER,
         ),
         (
-            "11:00",
-            "A real-world study",
-            ["Beta-blockers in", "septic shock"],
-            "Track 3 room",
-            MINT,
+            "3:30",
+            220,
+            "Show and tell",
+            ["A few minutes", "per group"],
+            "Main room",
+            BLUE,
         ),
-        (
-            "1:30",
-            "Closing the loop",
-            ["CQL, CDS Hooks,", "SMART, OMOP"],
-            "Track 3 room",
-            PEACH,
-        ),
-        ("3:30", "Show and tell", ["A few minutes", "per group"], "Main room", BLUE),
     ]
     b = [line(20, 60, 920, 60, GREY, 2, arrow=None)]
-    w, gap = 172, 14
-    for i, (when, title, rows, where, fill) in enumerate(blocks):
-        x = 10 + i * (w + gap)
+    x = 10
+    for i, (when, w, title, rows, where, fill) in enumerate(blocks):
         cx = x + w / 2
         now = i == 0
         b.append(
@@ -218,12 +172,13 @@ def friday():
         b.append(text(cx, 172, rows[0], 15))
         b.append(text(cx, 194, rows[1], 15))
         b.append(text(cx, 258, where, 14, fill=MUTED, italic=True))
-    b.append(text(103, 312, "You are here", 15, weight=700, fill=TEAL))
+        x += w + 20
+    b.append(text(120, 312, "You are here", 15, weight=700, fill=TEAL))
     b.append(
         text(
-            560,
+            600,
             312,
-            "Every Track 3 block: about 30 minutes of context and a demo, then hands-on",
+            "Each topic: some context and a demo, then hands-on",
             15,
             fill=MUTED,
             italic=True,
@@ -280,30 +235,29 @@ DECK = {
             "first time today, there's a slide near the end on how to get into the workspace.",
         ),
         diagram(
-            "Day 1 across the track",
+            "Across the track",
             "Four strands, one set of shared data and questions",
             "strands",
             strands(),
-            "Track 3 ran as four strands yesterday. In the analytics strand we had three blocks: the "
-            "kick-off, where we set up the Databricks environment and walked through the standards "
-            "map; then FHIR amid legacy and proprietary systems, where we mapped a flat CSV extract "
-            "into FHIR; then getting data out with Bulk Data and Pathling. Alongside that, James "
-            "Grant led terminology, Dion McMurtrie led the work on turning text into structured, "
-            "coded data, and Duncan Pullen brought the Queensland Health perspective. James and Dion "
-            "can tell you more about their strands.",
+            "Track 3 runs as four strands. In the analytics strand we're working through six topics "
+            "at the pace of the room, starting with the kick-off, where we set up the Databricks "
+            "environment and walked through the standards map. Alongside that, James Grant leads "
+            "terminology, Dion McMurtrie leads the work on turning text into structured, coded "
+            "data, and Duncan Pullen brings the Queensland Health perspective. James and Dion can "
+            "tell you more about their strands.",
         ),
         diagram(
-            "The analytics path so far",
-            "Thursday was about getting data into FHIR tables; Friday is about using them",
+            "The analytics path",
+            "Two ways into FHIR tables, then shaping, analysing and acting on them",
             "analytics-path",
             analytics_path(),
-            "This is where the analytics strand has got to. Yesterday was the left-hand side: getting "
-            "the data. There were two ways in. One was mapping a legacy extract, the Synthea CSV "
-            "tables, into FHIR resources with Spark. The other was the route a FHIR server gives "
-            "you: a Bulk Data export, which produces NDJSON files per resource type. Either way, "
-            "Pathling encodes the resources and writes one Delta table per resource type. Today is "
-            "the right-hand side: shaping those tables with SQL on FHIR views, analysing them, and "
-            "putting results back into the workflow.",
+            "This is the analytics path. It starts with getting the data, and there are two ways "
+            "in. One is mapping a legacy extract, the Synthea CSV tables, into FHIR resources with "
+            "Spark. The other is the route a FHIR server gives you: a Bulk Data export, which "
+            "produces NDJSON files per resource type. Either way, Pathling encodes the resources "
+            "and writes one Delta table per resource type. Everything after that reuses those "
+            "tables: shaping them with SQL on FHIR views, analysing them, and putting results back "
+            "into the workflow.",
         ),
         diagram(
             "Progress so far",
@@ -319,16 +273,15 @@ DECK = {
         ),
         diagram(
             "Friday in Track 3",
-            "Three hands-on blocks in the Track 3 room, then show and tell here",
+            "Hands-on in the Track 3 room, then show and tell here",
             "friday",
             friday(),
-            "Here's today. At 9:30 we start in the Track 3 room with SQL on FHIR: Pathling views and "
-            "terminology, on the synthetic Synthea data. At 11:00 we look at a "
-            "real-world study, beta-blockers in septic shock, using the MIMIC-IV intensive care demo data. At "
-            "1:30 we close the loop, with CQL, CDS Hooks, SMART apps and OMOP: how analytics results "
-            "get back to clinicians and researchers. Each block starts with about 30 minutes of "
-            "context and a demo from me, then the rest is hands-on time. At 3:30 we all come back "
-            "here for show and tell.",
+            "Here's today. From 9:30 the Track 3 room is open, and we carry on through the "
+            "analytics topics from wherever your group has got to: SQL on FHIR and terminology, the "
+            "septic shock study on the MIMIC-IV intensive care demo data, and closing the loop with "
+            "CQL, CDS Hooks, SMART apps and OMOP. Each topic starts with some context and a demo "
+            "from me, then the rest is hands-on time. At 3:30 we all come back here for show and "
+            "tell.",
         ),
         diagram(
             "Show and tell",
@@ -357,8 +310,8 @@ DECK = {
         closing(
             "Over to you",
             PRESENTER,
-            "That's the recap from Track 3. The Track 3 room opens at 9:30, and we start with SQL "
-            "on FHIR, Pathling views and terminology. If you're new today, scan the form on the "
+            "That's the recap from Track 3. The Track 3 room opens at 9:30. If you're new today, "
+            "scan the form on the "
             "left now, so your invitation is waiting when you sit down. The code on the right takes "
             "you to the exercises on GitHub, which stay public after the event. "
             "The track leads will be in the Track 3 room, so come and find us with your "

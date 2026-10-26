@@ -14,7 +14,9 @@ outlines and grey connectors, with JetBrains Mono for code.
 A deck module (decks/*.py) defines ``DECK``, a dict with ``file`` (output name
 without extension) and ``slides`` (a list built with the slide constructors
 below). The first slide must be ``title_slide`` and the last ``closing``. The
-closing heading must fit on one line of about 20 characters.
+closing heading must fit on one line of about 20 characters. The modules in
+decks/parts/ each define ``SLIDES``, one part of the analytics deck, opening
+with a ``section`` that names its PowerPoint section.
 
 Author: John Grimes
 """
@@ -363,9 +365,9 @@ def title_slide(title, subtitle, notes):
     return {"kind": "title", "title": title, "subtitle": subtitle, "notes": notes}
 
 
-def section(heading, notes):
-    """A dark section divider."""
-    return {"kind": "section", "heading": heading, "notes": notes}
+def section(heading, notes, part=None):
+    """A dark section divider; with part, it also starts a PowerPoint section of that name."""
+    return {"kind": "section", "heading": heading, "notes": notes, "part": part}
 
 
 def diagram(title, subtitle, name, drawing, notes):

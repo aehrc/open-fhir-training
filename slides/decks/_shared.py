@@ -15,6 +15,7 @@ from kit import (
     TEAL,
     YELLOW,
     box,
+    circle,
     line,
     qr,
     rect,
@@ -92,39 +93,101 @@ def standards_map(highlight=None):
     return svg(940, 335, b)
 
 
-def schedule(now=None):
-    """The Track 3 blocks over both days, with John's slab topics.
+# The analytics topics in the order they are presented, each with its stage on the
+# standards map, a fill, a full title and a short title. They have no fixed times.
+TOPICS = [
+    (
+        "Start here",
+        YELLOW,
+        "Kick-off: the environment and the standards map",
+        "Kick-off: environment and standards",
+    ),
+    (
+        "Get the data",
+        BLUE,
+        "FHIR amid legacy and proprietary systems",
+        "FHIR amid legacy systems",
+    ),
+    (
+        "Get the data",
+        BLUE,
+        "Getting data out: Bulk Data and Pathling",
+        "Getting data out: Bulk Data",
+    ),
+    (
+        "Shape it",
+        LAVENDER,
+        "SQL on FHIR, Pathling views and terminology",
+        "SQL on FHIR and terminology",
+    ),
+    (
+        "Analyse it",
+        MINT,
+        "A real-world study: beta-blockers in septic shock",
+        "Beta-blockers in septic shock",
+    ),
+    (
+        "Act on it",
+        PEACH,
+        "Closing the loop: CQL, CDS Hooks, SMART, OMOP",
+        "Closing the loop: CQL to OMOP",
+    ),
+]
 
-    now is the index (0-5) of the block to highlight.
-    """
-    blocks = [
-        ("Thu 11:30", "Kick-off: environment and the standards map"),
-        ("Thu 2:00", "FHIR amid legacy and proprietary systems"),
-        ("Thu 3:30", "Getting data out: Bulk Data and Pathling"),
-        ("Fri 9:30", "SQL on FHIR, Pathling views and terminology"),
-        ("Fri 11:00", "A real-world study: beta-blockers in septic shock"),
-        ("Fri 1:30", "Closing the loop: CQL, CDS Hooks, SMART, OMOP"),
-    ]
+
+def topics():
+    """The analytics topics, each with its stage on the standards map."""
     b = []
-    for i, (when, topic) in enumerate(blocks):
+    for i, (stage, fill, title, _) in enumerate(TOPICS):
         col, row = divmod(i, 3)
         x, y = 10 + col * 470, 20 + row * 100
-        on = now == i
-        fill = YELLOW if on else "#fff"
-        b.append(rect(x, y, 450, 80, fill, sw=2.4 if on else 1.6, rx=10))
-        b.append(text(x + 18, y + 33, when, 16, "start", 700, TEAL if on else INK))
-        b.append(text(x + 18, y + 60, topic, 15, "start"))
-    b.append(text(245, 325, "Thursday 29 October", 16, weight=700, fill=MUTED))
+        b.append(rect(x, y, 450, 80, fill, rx=10))
+        b.append(text(x + 18, y + 33, stage, 16, "start", 700, INK))
+        b.append(text(x + 18, y + 60, title, 15, "start"))
     b.append(
         text(
-            715,
+            470,
             325,
-            "Friday 30 October · Show and tell 3:30",
+            "Taken at the pace of the room · Show and tell: Friday 3:30, main room",
             16,
             weight=700,
             fill=MUTED,
         )
     )
+    return svg(940, 340, b)
+
+
+def strands():
+    """The four Track 3 strands: the analytics topics beside the other three leads."""
+    b = [rect(10, 10, 450, 320, BLUE, rx=12)]
+    b.append(text(30, 46, "Analytics", 20, "start", 700))
+    b.append(text(440, 46, "John Grimes", 14, "end", 400, MUTED))
+    for i, (_, fill, _, short) in enumerate(TOPICS):
+        y = 66 + i * 43
+        b.append(rect(30, y, 410, 36, "#fff", rx=8))
+        b.append(circle(52, y + 18, 8, fill, sw=1.2))
+        b.append(text(72, y + 24, short, 15, "start"))
+    others = [
+        (LAVENDER, "Terminology", "James Grant", "SNOMED CT-AU, AMT, Ontoserver, ECL"),
+        (
+            MINT,
+            "Text to structured data",
+            "Dion McMurtrie",
+            "Clinical notes to coded FHIR data",
+        ),
+        (
+            PEACH,
+            "Queensland Health context",
+            "Duncan Pullen",
+            "The Queensland Health perspective",
+        ),
+    ]
+    for i, (fill, title, lead, item) in enumerate(others):
+        y = 10 + i * 110
+        b.append(rect(480, y, 450, 100, fill, rx=12))
+        b.append(text(500, y + 32, title, 18, "start", 700))
+        b.append(text(910, y + 32, lead, 14, "end", 400, MUTED))
+        b.append(text(500, y + 70, item, 15, "start"))
     return svg(940, 340, b)
 
 
