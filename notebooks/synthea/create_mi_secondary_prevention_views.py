@@ -20,6 +20,8 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.legend_handler import HandlerTuple
+from matplotlib.patches import Patch
 from pathling import PathlingContext
 
 TERMINOLOGY_STORE = "s3://open-fhir-training-data/terminology/tx-store"
@@ -579,7 +581,18 @@ ax.set_xticks(list(x), DRUG_CLASSES)
 ax.set_ylim(0, 105)
 ax.set_ylabel("Patients treated (%)")
 ax.set_title("Secondary prevention after myocardial infarction")
-ax.legend(frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.1))
+# One legend entry per data source; the Synthea entry shows all four class colours.
+handles, labels = ax.get_legend_handles_labels()
+handles[0] = tuple(Patch(color=CLASS_COLOURS[c]) for c in DRUG_CLASSES)
+ax.legend(
+    handles,
+    labels,
+    handler_map={tuple: HandlerTuple(ndivide=None, pad=0)},
+    frameon=False,
+    ncol=2,
+    loc="upper center",
+    bbox_to_anchor=(0.5, -0.1),
+)
 plt.tight_layout()
 plt.show()
 
