@@ -348,15 +348,19 @@ encounter_fhir_df = encounters_df.select(
     # Other possible values: planned, arrived, triaged, in-progress, onleave
     lit("finished").alias("status"),
     # Class - this describes the setting/type of encounter
-    # We map CSV values (wellness, outpatient, etc.) to standard FHIR codes
+    # We map CSV values to v3-ActCode the same way Synthea's own FHIR exporter does
     struct(
         lit("http://terminology.hl7.org/CodeSystem/v3-ActCode").alias("system"),
-        when(col("ENCOUNTERCLASS") == "wellness", lit("WELLNESS"))
-        .when(col("ENCOUNTERCLASS") == "outpatient", lit("AMB"))
+        when(
+            col("ENCOUNTERCLASS").isin(
+                "wellness", "ambulatory", "outpatient", "urgentcare"
+            ),
+            lit("AMB"),
+        )
         .when(col("ENCOUNTERCLASS") == "emergency", lit("EMER"))
-        .when(col("ENCOUNTERCLASS") == "inpatient", lit("IMP"))
-        .when(col("ENCOUNTERCLASS") == "urgentcare", lit("ACUTE"))
-        .when(col("ENCOUNTERCLASS") == "ambulatory", lit("AMB"))
+        .when(col("ENCOUNTERCLASS").isin("inpatient", "snf"), lit("IMP"))
+        .when(col("ENCOUNTERCLASS").isin("home", "hospice"), lit("HH"))
+        .when(col("ENCOUNTERCLASS") == "virtual", lit("VR"))
         .otherwise(lit("AMB"))
         .alias("code"),
         col("ENCOUNTERCLASS").alias("display"),
