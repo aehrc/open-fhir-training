@@ -118,7 +118,7 @@ def clinical_question():
         text(
             30,
             66,
-            "Sepsis that needs vasopressors to hold blood pressure",
+            "Zhang et al.'s working definition, from Sepsis-3",
             14,
             "start",
             400,
@@ -127,7 +127,7 @@ def clinical_question():
     )
     for i, s in enumerate(
         [
-            "Infection with organ dysfunction (SOFA >= 2)",
+            "Infection with organ dysfunction (SOFA ≥ 2)",
             "Norepinephrine or vasopressin infusion",
             "Often still tachycardic after fluids",
         ]
@@ -270,7 +270,7 @@ def study_design():
         text(
             base + 14,
             57,
-            "culture <= 24 h after the antibiotic, or antibiotic <= 72 h after the culture",
+            "culture ≤ 24 h after the antibiotic, or antibiotic ≤ 72 h after the culture",
             13,
             "start",
             400,
@@ -283,7 +283,7 @@ def study_design():
         text(
             base + 14,
             117,
-            "SOFA >= 2 from the worst values, 48 h before to 24 h after",
+            "SOFA ≥ 2 from the worst values, 48 h before to 24 h after",
             14,
             "start",
         )
@@ -318,7 +318,7 @@ def study_design():
         text(
             930,
             332,
-            "Also: first ICU stay, aged 18+, ICU stay >= 48 h, no contraindication",
+            "Also: first ICU stay, aged 18+, ICU stay ≥ 48 h, no contraindication",
             13,
             "end",
             400,
@@ -600,8 +600,8 @@ def sofa():
             "Worst value from 48 h before",
             "to 24 h after the infection",
             "No measurement scores 0",
-            "Every cohort patient scores 4",
-            "here, from the vasopressors",
+            "All 10 in the cohort score 4",
+            "here; vasopressin doesn't score",
         ]
     ):
         b.append(text(636, 240 + i * 22, s, 14, "start", 700 if i in (0, 1) else 400))
@@ -1071,9 +1071,9 @@ SLIDES = [
         "Beta-blockers slow the heart and protect it from catecholamine stress, but they "
         "also lower cardiac output, so their use is controversial. In 2024 Zhang and "
         "colleagues looked at 4,860 patients with septic shock in the full MIMIC-IV "
-        "database. After propensity score matching, 28-day mortality was 21.5 percent in "
+        "database. After propensity score matching, 28-day mortality was 21.5 per cent in "
         "patients given a beta-blocker within 48 hours of starting vasopressors, and 27.1 "
-        "percent in those who were not. Our question is whether we can select the same "
+        "per cent in those who were not. Our question is whether we can select the same "
         "cohort from FHIR data.",
     ),
     diagram(
@@ -1101,10 +1101,12 @@ SLIDES = [
         "is the earlier of the two. Sepsis is a SOFA score of 2 or more, from the worst "
         "values in the 48 hours before to 24 hours after that onset. Septic shock is "
         "norepinephrine or vasopressin started within 48 hours of the onset of sepsis, and "
-        "the first start is the baseline. A beta-blocker in the 48 hours after the baseline "
-        "puts a patient in the treatment group, and the outcome is death within 28 days. On "
-        "top of that: first ICU stay, adults, at least 48 hours in the ICU, and no "
-        "contraindication.",
+        "the first start is the baseline. These are Zhang's working definitions rather than "
+        "Sepsis-3 itself: Sepsis-3 asks for a rise in SOFA of 2 or more, which this assumes "
+        "from a baseline of zero, and its septic shock also needs a lactate above 2 mmol/L. A "
+        "beta-blocker in the 48 hours after the baseline puts a patient in the treatment "
+        "group, and the outcome is death within 28 days. On top of that: first ICU stay, "
+        "adults, at least 48 hours in the ICU, and no contraindication.",
     ),
     diagram(
         "Views, then one patient-level view",
@@ -1129,7 +1131,7 @@ SLIDES = [
         "choice type. An infusion has a Period and a bolus has a dateTime; ofType picks each, "
         "and the union operator takes whichever is present. Three: rather than listing every "
         "antibiotic, the where clause selects administrations in the ICU's two antibiotic "
-        "categories. The categories also include the diluent rows, like dextrose 5 percent, "
+        "categories. The categories also include the diluent rows, like 5 per cent dextrose, "
         "which doesn't change the result here. Antibiotics given on the ward have no "
         "category, so they aren't seen.",
     ),
@@ -1158,9 +1160,11 @@ SLIDES = [
         "with no measurement scores zero. The SQL takes the worst value of each measurement "
         "in the window around the suspected infection and scores it with a CASE expression, "
         "like this one for the cardiovascular component. It is simplified: no urine output, "
-        "and the respiratory score doesn't check for ventilation. Every patient in the cohort "
-        "scores 4 for cardiovascular, because the vasopressors that make them eligible also "
-        "score.",
+        "and the respiratory score doesn't check for ventilation. All 10 patients in the "
+        "cohort score 4 for cardiovascular, but the vasopressors that make them eligible don't "
+        "guarantee it: norepinephrine at 0.1 micrograms per kilogram per minute or less scores "
+        "3, and vasopressin isn't in the SOFA criteria at all. Two patients outside the "
+        "cohort who meet the vasopressor criterion score 3.",
     ),
     diagram(
         "Each criterion is a column",
@@ -1170,8 +1174,8 @@ SLIDES = [
         "The combine SQL file builds one common table expression per step and then selects "
         "one row per patient, with each criterion as a column. in_cohort is true when they "
         "all hold. That makes the attrition easy to see: all 100 patients are adults, about "
-        "half are out on the 48-hour ICU stay, 41 have a suspected infection, 39 meet "
-        "Sepsis-3, 17 have septic shock, and 7 of those are excluded for a contraindication, "
+        "half are out on the 48-hour ICU stay, 41 have a suspected infection, 39 meet the "
+        "sepsis criterion, 17 have septic shock, and 7 of those are excluded for a contraindication, "
         "mostly acute heart failure. That leaves 10 patients: 2 with a beta-blocker and 8 "
         "without. If a number looks wrong, you can filter on any column and see why.",
     ),
@@ -1196,8 +1200,9 @@ SLIDES = [
         "Here is the summary query's result: one of two patients died in the beta-blocker "
         "group, and three of eight in the control group. Please don't read anything into "
         "these numbers. With two patients, one death is 50 points. The comparison is also "
-        "unadjusted, where Zhang et al. matched 619 pairs on age, sex, weight and severity "
-        "scores. What this shows is that the cohort definition runs end to end on FHIR, and "
+        "unadjusted, where Zhang et al. matched 619 pairs on age, sex, weight, SOFA, SAPS II, "
+        "the Charlson comorbidity score, heart disease and atrial arrhythmia. What this shows "
+        "is that the cohort definition runs end to end on FHIR, and "
         "the same views and SQL would run unchanged on the full MIMIC-IV.",
     ),
     diagram(
@@ -1224,10 +1229,13 @@ SLIDES = [
         "beta-blocker dose in the 48 hours after the baseline and counts patients and deaths "
         "by group. Run it, then change the interval on the highlighted line to 24 hours and "
         "to 7 days, and watch patients change group. Then think about why the study fixes the "
-        "window from the baseline: a patient who dies early has less time to be given a "
-        "beta-blocker, so a longer window starts to sort patients by how long they lived. If "
-        "you want more, add a heart disease subgroup from diagnosis_view. If you create "
-        "tables, put them in your own schema.",
+        "window from the baseline. A patient who dies early has less time to be given a "
+        "beta-blocker, so a longer window favours patients who lived longer, and the treated "
+        "group looks better than it is. This is immortal time bias, and a fixed 48-hour window "
+        "is how the design limits it. Don't expect these 10 patients to show it: here the "
+        "treated group's mortality goes up as the window grows. If you want more, add a heart "
+        "disease subgroup from diagnosis_view. If you create tables, put them in your own "
+        "schema.",
     ),
     section(
         "Demo walkthrough",
@@ -1245,8 +1253,8 @@ SLIDES = [
         "This is the SQL editor with the Serverless Starter Warehouse attached. One: the Run "
         "all button. Two: the query reads the patient-level view and keeps the rows where "
         "in_cohort is true, grouped by the beta_blocker column. Three: the result - two "
-        "patients in the beta-blocker group with one death, 50 percent, and eight in the "
-        "control group with three deaths, 37.5 percent.",
+        "patients in the beta-blocker group with one death, 50 per cent, and eight in the "
+        "control group with three deaths, 37.5 per cent.",
     ),
     diagram(
         "Expected outputs",
@@ -1257,8 +1265,10 @@ SLIDES = [
         "the 10 patients where in_cohort is true. On the right is the Your turn query with "
         "four windows, shown as deaths over patients. At 48 hours it matches the summary. At "
         "24 hours one patient moves to the control group; at 7 days five patients are "
-        "treated, and at 28 days six. With 100 patients this is as far as we can go. The pipeline "
-        "works and the choice of window clearly affects the groups, but answering the question "
-        "would need the full dataset.",
+        "treated, and at 28 days six. The treated group's mortality rises with the window, "
+        "from 1 of 2 to 3 of 5 and 3 of 6, the opposite of what immortal time bias would "
+        "produce; with this few patients, chance decides it. With 100 patients this is as far "
+        "as we can go. The pipeline works and the choice of window clearly affects the groups, "
+        "but answering the question would need the full dataset.",
     ),
 ]

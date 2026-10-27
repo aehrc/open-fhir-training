@@ -179,7 +179,7 @@ def export_flow():
         )
     )
     b.append(msg(282, "200 OK + manifest (JSON)", back=True, teal=True))
-    b.append(msg(326, "GET each output url -> NDJSON"))
+    b.append(msg(326, "GET each output url for NDJSON"))
     b.append(
         code(
             600,
@@ -189,6 +189,7 @@ def export_flow():
                 "{",
                 '  "transactionTime":',
                 '      "2021-01-01T00:00:00Z",',
+                '  "request": ".../Patient/$export",',
                 '  "requiresAccessToken": true,',
                 '  "output": [',
                 '    {"type": "Patient",',
@@ -248,7 +249,7 @@ def levels():
         ),
         (
             "_typeFilter",
-            "A search query per type (experimental, URL-encoded)",
+            "A search query per type (URL-encoded)",
             [
                 "[base]/Patient/$export?_type=Observation",
                 "  &_typeFilter=Observation?category=laboratory",
@@ -286,9 +287,9 @@ def ndjson():
         text(26, 33, "Patient.00000.ndjson", 15, "start", 700, family="JetBrains Mono")
     )
     rows = [
-        '{"resourceType":"Patient","id":"9f8e2002-...","gender":"male",...}',
-        '{"resourceType":"Patient","id":"ed7e40af-...","gender":"male",...}',
-        '{"resourceType":"Patient","id":"5b01a645-...","gender":"female",...}',
+        '{"resourceType":"Patient","id":"d286c559-...","gender":"male",...}',
+        '{"resourceType":"Patient","id":"a5f5cfb0-...","gender":"female",...}',
+        '{"resourceType":"Patient","id":"3695d2ed-...","gender":"female",...}',
         "...",
     ]
     for i, r in enumerate(rows):
@@ -349,7 +350,7 @@ def ndjson():
             287,
             [
                 "Easy to stream, split and process in parallel: each line parses on its own",
-                "Pathling takes the resource type from the file name: Patient.00000.ndjson -> Patient",
+                "File names are up to the server; Pathling reads the type from names like Patient.00000.ndjson",
             ],
             16,
         )
@@ -376,8 +377,8 @@ def backend_services():
             YELLOW,
             [
                 "client_id issued",
-                "public key as a JWKS",
-                "  (or a JWKS URL)",
+                "a JWKS URL for its",
+                "  public keys (preferred)",
                 "private key never",
                 "  leaves the client",
                 "",
@@ -449,7 +450,7 @@ def pathling_arch():
     b.append(rect(10, 108, 920, 120, LAVENDER, rx=12))
     b.append(text(30, 136, "Pathling", 17, "start", 700))
     mods = [
-        (["FHIR encoders", "FHIR -> data frames"]),
+        (["FHIR encoders", "FHIR to data frames"]),
         (["SQL on FHIR views", "ViewDefinitions"]),
         (["FHIRPath engine", "expressions over FHIR"]),
         (["Terminology functions", "member_of, translate, ..."]),
@@ -482,7 +483,7 @@ def encoders():
                 ' "meta": {"profile": [".../au-core-patient",',
                 '                      ".../au-erequesting-patient"]},',
                 ' "gender": "male",',
-                ' "name": [{"family": "Lakin515", ...}], ...}',
+                ' "name": [{"family": "Collins926", ...}], ...}',
             ],
             "NDJSON or Bundles",
             12,
@@ -539,7 +540,7 @@ def encoders():
             470,
             40,
             MINT,
-            ["Delta / Parquet tables - lossless, round-trips to FHIR"],
+            ["Delta / Parquet tables - extensions only if enabled"],
             14.5,
         )
     )
@@ -561,13 +562,13 @@ def import_code():
             6,
             560,
             [
-                "pc = PathlingContext.create()                     (1)",
+                "pc = PathlingContext.create()",
                 'pc.spark.sql("CREATE SCHEMA IF NOT EXISTS synthea")',
                 'pc.spark.catalog.setCurrentDatabase("synthea")',
-                "source = pc.read.ndjson(                          (2)",
+                "source = pc.read.ndjson(",
                 '    "s3://open-fhir-training-data/synthea/au/fhir")',
-                "source.resource_types()                           (3)",
-                "source.write.tables()                             (4)",
+                "source.resource_types()",
+                "source.write.tables()",
             ],
             "notebooks/synthea/import_synthea.py",
             12.5,
@@ -580,10 +581,10 @@ def import_code():
             196,
             560,
             [
-                "pc = PathlingContext.create(enable_extensions=True)  (5)",
+                "pc = PathlingContext.create(enable_extensions=True)",
                 "source = pc.read.ndjson(",
                 '    "s3://.../mimic-iv-clinical-database-demo-on-fhir-2.1.0/fhir",',
-                "    file_name_mapper=lambda file_name: re.findall(   (6)",
+                "    file_name_mapper=lambda file_name: re.findall(",
                 '        r"Mimic(\\w+?)(?:ED|ICU|...|VitalSignsED)?$", file_name))',
             ],
             "notebooks/mimic_iv/import_mimic_iv_demo.py",
@@ -592,13 +593,23 @@ def import_code():
             title_fill=PINK,
         )
     )
+    # Numbered markers beside the code lines they describe, outside the code so it copies cleanly.
+    for n, top, fs, row in [
+        (1, 6, 12.5, 0),
+        (2, 6, 12.5, 3),
+        (3, 6, 12.5, 5),
+        (4, 6, 12.5, 6),
+        (5, 196, 11.5, 0),
+        (6, 196, 11.5, 3),
+    ]:
+        b.append(callout(n, 554, top + 38 + fs + row * fs * 1.4 - fs * 0.35, 8))
     notes = [
         ("Start Spark with Pathling", "encoders, FHIRPath, terminology"),
         ("Point at a directory", "of NDJSON files"),
         ("List what was found", "15 resource types for Synthea"),
         ("One Delta table per type", "in the current schema"),
         ("Keep FHIR extensions", "e.g. US Core race in MIMIC"),
-        ("Map file names to types", "MimicObservationLabevents -> Observation"),
+        ("Map file names to types", "MimicObservationLabevents to Observation"),
     ]
     for i, (t, d) in enumerate(notes):
         y = 26 + i * 54
@@ -833,8 +844,9 @@ SLIDES = [
         "export a defined cohort. Then there are parameters. _type limits the resource types. "
         "_since returns only resources changed after an instant, so you can do incremental "
         "loads using the transaction time from your previous manifest. _typeFilter applies a "
-        "search query per type; it is marked experimental, and in a real request the query is "
-        "URL-encoded.",
+        "search query per type, and in a real request the query is URL-encoded. Bulk Data "
+        "3.0 has dropped the experimental label from _typeFilter itself; only chained "
+        "parameters inside it are still experimental.",
     ),
     diagram(
         "NDJSON: newline-delimited JSON",
@@ -844,10 +856,11 @@ SLIDES = [
         "The output format is NDJSON: newline-delimited JSON. Each line is one complete FHIR "
         "resource, with no Bundle around it. That makes the files easy to stream, split and "
         "process in parallel, because every line parses on its own. Each file holds one "
-        "resource type, and large exports are split across several files. The Synthea data in "
-        "our workspace uses the same bulk-style naming, for example Patient.00000.ndjson. "
-        "Pathling takes the resource type from the start of the file name, so it reads a "
-        "directory like this without any configuration.",
+        "resource type, and large exports are split across several files. The specification "
+        "leaves file names to the server. The Synthea data in our workspace is named like "
+        "Patient.00000.ndjson, which is the form Pathling expects: it takes the resource type "
+        "from the start of the file name, so it reads a directory like this without any "
+        "configuration.",
     ),
     diagram(
         "SMART Backend Services",
@@ -855,8 +868,9 @@ SLIDES = [
         "backend-services",
         backend_services(),
         "Bulk export usually runs with no user present, so it is authorised with SMART "
-        "Backend Services, part of SMART App Launch 2.2. First, once, the client registers its "
-        "public key with the authorisation server, as a JSON Web Key Set. Each time it needs "
+        "Backend Services, part of SMART App Launch 2.2. First, once, the client registers "
+        "with the authorisation server the URL of a JSON Web Key Set holding its public keys; "
+        "supplying the key set directly is allowed but discouraged. Each time it needs "
         "access, it signs a short-lived JWT with its private key: issuer and subject are its "
         "client ID, audience is the token endpoint. It posts that to the token endpoint with "
         "the client credentials grant and system scopes, such as system/*.rs for read and "
@@ -887,7 +901,7 @@ SLIDES = [
     ),
     diagram(
         "FHIR encoders",
-        "FHIR JSON becomes nested Spark columns, with nothing lost along the way",
+        "FHIR JSON becomes nested Spark columns that keep the FHIR structure",
         "encoders",
         encoders(),
         "The rest of Pathling is built on the encoders. They take FHIR JSON, from NDJSON files, "
@@ -895,12 +909,15 @@ SLIDES = [
         "Every element becomes a column, keeping the FHIR structure: complex types become structs "
         "and repeating elements become arrays. You can see that on the right, in the patient "
         "table in our catalog. One, meta is a struct. Two, meta.profile is an array of "
-        "strings. Three, meta.security is an array of structs. Because nothing is dropped, you "
-        "can write the tables out as Delta or Parquet and turn them back into FHIR later.",
+        "strings. Three, meta.security is an array of structs. Two defaults decide what is "
+        "kept: extensions are dropped unless you set enable_extensions, and recursive elements "
+        "stop at a nesting level of three. Our Synthea import uses the defaults, so its tables "
+        "have no extensions. Within those limits, you can write the tables out as Delta or "
+        "Parquet and turn them back into FHIR later.",
     ),
     diagram(
         "The import code",
-        "Four lines of Pathling load a whole bulk export; the MIMIC variant needs two options",
+        "A few lines of Pathling load a whole bulk export; the MIMIC variant needs two options",
         "import-code",
         import_code(),
         "This is the real code from our two import notebooks. One, create a Pathling context, "
@@ -908,7 +925,7 @@ SLIDES = [
         "Three, resource_types lists what was found: 15 types for Synthea. Four, write.tables "
         "writes one Delta table per resource type into the current schema. The MIMIC demo "
         "needs two changes. Five, enable_extensions keeps FHIR extensions, which MIMIC uses "
-        "for things like US Core race. Six, its file names don't follow the bulk convention, "
+        "for things like US Core race. Six, its file names aren't in the form Pathling expects, "
         "so a file name mapper pulls the resource type out of names like "
         "MimicObservationLabevents.",
     ),
@@ -1069,7 +1086,7 @@ SLIDES = [
         ),
         "This is the Sample Data tab for the patient table. One, the tab itself, next to the "
         "Overview we saw earlier with the column types. Two, the id column holds the "
-        "resource's logical id; id_versioned beside it adds the type and version. Three, meta "
+        "resource's logical id; id_versioned beside it adds the resource type. Three, meta "
         "is a struct, which the catalog shows as nested JSON. Further to the right are gender, "
         "birthDate, name, address and the rest of the patient, all keeping their FHIR shape. "
         "That's what you'll query in the SQL editor.",

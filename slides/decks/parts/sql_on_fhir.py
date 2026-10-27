@@ -311,7 +311,7 @@ def layers():
 
 
 def whats_next():
-    """SQL on FHIR 3.0.0-ballot: SQL as FHIR Library resources, terminology in SQL."""
+    """SQL on FHIR 3.0.0-ballot: SQL as FHIR Library resources; terminology in SQL from the CI build."""
     b = [text(0, 18, "v2 today", 15, "start", 700, MUTED)]
     for j, s in enumerate(["ViewDefinition", "ViewDefinition"]):
         b.append(box(0, 30 + j * 62, 190, 48, LAVENDER, [s], 15, 700))
@@ -329,10 +329,22 @@ def whats_next():
     b.append(hcurve(192, 116, 238, 210, stroke=GREY))
     b.append(vcurve(405, 142, 405, 160, lead=2, tail=8))
     b.append(rect(620, 30, 315, 110, CYAN, rx=10))
-    b.append(text(636, 56, "Terminology in SQL", 16, "start", 700))
-    b.append(text(636, 82, "A query declares a ValueSet or ConceptMap;", 13, "start"))
-    b.append(text(636, 102, "the runner exposes its members or", 13, "start"))
-    b.append(text(636, 122, "mappings as a table to join to", 13, "start"))
+    b.append(text(636, 54, "Terminology in SQL", 16, "start", 700))
+    b.append(
+        text(
+            636,
+            74,
+            "CI build only, not in the ballot",
+            13,
+            "start",
+            400,
+            MUTED,
+            italic=True,
+        )
+    )
+    b.append(text(636, 96, "A query declares a ValueSet or ConceptMap;", 13, "start"))
+    b.append(text(636, 114, "the runner exposes its members or", 13, "start"))
+    b.append(text(636, 132, "mappings as a table to join to", 13, "start"))
     b.append(hcurve(618, 85, 572, 220, stroke=GREY))
     b.append(rect(620, 162, 315, 130, "#fff", rx=10))
     b.append(text(636, 188, "Operations", 16, "start", 700))
@@ -343,7 +355,7 @@ def whats_next():
         text(
             470,
             326,
-            "STU 3 ballot (2026): draft content that may change before publication",
+            "STU 3 ballot (2026) and CI build: draft content that may change before publication",
             14,
             fill=MUTED,
             italic=True,
@@ -779,7 +791,9 @@ def steps_panel(steps, x, y, w, fs=15, gap=50, fill=YELLOW):
 
 def backup_clone():
     """Cloning a notebook before changing it."""
-    s, w, h, p = screenshot("file-menu-clone", 0, 0, 480, 335, crop=(243, 95, 560, 500))
+    s, w, h, p = screenshot(
+        "file-menu-clone-mi", 0, 0, 480, 335, crop=(243, 95, 560, 500)
+    )
     b = [s]
     k = w / 560
     b.append(highlight(*p(254, 126), 46 * k, 28 * k))
@@ -970,17 +984,18 @@ SLIDES = [
     ),
     diagram(
         "What's next in the spec",
-        "SQL on FHIR 3.0.0-ballot: SQL as FHIR resources, and terminology in SQL",
+        "SQL on FHIR 3.0.0-ballot: SQL as FHIR resources; terminology in SQL in the CI build",
         "whats-next",
         whats_next(),
         "SQL on FHIR version 3 is out for ballot. Today a ViewDefinition gets you to tables, "
         "but the SQL that joins them lives in files like the one in the exercise. The "
         "ballot adds two profiles on the FHIR Library resource: SQLView, a named query other "
         "queries can use as a table, and SQLQuery, a shareable, parameterised query that "
-        "declares the views it depends on. It also adds terminology in SQL: a query can "
-        "declare a ValueSet or ConceptMap and join to it as a table. Pathling 10 already does "
-        "this, and the exercise uses it. And there are standard operations to run "
-        "and export. This is ballot content, so details may change.",
+        "declares the views it depends on. Since the ballot, the continuous integration build "
+        "has added terminology in SQL: a query can declare a ValueSet or ConceptMap and join "
+        "to it as a table. That isn't in the published ballot, but Pathling 10 already does "
+        "it, and the exercise uses it. The ballot also defines standard operations to run and "
+        "export. All of this is draft content, so details may change.",
     ),
     section(
         "Exercise: secondary prevention after myocardial infarction",

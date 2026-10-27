@@ -84,7 +84,7 @@ def standards_map(highlight=None):
         text(
             470,
             320,
-            "FHIR data flows left to right; Pathling covers the middle two stages",
+            "Data flows left to right; Pathling's libraries work in the middle two stages, and its server does bulk export",
             15,
             fill=MUTED,
             italic=True,

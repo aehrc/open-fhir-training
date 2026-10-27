@@ -89,7 +89,7 @@ def analytics_path():
         text(
             470,
             322,
-            "Two ways in, one set of FHIR tables - everything after reuses them",
+            "Two ways in, both ending in one Delta table per FHIR resource type",
             15,
             fill=MUTED,
             italic=True,
@@ -255,9 +255,11 @@ DECK = {
             "in. One is mapping a legacy extract, the Synthea CSV tables, into FHIR resources with "
             "Spark. The other is the route a FHIR server gives you: a Bulk Data export, which "
             "produces NDJSON files per resource type. Either way, Pathling encodes the resources "
-            "and writes one Delta table per resource type. Everything after that reuses those "
-            "tables: shaping them with SQL on FHIR views, analysing them, and putting results back "
-            "into the workflow.",
+            "and writes one Delta table per resource type. The later stages work on tables of "
+            "that shape: shaping them with SQL on FHIR views, analysing them, and putting results "
+            "back into the workflow. In the exercises, the MI study uses the Synthea tables and "
+            "the septic shock study uses the MIMIC-IV tables; the CSV exercise's own tables stand "
+            "alone.",
         ),
         diagram(
             "Progress so far",

@@ -280,15 +280,15 @@ def fhir_as_data():
     rows = [
         "{",
         '  "resourceType": "Patient",',
-        '  "id": "9f8e2002-9898-...",',
+        '  "id": "d286c559-67c1-77b7-...",',
         '  "meta": {',
         '    "profile": ["...au-core-patient", ...]',
         "  },",
         '  "gender": "male",',
-        '  "birthDate": "2001-12-16",',
+        '  "birthDate": "2012-07-09",',
         '  "name": [{',
-        '    "family": "Lakin515",',
-        '    "given": ["Daron260", "Sammy219"]',
+        '    "family": "Collins926",',
+        '    "given": ["Brice635", "Rocco842"]',
         "  }]",
         "}",
     ]
@@ -395,7 +395,7 @@ def six_standards():
 
 
 def exercises_map():
-    """The five exercises, the concepts each teaches, and the section it goes with."""
+    """The five exercises used in the track, the concepts each teaches, and its section."""
     rows = [
         (
             YELLOW,
@@ -544,14 +544,14 @@ def your_turn():
 def backup_catalog():
     """Catalog Explorer at hive_metastore > synthea."""
     shot, w, h, pt = screenshot(
-        "catalog-synthea", 0, 0, 940, 298, crop=(0, 160, 940, 340)
+        "catalog-synthea", 0, 0, 940, 298, crop=(0, 155, 940, 375)
     )
     b = [shot]
     b.append(mark(pt, 14, 159, 174, 26))
     b.append(mark(pt, 250, 335, 140, 24))
-    b.append(mark(pt, 212, 474, 300, 26))
+    b.append(mark(pt, 212, 502, 300, 26))
     b.append(mark(pt, 800, 175, 70, 24))
-    for i, (px, py) in enumerate([(190, 172), (392, 347), (514, 487), (884, 187)], 1):
+    for i, (px, py) in enumerate([(190, 172), (392, 347), (514, 515), (884, 187)], 1):
         b.append(callout(i, *pt(px, py)))
     b.append(
         legend(
@@ -581,7 +581,7 @@ def backup_patient():
     x0 = 672
     notes = [
         ("id", ["the resource's logical id"]),
-        ("id_versioned", ["the id qualified by type,", "e.g. Patient/9f8e2002-..."]),
+        ("id_versioned", ["the id qualified by type,", "e.g. Patient/d286c559-..."]),
         ("meta", ["a struct: one row holds", "the whole nested object"]),
     ]
     y = 14
@@ -743,10 +743,11 @@ DECK = {
             "This is why we need a shaping stage. On the left is one Patient from our Synthea data, "
             "abridged. It's a tree: meta is an object, profile is a list inside it, name is a list of "
             "objects with its own list of given names. On the right is the same resource type as a "
-            "table in Databricks. Pathling has encoded every element, so meta becomes a struct column "
-            "and profile an array. Nothing is lost, but this isn't the shape an analyst wants. SQL on "
-            "FHIR views are how we flatten it into plain rows and columns, which we'll cover in the "
-            "SQL on FHIR section.",
+            "table in Databricks. Pathling has encoded each element it keeps, so meta becomes a "
+            "struct column and profile an array. By default it leaves out extensions and stops "
+            "recursive elements at three levels of nesting. Either way, this isn't the shape an "
+            "analyst wants. SQL on FHIR views are how we flatten it into plain rows and columns, "
+            "which we'll cover in the SQL on FHIR section.",
         ),
         diagram(
             "Six standards at a glance",
@@ -763,17 +764,20 @@ DECK = {
         ),
         diagram(
             "The exercises",
-            "Five exercises in the repository, each tied to a section",
+            "Five exercises for this track, each tied to a section",
             "exercises",
             exercises_map(),
-            "These are the five exercises in the repository. CSV to FHIR maps a flat legacy extract "
+            "These are the five exercises we'll use in the track. CSV to FHIR maps a flat legacy extract "
             "into FHIR resources, and goes with the section on legacy systems. The two import "
             "notebooks read NDJSON files with Pathling and store them as tables; you'll run part of "
             "the Synthea one shortly. The MI secondary prevention exercise builds SQL on FHIR "
             "views, classifies medicines with a ConceptMap and joins them in SQL, and goes with the "
             "SQL on FHIR section. The septic shock study selects the cohort of a published study of "
             "beta-blockers from de-identified intensive care data, and has a section of its own. "
-            "You don't need to do them in order.",
+            "The repository also has two earlier studies, on prostate cancer and pulse oximetry, "
+            "and the notebook that builds the AMT terminology store. They aren't part of the "
+            "sections, but you're welcome to look at them. You don't need to do the exercises in "
+            "order.",
         ),
         diagram(
             "Demo",
@@ -816,8 +820,9 @@ DECK = {
             backup_catalog(),
             "Backup slide. "
             "This is Catalog Explorer. Click Catalog in the left-hand menu, then expand "
-            "hive_metastore under Legacy. You'll see a schema for each dataset: mimic_iv_demo and "
-            "mimic_iv_views for the intensive care data, and synthea for the synthetic Queensland "
+            "hive_metastore under Legacy. You'll see a schema for each dataset: mimic_iv_demo for the "
+            "intensive care data and mimic_iv_beta_blocker_views for the septic shock study's views, "
+            "and synthea for the synthetic Queensland "
             "patients. Click synthea and the overview lists fifteen tables, one per FHIR resource "
             "type: allergy intolerances, conditions, encounters, observations and so on. These were "
             "written by the import notebook with Pathling, and they're shared, so treat them as "

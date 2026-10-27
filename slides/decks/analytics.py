@@ -8,15 +8,15 @@ Author: John Grimes
 
 from kit import closing, title_slide
 
-from decks._shared import LINKS, PRESENTER
+from decks._shared import EVENT, LINKS, PRESENTER
 from decks.parts import bulk, closing_the_loop, legacy, septic_shock, sql_on_fhir
 
 DECK = {
     "file": "track-3-analytics",
     "slides": [
         title_slide(
-            "Data for FHIR track",
-            "Tools and techniques for transforming and analysing FHIR data",
+            "FHIR for Data track",
+            f"Tools and techniques for transforming and analysing FHIR data · {EVENT}",
             "These are the slides for the analytics strand of Track 3. There are five sections: "
             "FHIR amid legacy and proprietary systems; getting data out with Bulk Data and "
             "Pathling; SQL on FHIR views and terminology; a real-world study of beta-blockers in "

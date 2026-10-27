@@ -188,7 +188,7 @@ def patterns():
         (
             YELLOW,
             "Extract and map",
-            "CSV or SQL extract -> NDJSON · this exercise",
+            "CSV or SQL extract to NDJSON · this exercise",
             "CSV, SQL extracts",
             2,
             ["You can get extracts now;", "batch analytics and research"],
@@ -197,7 +197,7 @@ def patterns():
             AMBER,
             "HL7 v2 to FHIR",
             "integration engine · Track 2, 2B",
-            "ADT, ORU messages",
+            "SIU appointment messages",
             2,
             [
                 "Feeds already flow through the engine;",
@@ -439,7 +439,7 @@ def flat_to_nested():
     b.append(rect(455, 228, 150, 36, "#F6F8FA", GREY, 1.2, 18, "4 3"))
     b.append(callout(3, 471, 246, 10))
     b.append(text(487, 251, "DEATHDATE", 13, "start", 700, MUTED))
-    b.append(text(455, 284, "-> deceasedDateTime,", 12, "start", 400, MUTED))
+    b.append(text(455, 284, "becomes deceasedDateTime,", 12, "start", 400, MUTED))
     b.append(text(455, 300, "omitted when null", 12, "start", 400, MUTED))
     b.append(
         text(
@@ -544,7 +544,7 @@ def pipeline():
         text(
             710,
             187,
-            "-> query JSON strings with SQL",
+            "so you query JSON strings with SQL",
             13,
             "start",
             fill=MUTED,
@@ -615,7 +615,7 @@ def mapping_code():
     b.append(callout(2, 484, y(11), 11))
     b.append(callout(3, 924, y(3), 11))
     notes = [
-        (1, "Three optional columns -> one identifier array"),
+        (1, "Three optional columns become one identifier array"),
         (2, "A value set mapping, with a default"),
         (3, "Encoders turn JSON into typed, nested columns"),
     ]
@@ -645,10 +645,10 @@ def pitfalls():
             "Dates and time zones",
             13,
             [
-                "BIRTHDATE 2012-09-11 has no zone;",
+                "BIRTHDATE 2012-09-11 is a UTC+10 date;",
                 "first Observation 2012-09-10T23:57:37Z",
-                "is UTC. Brisbane is UTC+10 - compare",
-                "instants, not truncated dates.",
+                "is UTC: 09:57 on the 11th in UTC+10.",
+                "Compare instants, not dates.",
             ],
         ),
         (
@@ -656,10 +656,10 @@ def pitfalls():
             "Value set mapping",
             13,
             [
-                "GENDER M/F -> male/female, else",
-                "unknown. Encounter class 'home' (348)",
-                "and 'snf' (195) fall through to",
-                "the AMB default.",
+                "GENDER M/F becomes male/female,",
+                "else unknown. Encounter class as",
+                "Synthea maps it: snf to IMP, home",
+                "and hospice to HH, urgent care to AMB.",
             ],
         ),
         (
@@ -846,12 +846,12 @@ def backup_notebook():
         "csv-notebook", 0, 2, 620, 330, crop=(243, 50, 920, 550)
     )
     b = [shot]
-    marks = [(1090, 67), (1050, 172), (903, 172), (700, 393)]
+    marks = [(847, 67), (1050, 172), (903, 172), (700, 393)]
     for n, (px, py) in enumerate(marks, 1):
         x, y = pt(px, py)
         b.append(callout(n, x, y, 12))
-    tx, ty = pt(850, 55)
-    tx2, ty2 = pt(1030, 80)
+    tx, ty = pt(597, 55)
+    tx2, ty2 = pt(787, 80)
     b.append(highlight(tx, ty, tx2 - tx, ty2 - ty))
     notes = [
         ["transform_csv_to_fhir, opened from", "the open-fhir-training Git folder"],
@@ -1063,11 +1063,16 @@ SLIDES = [
         pitfalls(),
         "Every one of these shows up in our workspace. Immunisation ids join two UUIDs and a "
         "code, giving 76 or 77 characters - FHIR ids allow 64. That's a known issue to fix. "
-        "Dates: birth dates have no time zone, while observations are UTC, so a naive date "
-        "comparison puts this baby's first measurement the day before birth. Unmapped "
-        "encounter classes like home and snf fall through to ambulatory. Vaccines use US CVX "
-        "codes, not AMT. And shape errors are silent: identifier type was built as a Coding, "
-        "not a CodeableConcept, so the encoder dropped it for every patient.",
+        "Dates: the birth dates in this extract are calendar dates in UTC+10, probably the "
+        "time zone of the machine that generated it, even though the patients live in "
+        "Massachusetts. Observations are UTC instants. So a naive date comparison puts this "
+        "baby's first measurement the day before birth: 23:57 UTC on the 10th is 9:57 on the "
+        "11th in UTC+10. All 42 patients whose first encounter falls between 14:00 and "
+        "midnight UTC show the same one-day gap. Encounter classes need a mapping decision: the "
+        "notebook follows Synthea's own FHIR exporter, so skilled nursing becomes inpatient, "
+        "home and hospice become home health, and urgent care becomes ambulatory. Vaccines use "
+        "US CVX codes, not AMT. And shape errors are silent: identifier type was built as a "
+        "Coding, not a CodeableConcept, so the encoder dropped it for every patient.",
     ),
     diagram(
         "Demo",
@@ -1117,7 +1122,7 @@ SLIDES = [
     ),
     diagram(
         "Flat versus nested",
-        "The same patients in the CSV extract and as FHIR, in Catalog Explorer",
+        "A flat CSV table beside a nested FHIR table, in Catalog Explorer",
         "backup-compare",
         backup_compare(),
         "In Catalog Explorer, open hive_metastore, synthea_csv, patients, and the Sample Data "

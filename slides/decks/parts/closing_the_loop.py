@@ -36,13 +36,13 @@ from kit import (
 
 from decks._shared import standards_map
 
-# Validated with the cql-to-elm translator at signature level Overloads (no errors
+# Validated with the cql-to-elm translator 3.26.0 at signature level Overloads (no errors
 # or warnings). The statin value set URL is illustrative.
 CQL = [
     "library StatinAfterMI version '1.0.0'",
     "using FHIR version '4.0.1'",
     "include FHIRHelpers version '4.0.1'",
-    "valueset \"MI\": 'http://snomed.info/sct?fhir_vs=ecl/<< 22298006'",
+    "valueset \"MI\": 'http://snomed.info/sct?fhir_vs=isa/22298006'",
     "valueset \"Statins\": 'https://example.org/ValueSet/statins'",
     "context Patient",
     "",
@@ -58,6 +58,7 @@ CQL = [
     "",
     'define "Statin gap":',
     '  exists "Recent MI" and not exists "Statin since MI"',
+    '    and not exists [AllergyIntolerance: "Statins"]',
 ]
 
 CARD = [
@@ -99,7 +100,7 @@ def msg(x1, x2, y, label, fs=14, below=None, dash=None):
 
 def cql_anatomy():
     """The CQL example with the parts of a library labelled."""
-    cx, fs, lh = 395, 12.5, 1.24
+    cx, fs, lh = 395, 12.5, 1.18
 
     def base(i):
         return 30 + 8 + fs + i * fs * lh
@@ -116,7 +117,15 @@ def cql_anatomy():
             ["An MI in the last year, including", "STEMI and NSTEMI (descendants)"],
         ),
         (12, 15, ["Statins on or after the MI:", "with relates two queries"]),
-        (17, 18, ["True or false: the gap that", "a CDS service acts on"]),
+        (
+            17,
+            19,
+            [
+                "The gap a CDS service acts on,",
+                "unless a statin intolerance",
+                "is recorded",
+            ],
+        ),
     ]
     for first, last, rows in notes:
         y1, y2 = base(first) - fs + 2, base(last) + 4
@@ -421,7 +430,7 @@ def scenario():
             LAVENDER,
             "Express",
             "CQL",
-            ['"Statin gap"', "in a shared,", "versioned Library"],
+            ['"Statin gap"', "unless intolerant,", "in a shared Library"],
         ),
         (
             PEACH,
@@ -437,9 +446,9 @@ def scenario():
         ),
         (
             MINT,
-            "Pool",
+            "Federate",
             "OMOP",
-            ["drug_exposure rows", "from many sites,", "one network study"],
+            ["each site maps to", "OMOP and shares", "aggregate results"],
         ),
     ]
     b = []
@@ -460,7 +469,7 @@ def scenario():
         text(
             466,
             314,
-            "Pooled results raise new questions and refine the logic",
+            "Network results raise new questions and refine the logic",
             15,
             fill=INK,
             italic=True,
@@ -655,27 +664,31 @@ SLIDES = [
         "three standards to cover. CQL lets you write clinical logic once, in a form that can be "
         "shared and executed. CDS Hooks delivers advice into the EHR at a point in the workflow. "
         "SMART App Launch lets an app open inside the EHR with the patient already selected. I'll "
-        "also come back to OMOP from the analyse box, because it is how findings get pooled across "
-        "sites for research. These standards build on the data and views you've worked with this "
+        "also come back to OMOP from the analyse box, because it is how sites compare findings "
+        "in federated research. These standards build on the data and views you've worked with this "
         "week, rather than replacing them.",
     ),
     diagram(
         "CQL: clinical logic you can share",
-        "HL7 CQL v1.5: readable logic over a FHIR data model, shared as FHIR Library resources",
+        "HL7 CQL 1.5.3: readable logic over a FHIR data model, shared as FHIR Library resources",
         "cql-anatomy",
         cql_anatomy(),
-        "CQL is the Clinical Quality Language from HL7, now at version 1.5. It is designed to "
+        "CQL is the Clinical Quality Language from HL7. 1.5.3 is the normative version, and 2.0 "
+        "was published for trial use in July. It is designed to "
         "be read by clinicians and informaticians, not just programmers. This library carries "
         "a finding from the MI secondary prevention exercise into the workflow: a myocardial infarction in "
-        "the last year with no statin prescribed since. The using and include lines bind it "
+        "the last year with no statin prescribed since, and no recorded statin intolerance. The "
+        "using and include lines bind it "
         "to FHIR R4, with FHIRHelpers converting FHIR types to CQL types. The value sets are "
-        "the terminology. The MI one is an ECL expression, 22298006 and its descendants, which "
-        "takes in STEMI and NSTEMI; the statin one stands for the AMT products the ConceptMap "
-        "relates to HMG-CoA reductase inhibitor. The context line says every expression is "
-        "evaluated for one patient. The defines are named expressions you can reuse, and the "
-        "with clause relates statin requests to the MI. I ran this through the reference CQL "
-        "to ELM translator and it compiles cleanly. In practice the library is stored in a "
-        "FHIR Library resource.",
+        "the terminology. The MI one is an implicit SNOMED CT value set, 22298006 and its "
+        "descendants, which takes in STEMI and NSTEMI; the statin one stands for the AMT "
+        "products the ConceptMap relates to HMG-CoA reductase inhibitor. The context line says "
+        "every expression is evaluated for one patient. The defines are named expressions you "
+        "can reuse, and the with clause relates statin requests to the MI. The last line "
+        "leaves out patients with a statin allergy or intolerance, who shouldn't be prompted "
+        "to start one; our SQL count of 22 doesn't make that exclusion. The library translates "
+        "to ELM with the reference translator, version 3.26, with no errors or warnings. In "
+        "practice it is stored in a FHIR Library resource.",
     ),
     diagram(
         "Where CQL runs",
@@ -707,12 +720,12 @@ SLIDES = [
     ),
     diagram(
         "CDS Hooks: advice at the right moment",
-        "CDS Hooks v2.0: the EHR calls a service at a workflow event and shows the cards it returns",
+        "CDS Hooks 2.0.1: the EHR calls a service at a workflow event and shows the cards it returns",
         "cds-hooks",
         cds_hooks(),
         "CDS Hooks is one way of getting this logic in front of a clinician. The EHR discovers "
-        "services at a well-known endpoint, then calls a service when something happens in the "
-        "workflow - "
+        "a service's hooks from its discovery endpoint, the base URL followed by cds-services, "
+        "then calls a service when something happens in the workflow - "
         "here, patient-view, when a chart is opened. The request carries context, such as the "
         "patient id, and prefetched FHIR data the service asked for up front, so it doesn't "
         "have to query back. The service evaluates its logic, perhaps our CQL, and returns "
@@ -770,12 +783,13 @@ SLIDES = [
         scenario(),
         "To bring this together, take a finding from the MI secondary prevention exercise. In Databricks, 22 "
         "of the 274 synthetic patients with an MI had no statin prescribed within a year. That "
-        "definition becomes a CQL expression in a shared library. A CDS service evaluates it "
+        "definition becomes a CQL expression in a shared library, which also leaves out "
+        "patients with a recorded statin intolerance. A CDS service evaluates it "
         "when a chart is opened and returns a warning card. The clinician opens a SMART app "
-        "from the card to see the medication history. Meanwhile, the same data, mapped to "
-        "OMOP condition occurrence and drug exposure rows, is pooled with other sites in a "
-        "network study. The results of that study raise new questions and feed back into the "
-        "logic, which closes the loop.",
+        "from the card to see the medication history. Meanwhile, each site in a research "
+        "network maps its data to OMOP condition occurrence and drug exposure rows, runs the "
+        "same network study locally, and shares only aggregate results. Those results raise "
+        "new questions and feed back into the logic, which closes the loop.",
     ),
     diagram(
         "Demo",
@@ -787,7 +801,7 @@ SLIDES = [
         "exercise, which counts patients and deaths within 28 days by treatment group, and "
         "click Run all. Two rows appear, one per group. Three: click the plus next to the "
         "Table tab and choose Visualization. Four: pick a bar chart, put treatment group on "
-        "the X axis and mortality percent on the Y axis. Five: save it with the query. "
+        "the X axis and mortality_percent on the Y axis. Five: save it with the query. "
         "I'll point out that there are only 10 patients, so this is a "
         "picture, not a result.",
     ),
@@ -832,8 +846,8 @@ SLIDES = [
         backup_chart(),
         "On the left is the summary result: two treatment groups with patient and death "
         "counts and the percentage who died within 28 days. Click the plus, choose "
-        "Visualization, then a bar chart with treatment group on the X axis and mortality "
-        "percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
+        "Visualization, then a bar chart with treatment group on the X axis and "
+        "mortality_percent on the Y axis. On the right is roughly what you'll get, drawn from those two "
         "rows: 50.0 and 37.5. Always show the number of patients, because with 2 and 8 "
         "patients one death moves a bar by 12.5 to 50 points. Present it as a demonstration "
         "of the method, not a finding.",
