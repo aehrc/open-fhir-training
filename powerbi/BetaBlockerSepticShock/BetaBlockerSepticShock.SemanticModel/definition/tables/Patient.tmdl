@@ -1,0 +1,256 @@
+table Patient
+
+	measure Patients = COUNTROWS(Patient)
+		formatString: #,0
+
+	measure 'Patients remaining' = ```
+			VAR s = SELECTEDVALUE('Cohort step'[Order])
+			RETURN COUNTROWS(FILTER(Patient,
+			    (s < 2 || Patient[adult])
+			        && (s < 3 || Patient[stay_48_hours])
+			        && (s < 4 || NOT ISBLANK(Patient[suspected_infection_time]))
+			        && (s < 5 || NOT ISBLANK(Patient[sepsis_time]))
+			        && (s < 6 || NOT ISBLANK(Patient[baseline_time]))
+			        && (s < 7 || NOT (Patient[av_block] || Patient[acute_mi] || Patient[acute_heart_failure] || Patient[asthma]))))
+			```
+		formatString: #,0
+
+	measure 'Deaths within 28 days' = CALCULATE([Patients], Patient[Died within 28 days] = "Yes")
+		formatString: #,0
+
+	measure '28-day mortality' = DIVIDE([Deaths within 28 days], [Patients])
+		formatString: 0%
+
+	measure 'Zhang et al. (2024)' = DIVIDE(SELECTEDVALUE('Treatment group'[Published percent]), 100)
+		formatString: 0.0%
+
+	measure '% alive' = ```
+			VAR d = MAX(Day[Days since baseline])
+			RETURN 1 - DIVIDE(COUNTROWS(FILTER(Patient, NOT ISBLANK(Patient[Days to death]) && Patient[Days to death] <= d)), [Patients])
+			```
+		formatString: 0%
+
+	measure 'Patients with contraindication' = DISTINCTCOUNT(Contraindication[patient_id])
+		formatString: #,0
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Patient
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Patient
+
+	column stay_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: stay_id
+
+	column Gender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: gender
+
+	column Age
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: age
+
+	column 'ICU hours'
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: icu_hours
+
+	column SOFA
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: sofa
+
+	column 'Treatment group'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Treatment group
+
+	column 'Days to death'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: Days to death
+
+	column 'Hours to first beta-blocker'
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: Hours to first beta-blocker
+
+	column 'Died within 28 days'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Died within 28 days
+
+	column admit_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: admit_time
+
+	column discharge_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: discharge_time
+
+	column suspected_infection_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: suspected_infection_time
+
+	column sepsis_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: sepsis_time
+
+	column baseline_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: baseline_time
+
+	column first_beta_blocker_time
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: first_beta_blocker_time
+
+	column deceased
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		isHidden
+		summarizeBy: none
+		sourceColumn: deceased
+
+	column adult
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: adult
+
+	column stay_48_hours
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: stay_48_hours
+
+	column av_block
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: av_block
+
+	column acute_mi
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: acute_mi
+
+	column acute_heart_failure
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: acute_heart_failure
+
+	column asthma
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: asthma
+
+	column in_cohort
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: in_cohort
+
+	column beta_blocker
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: beta_blocker
+
+	column died_within_28_days
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: died_within_28_days
+
+	column sofa_respiration
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_respiration
+
+	column sofa_coagulation
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_coagulation
+
+	column sofa_liver
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_liver
+
+	column sofa_cardiovascular
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_cardiovascular
+
+	column sofa_cns
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_cns
+
+	column sofa_renal
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: sofa_renal
+
+	partition Patient = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "mimic_iv_beta_blocker_views"]}[Data],
+				    Data = Schema{[Name = "beta_blocker_septic_shock"]}[Data],
+				    Typed = Table.TransformColumnTypes(Data, {{"admit_time", type datetime}, {"discharge_time", type datetime}, {"suspected_infection_time", type datetime}, {"sepsis_time", type datetime}, {"baseline_time", type datetime}, {"first_beta_blocker_time", type datetime}, {"deceased", type datetime}, {"age", Int64.Type}, {"icu_hours", type number}}),
+				    Group = Table.AddColumn(Typed, "Treatment group", each if [beta_blocker] then "Beta-blocker" else "No beta-blocker", type text),
+				    // Days from the baseline (first vasopressor) to death, and to the first beta-blocker.
+				    ToDeath = Table.AddColumn(Group, "Days to death", each
+				        if [deceased] = null or [baseline_time] = null then null else Duration.TotalDays([deceased] - [baseline_time]), type number),
+				    ToBeta = Table.AddColumn(ToDeath, "Hours to first beta-blocker", each
+				        if [first_beta_blocker_time] = null or [baseline_time] = null then null
+				        else Duration.TotalHours([first_beta_blocker_time] - [baseline_time]), type number),
+				    Died = Table.AddColumn(ToBeta, "Died within 28 days", each if [died_within_28_days] = true then "Yes" else "No", type text),
+				    Label = Table.AddColumn(Died, "Patient", each Text.End([patient_id], 8), type text)
+				in
+				    Label

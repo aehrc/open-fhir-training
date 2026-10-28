@@ -1,0 +1,114 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "2bf0bcaa4fd62f8d6f10",
+  "position": {
+    "x": 20,
+    "y": 412,
+    "z": 4000,
+    "height": 290,
+    "width": 400,
+    "tabOrder": 4000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "treatment_group"
+                }
+              },
+              "queryRef": "Summary query.treatment_group",
+              "nativeQueryRef": "treatment_group"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "patients"
+                }
+              },
+              "queryRef": "Summary query.patients",
+              "nativeQueryRef": "patients"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "deaths"
+                }
+              },
+              "queryRef": "Summary query.deaths",
+              "nativeQueryRef": "deaths"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "mortality_percent"
+                }
+              },
+              "queryRef": "Summary query.mortality_percent",
+              "nativeQueryRef": "mortality_percent"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Summary query (SQL file in the repository)'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+table 'SaO2 reading'
+
+	column subject_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subject_id
+
+	column 'Chart time'
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: chart_time
+
+	column SaO2
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: so2
+
+	partition 'SaO2 reading' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "mimic_iv_views"]}[Data],
+				    Data = Schema{[Name = "coh_reading_so2"]}[Data],
+				    Typed = Table.TransformColumnTypes(Data, {{"chart_time", type datetime}, {"so2", type number}})
+				in
+				    Typed

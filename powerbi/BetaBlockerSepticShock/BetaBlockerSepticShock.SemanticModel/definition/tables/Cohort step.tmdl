@@ -1,0 +1,21 @@
+table 'Cohort step'
+
+	column Order
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: Order
+
+	column Step
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Step
+		sortByColumn: Order
+
+	partition 'Cohort step' = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Order = Int64.Type, Step = text], {{1, "First ICU stay"}, {2, "Aged 18 or over"}, {3, "ICU stay of 48 hours or more"}, {4, "Suspected infection"}, {5, "Sepsis (SOFA 2 or more)"}, {6, "Septic shock (vasopressor)"}, {7, "No contraindication"}})
+				in
+				    Source

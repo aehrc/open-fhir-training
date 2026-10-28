@@ -1,0 +1,160 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "cb42f8556d8a61f335ad",
+  "position": {
+    "x": 650,
+    "y": 422,
+    "z": 10000,
+    "height": 280,
+    "width": 610,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Subject"
+                    }
+                  },
+                  "Property": "Race"
+                }
+              },
+              "queryRef": "Subject.Race",
+              "nativeQueryRef": "Race"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Subject"
+                    }
+                  },
+                  "Property": "Gender"
+                }
+              },
+              "queryRef": "Subject.Gender",
+              "nativeQueryRef": "Gender"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Paired reading"
+                    }
+                  },
+                  "Property": "SaO2 time"
+                }
+              },
+              "queryRef": "Paired reading.SaO2 time",
+              "nativeQueryRef": "SaO2 time"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Paired reading"
+                    }
+                  },
+                  "Property": "SaO2"
+                }
+              },
+              "queryRef": "Paired reading.SaO2",
+              "nativeQueryRef": "SaO2"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Paired reading"
+                    }
+                  },
+                  "Property": "SpO2"
+                }
+              },
+              "queryRef": "Paired reading.SpO2",
+              "nativeQueryRef": "SpO2"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Paired reading"
+                    }
+                  },
+                  "Property": "SpO2 minus SaO2"
+                }
+              },
+              "queryRef": "Paired reading.SpO2 minus SaO2",
+              "nativeQueryRef": "SpO2 minus SaO2"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Paired reading"
+                  }
+                },
+                "Property": "SaO2 time"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Paired readings'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+table Patient
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Gender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Gender
+
+	partition Patient = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "synthea"]}[Data],
+				    Data = Schema{[Name = "patient"]}[Data],
+				    // The Patient table holds the FHIR resources encoded by Pathling. id_versioned
+				    // has the same "Patient/<id>" form as the patient_id column of the view.
+				    Selected = Table.SelectColumns(Data, {"id_versioned", "gender"}),
+				    Renamed = Table.RenameColumns(Selected, {{"id_versioned", "patient_id"}, {"gender", "Gender"}})
+				in
+				    Renamed

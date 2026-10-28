@@ -1,0 +1,21 @@
+table 'Treatment group'
+
+	column 'Treatment group'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Treatment group
+
+	column 'Published percent'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: Published percent
+
+	partition 'Treatment group' = m
+		mode: import
+		source =
+				let
+				    // 28-day mortality after propensity score matching reported by Zhang et al. (2024).
+				    Source = #table(type table [Treatment group = text, Published percent = number], {{"Beta-blocker", 21.5}, {"No beta-blocker", 27.1}})
+				in
+				    Source

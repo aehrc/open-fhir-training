@@ -1,0 +1,13 @@
+table Day
+
+	column 'Days since MI'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: [Days since MI]
+
+	partition Day = calculated
+		mode: import
+		source = ```
+				SELECTCOLUMNS(GENERATESERIES(0, 365, 1), "Days since MI", [Value])
+				```

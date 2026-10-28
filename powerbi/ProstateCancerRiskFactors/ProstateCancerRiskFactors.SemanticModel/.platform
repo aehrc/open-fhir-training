@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "ProstateCancerRiskFactors"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f939e49c-fb96-b3dd-5e3f-1ddad66c241f"
+  }
+}

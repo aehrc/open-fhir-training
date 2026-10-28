@@ -1,0 +1,31 @@
+table Contraindication
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Contraindication
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Contraindication
+
+	partition Contraindication = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "mimic_iv_beta_blocker_views"]}[Data],
+				    Data = Schema{[Name = "beta_blocker_septic_shock"]}[Data],
+				    // Contraindications among the patients with septic shock. A patient can have more than one.
+				    Shock = Table.SelectRows(Data, each [adult] = true and [stay_48_hours] = true and [baseline_time] <> null),
+				    Selected = Table.SelectColumns(Shock, {"patient_id", "av_block", "acute_mi", "acute_heart_failure", "asthma"}),
+				    Renamed = Table.RenameColumns(Selected, {{"av_block", "Complete heart block"}, {"acute_mi", "Acute myocardial infarction"},
+				        {"acute_heart_failure", "Acute heart failure"}, {"asthma", "Asthma"}}),
+				    Unpivoted = Table.UnpivotOtherColumns(Renamed, {"patient_id"}, "Contraindication", "Present"),
+				    Present = Table.SelectRows(Unpivoted, each [Present] = true),
+				    Result = Table.SelectColumns(Present, {"patient_id", "Contraindication"})
+				in
+				    Result

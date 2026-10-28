@@ -1,0 +1,67 @@
+table 'Paired reading'
+
+	column subject_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: subject_id
+
+	column Pair
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Pair
+
+	column 'SaO2 time'
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: sao2_time
+
+	column SaO2
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: sao2
+
+	column 'SpO2 time'
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: spo2_time
+
+	column SpO2
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: spo2
+
+	column 'SpO2 minus SaO2'
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SpO2 minus SaO2
+
+	partition 'Paired reading' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    // Pairs each SaO2 (arterial blood gas) with the last SpO2 (pulse oximeter) in the 10 minutes before it.
+				    Query = Value.NativeQuery(Catalog, "SELECT s.subject_id,
+				       s.chart_time AS sao2_time,
+				       CAST(s.so2 AS DOUBLE) AS sao2,
+				       p.chart_time AS spo2_time,
+				       CAST(p.spo2 AS DOUBLE) AS spo2
+				FROM hive_metastore.mimic_iv_views.coh_reading_so2 AS s
+				JOIN hive_metastore.mimic_iv_views.coh_reading_spo2 AS p
+				  ON p.subject_id = s.subject_id
+				 AND p.chart_time BETWEEN s.chart_time - INTERVAL 10 MINUTES AND s.chart_time
+				-- The SpO2 reading closest before each SaO2 measurement.
+				QUALIFY ROW_NUMBER() OVER (PARTITION BY s.subject_id, s.chart_time ORDER BY p.chart_time DESC) = 1", null, [EnableFolding = true]),
+				    Typed = Table.TransformColumnTypes(Query, {{"sao2_time", type datetime}, {"spo2_time", type datetime}, {"sao2", type number}, {"spo2", type number}}),
+				    Difference = Table.AddColumn(Typed, "SpO2 minus SaO2", each [spo2] - [sao2], type number),
+				    Pair = Table.AddColumn(Difference, "Pair", each [subject_id] & " " & DateTime.ToText([sao2_time], "yyyy-MM-dd HH:mm"), type text)
+				in
+				    Pair

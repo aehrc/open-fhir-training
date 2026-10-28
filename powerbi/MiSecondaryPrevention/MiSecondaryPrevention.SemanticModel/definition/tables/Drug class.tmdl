@@ -1,0 +1,28 @@
+table 'Drug class'
+
+	column 'Drug class'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Drug class
+		sortByColumn: Order
+
+	column Order
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: Order
+
+	column 'Published percent'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: Published percent
+
+	partition 'Drug class' = m
+		mode: import
+		source =
+				let
+				    // Percentages discharged on each class reported by Halvorsen et al. (2016).
+				    Source = #table(type table [Drug class = text, Order = Int64.Type, Published percent = number], {{"Antiplatelet", 1, 91}, {"Statin", 2, 90}, {"Beta-blocker", 3, 82}, {"ACE inhibitor or ARB", 4, 60}})
+				in
+				    Source

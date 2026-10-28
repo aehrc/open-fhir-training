@@ -1,0 +1,119 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "d48d35cb2d6125c65146",
+  "position": {
+    "x": 660,
+    "y": 92,
+    "z": 5000,
+    "height": 300,
+    "width": 600,
+    "tabOrder": 5000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Risk factors"
+                    }
+                  },
+                  "Property": "Prostate cancer"
+                }
+              },
+              "queryRef": "Risk factors.Prostate cancer",
+              "nativeQueryRef": "Prostate cancer"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Risk factors"
+                    }
+                  },
+                  "Property": "High BMI %"
+                }
+              },
+              "queryRef": "Risk factors.High BMI %",
+              "nativeQueryRef": "High BMI %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Risk factors"
+                    }
+                  },
+                  "Property": "Hyperlipidaemia %"
+                }
+              },
+              "queryRef": "Risk factors.Hyperlipidaemia %",
+              "nativeQueryRef": "Hyperlipidaemia %"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Risk factors recorded, by prostate cancer diagnosis'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

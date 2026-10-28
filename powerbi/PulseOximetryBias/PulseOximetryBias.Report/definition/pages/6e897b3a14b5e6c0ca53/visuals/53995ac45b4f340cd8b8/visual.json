@@ -1,0 +1,138 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "53995ac45b4f340cd8b8",
+  "position": {
+    "x": 20,
+    "y": 212,
+    "z": 8000,
+    "height": 490,
+    "width": 620,
+    "tabOrder": 8000
+  },
+  "visual": {
+    "visualType": "scatterChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Paired reading"
+                    }
+                  },
+                  "Property": "Pair"
+                }
+              },
+              "queryRef": "Paired reading.Pair",
+              "nativeQueryRef": "Pair"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Subject"
+                    }
+                  },
+                  "Property": "Race"
+                }
+              },
+              "queryRef": "Subject.Race",
+              "nativeQueryRef": "Race"
+            }
+          ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Paired reading"
+                        }
+                      },
+                      "Property": "SaO2"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "Avg(Paired reading.SaO2)",
+              "nativeQueryRef": "Average of SaO2",
+              "displayName": "SaO2 (%)"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Paired reading"
+                        }
+                      },
+                      "Property": "SpO2"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "Avg(Paired reading.SpO2)",
+              "nativeQueryRef": "Average of SpO2",
+              "displayName": "SpO2 (%)"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'SpO2 against SaO2 for each pair (%)'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

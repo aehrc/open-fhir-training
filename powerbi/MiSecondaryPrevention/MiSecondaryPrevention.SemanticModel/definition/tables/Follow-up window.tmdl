@@ -1,0 +1,15 @@
+table 'Follow-up window'
+
+	column 'Follow-up window (days)'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Follow-up window (days)
+
+	partition 'Follow-up window' = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [#"Follow-up window (days)" = Int64.Type], {{30}, {90}, {180}, {365}, {730}})
+				in
+				    Source

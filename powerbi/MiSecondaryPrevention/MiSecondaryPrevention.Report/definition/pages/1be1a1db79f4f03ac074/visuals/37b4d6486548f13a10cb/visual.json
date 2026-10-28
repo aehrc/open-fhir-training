@@ -1,0 +1,114 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "37b4d6486548f13a10cb",
+  "position": {
+    "x": 20,
+    "y": 412,
+    "z": 7000,
+    "height": 290,
+    "width": 720,
+    "tabOrder": 7000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "drug_class"
+                }
+              },
+              "queryRef": "Summary query.drug_class",
+              "nativeQueryRef": "drug_class"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "patients"
+                }
+              },
+              "queryRef": "Summary query.patients",
+              "nativeQueryRef": "patients"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "treated"
+                }
+              },
+              "queryRef": "Summary query.treated",
+              "nativeQueryRef": "treated"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Summary query"
+                    }
+                  },
+                  "Property": "percent_treated"
+                }
+              },
+              "queryRef": "Summary query.percent_treated",
+              "nativeQueryRef": "percent_treated"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Summary query from combine_mi_secondary_prevention_views.sql (FollowUpDays parameter)'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "PulseOximetryBias"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "7f37eaee-772d-16cf-6010-1f3f2ddff45c"
+  }
+}

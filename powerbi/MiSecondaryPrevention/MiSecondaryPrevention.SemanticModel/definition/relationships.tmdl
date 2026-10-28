@@ -1,0 +1,7 @@
+relationship 63e88915-01b6-d156-4947-fce0dbd4e4ba
+	fromColumn: Prescription.patient_id
+	toColumn: Cohort.patient_id
+
+relationship 7a8b9c9b-2bbb-129e-4b5f-bfc8404fb790
+	fromColumn: Prescription.'Drug class'
+	toColumn: 'Drug class'.'Drug class'

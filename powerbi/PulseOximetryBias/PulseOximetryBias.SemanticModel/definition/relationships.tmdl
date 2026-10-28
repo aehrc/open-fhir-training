@@ -1,0 +1,11 @@
+relationship a573204f-3298-5cc3-457c-12fef27ec104
+	fromColumn: 'SpO2 reading'.subject_id
+	toColumn: Subject.subject_id
+
+relationship ea2996ee-6a41-3e6c-c109-439e2ce9ccac
+	fromColumn: 'SaO2 reading'.subject_id
+	toColumn: Subject.subject_id
+
+relationship 25c7464d-ae0c-d9d4-ce5c-51e4d3e5fde9
+	fromColumn: 'Paired reading'.subject_id
+	toColumn: Subject.subject_id

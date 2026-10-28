@@ -1,0 +1,17 @@
+model Model
+	culture: en-AU
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-AU
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+	annotation __PBI_TimeIntelligenceEnabled = 0
+
+	annotation PBI_QueryOrder = ["DatabricksHost", "DatabricksHttpPath", "Subject", "SpO2 reading", "SaO2 reading", "Paired reading"]
+
+ref table Subject
+ref table 'SpO2 reading'
+ref table 'SaO2 reading'
+ref table 'Paired reading'

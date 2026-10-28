@@ -1,0 +1,3 @@
+relationship 77423b25-9c82-ae34-19d1-184c76e6b716
+	fromColumn: 'Risk factors'.patient_id
+	toColumn: Patient.patient_id

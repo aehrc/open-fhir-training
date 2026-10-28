@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "BetaBlockerSepticShock"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f2d063db-f87a-b265-30c4-f579aec48184"
+  }
+}

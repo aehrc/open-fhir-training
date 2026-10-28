@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "MiSecondaryPrevention"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "8a7dd2ef-8dd2-b319-5c87-444592e82a95"
+  }
+}

@@ -1,0 +1,15 @@
+table 'Number of classes'
+
+	column Classes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Classes
+
+	partition 'Number of classes' = m
+		mode: import
+		source =
+				let
+				    Source = #table(type table [Classes = Int64.Type], {{0}, {1}, {2}, {3}, {4}})
+				in
+				    Source

@@ -1,0 +1,86 @@
+table 'MI cohort'
+
+	measure Patients = COUNTROWS('MI cohort')
+		formatString: #,0
+
+	measure 'Antiplatelet within 365 days' = DIVIDE(CALCULATE([Patients], 'MI cohort'[days_to_antiplatelet] <= 365, NOT ISBLANK('MI cohort'[days_to_antiplatelet])), [Patients])
+		formatString: 0%
+
+	measure 'Statin within 365 days' = DIVIDE(CALCULATE([Patients], 'MI cohort'[days_to_statin] <= 365, NOT ISBLANK('MI cohort'[days_to_statin])), [Patients])
+		formatString: 0%
+
+	measure 'Beta-blocker within 365 days' = DIVIDE(CALCULATE([Patients], 'MI cohort'[days_to_beta_blocker] <= 365, NOT ISBLANK('MI cohort'[days_to_beta_blocker])), [Patients])
+		formatString: 0%
+
+	measure 'ACE inhibitor or ARB within 365 days' = DIVIDE(CALCULATE([Patients], 'MI cohort'[days_to_ace_inhibitor_or_arb] <= 365, NOT ISBLANK('MI cohort'[days_to_ace_inhibitor_or_arb])), [Patients])
+		formatString: 0%
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Gender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: gender
+
+	column 'Age at MI'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: age_at_index
+
+	column 'MI date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: index_date
+
+	column 'MI type'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: index_display
+
+	column 'MI year' = YEAR('MI cohort'[MI date])
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+
+	column days_to_antiplatelet
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_antiplatelet
+
+	column days_to_statin
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_statin
+
+	column days_to_beta_blocker
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_beta_blocker
+
+	column days_to_ace_inhibitor_or_arb
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_ace_inhibitor_or_arb
+
+	partition 'MI cohort' = m
+		mode: directQuery
+		source =
+				let
+				    // QueryTags labels every query that Power BI sends, so they can be found in
+				    // Databricks query history and system.query.history.
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null, QueryTags = "source:powerbi-directquery-demo"]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "synthea_mi_secondary_prevention_views"]}[Data],
+				    Data = Schema{[Name = "mi_secondary_prevention"]}[Data]
+				in
+				    Data

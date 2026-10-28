@@ -1,0 +1,42 @@
+table 'Summary query'
+
+	column treatment_group
+		dataType: string
+		summarizeBy: none
+		sourceColumn: treatment_group
+
+	column patients
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: patients
+
+	column deaths
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: deaths
+
+	column mortality_percent
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: mortality_percent
+
+	partition 'Summary query' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    // The summary query from sql/mimic_iv/combine_beta_blocker_septic_shock_views.sql.
+				    Query = Value.NativeQuery(Catalog, "SELECT IF(beta_blocker, 'Beta-blocker', 'No beta-blocker') AS treatment_group,
+				       COUNT(*) AS patients,
+				       COUNT_IF(died_within_28_days) AS deaths,
+				       ROUND(100 * COUNT_IF(died_within_28_days) / COUNT(*), 1) AS mortality_percent
+				FROM hive_metastore.mimic_iv_beta_blocker_views.beta_blocker_septic_shock
+				WHERE in_cohort
+				GROUP BY beta_blocker", null, [EnableFolding = true]),
+				    Typed = Table.TransformColumnTypes(Query, {{"patients", Int64.Type}, {"deaths", Int64.Type}, {"mortality_percent", type number}})
+				in
+				    Typed

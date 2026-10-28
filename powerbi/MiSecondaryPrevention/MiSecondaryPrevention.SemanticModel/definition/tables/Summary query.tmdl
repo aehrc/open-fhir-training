@@ -1,0 +1,61 @@
+table 'Summary query'
+
+	column drug_class
+		dataType: string
+		summarizeBy: none
+		sourceColumn: drug_class
+
+	column patients
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: patients
+
+	column treated
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: treated
+
+	column percent_treated
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: percent_treated
+
+	partition 'Summary query' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    // The summary query from sql/synthea/combine_mi_secondary_prevention_views.sql,
+				    // with the FollowUpDays parameter in place of :follow_up_days.
+				    Query = Value.NativeQuery(Catalog, "WITH treated AS (
+				  SELECT patient_id,
+				         drug_class,
+				         COALESCE(days <= " & Number.ToText(FollowUpDays) & ", FALSE) AS treated
+				  FROM hive_metastore.synthea_mi_secondary_prevention_views.mi_secondary_prevention
+				  UNPIVOT INCLUDE NULLS (
+				    days FOR drug_class IN (
+				      days_to_antiplatelet AS `Antiplatelet`,
+				      days_to_statin AS `Statin`,
+				      days_to_beta_blocker AS `Beta-blocker`,
+				      days_to_ace_inhibitor_or_arb AS `ACE inhibitor or ARB`
+				    )
+				  )
+				),
+				per_class AS (
+				  SELECT drug_class, COUNT(*) AS patients, COUNT_IF(treated) AS treated
+				  FROM treated
+				  GROUP BY drug_class
+				),
+				all_four AS (
+				  SELECT 'All four' AS drug_class, COUNT(*) AS patients, COUNT_IF(classes = 4) AS treated
+				  FROM (SELECT patient_id, COUNT_IF(treated) AS classes FROM treated GROUP BY patient_id)
+				)
+				SELECT drug_class, patients, treated, ROUND(100 * treated / patients, 1) AS percent_treated
+				FROM (SELECT * FROM per_class UNION ALL SELECT * FROM all_four)", null, [EnableFolding = true]),
+				    Typed = Table.TransformColumnTypes(Query, {{"patients", Int64.Type}, {"treated", Int64.Type}, {"percent_treated", type number}})
+				in
+				    Typed

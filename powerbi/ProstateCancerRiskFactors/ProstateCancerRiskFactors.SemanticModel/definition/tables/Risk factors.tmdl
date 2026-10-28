@@ -1,0 +1,109 @@
+table 'Risk factors'
+
+	measure Patients = COUNTROWS('Risk factors')
+		formatString: #,0
+
+	measure 'Prostate cancer cases' = CALCULATE([Patients], 'Risk factors'[Prostate cancer] = "Diagnosed")
+		formatString: #,0
+
+	measure 'High BMI %' = DIVIDE(CALCULATE([Patients], 'Risk factors'[High BMI] = "Yes"), [Patients])
+		formatString: 0.0%;-0.0%;0.0%
+
+	measure 'Hyperlipidaemia %' = DIVIDE(CALCULATE([Patients], 'Risk factors'[Hyperlipidaemia] = "Yes"), [Patients])
+		formatString: 0.0%;-0.0%;0.0%
+
+	measure 'Mean age at diagnosis' = AVERAGE('Risk factors'[Age at diagnosis])
+		formatString: 0.0
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column birth_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isHidden
+		summarizeBy: none
+		sourceColumn: birth_date
+
+	column 'Diagnosis date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: prostate_cancer_onset
+
+	column BMI
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: bmi_value
+
+	column 'Total cholesterol (mg/dL)'
+		dataType: double
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: total_cholesterol_mg_dl
+
+	column 'Prostate cancer'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Prostate cancer
+
+	column 'High BMI'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: High BMI
+
+	column Hyperlipidaemia
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Hyperlipidaemia
+
+	column 'Age at diagnosis'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Age at diagnosis
+
+	column 'Age group at diagnosis'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Age group at diagnosis
+
+	column 'Diagnosis year'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Diagnosis year
+
+	partition 'Risk factors' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "synthea_prostate_cancer_views"]}[Data],
+				    Data = Schema{[Name = "prostate_cancer_risk_factors"]}[Data],
+				    // The onset and observation times are FHIR dateTime strings with an offset.
+				    ToDate = (t) => if t = null then null else Date.From(DateTimeZone.FromText(t)),
+				    Selected = Table.SelectColumns(Data, {"patient_id", "birth_date", "prostate_cancer_onset", "bmi_value", "total_cholesterol_mg_dl"}),
+				    Dates = Table.TransformColumns(Selected, {{"prostate_cancer_onset", ToDate, type nullable date}, {"birth_date", Date.From, type date}}),
+				    Typed = Table.TransformColumnTypes(Dates, {{"bmi_value", type nullable number}, {"total_cholesterol_mg_dl", type nullable number}}),
+				    // The view only holds BMI over 30 and total cholesterol over 240 mg/dL, recorded before any diagnosis.
+				    Flags = Table.AddColumn(Table.AddColumn(Table.AddColumn(Typed,
+				        "Prostate cancer", each if [prostate_cancer_onset] = null then "Not diagnosed" else "Diagnosed", type text),
+				        "High BMI", each if [bmi_value] = null then "No" else "Yes", type text),
+				        "Hyperlipidaemia", each if [total_cholesterol_mg_dl] = null then "No" else "Yes", type text),
+				    Age = Table.AddColumn(Flags, "Age at diagnosis", each
+				        if [prostate_cancer_onset] = null then null
+				        else Date.Year([prostate_cancer_onset]) - Date.Year([birth_date])
+				            - (if Date.DayOfYear([prostate_cancer_onset]) < Date.DayOfYear([birth_date]) then 1 else 0), Int64.Type),
+				    Band = Table.AddColumn(Age, "Age group at diagnosis", each
+				        if [Age at diagnosis] = null then null else Number.IntegerDivide([Age at diagnosis], 5) * 5, Int64.Type),
+				    Year = Table.AddColumn(Band, "Diagnosis year", each
+				        if [prostate_cancer_onset] = null then null else Date.Year([prostate_cancer_onset]), Int64.Type)
+				in
+				    Year

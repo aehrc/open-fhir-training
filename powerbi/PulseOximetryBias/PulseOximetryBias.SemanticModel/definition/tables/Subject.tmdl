@@ -1,0 +1,58 @@
+table Subject
+
+	measure Subjects = COUNTROWS(Subject)
+		formatString: #,0
+
+	measure 'SpO2 readings' = COUNTROWS('SpO2 reading')
+		formatString: #,0
+
+	measure 'SaO2 readings' = COUNTROWS('SaO2 reading')
+		formatString: #,0
+
+	measure 'Paired readings' = COUNTROWS('Paired reading')
+		formatString: #,0
+
+	measure 'Mean SpO2 minus SaO2' = AVERAGE('Paired reading'[SpO2 minus SaO2])
+		formatString: 0.0
+
+	measure 'Occult hypoxaemia' = COUNTROWS(FILTER('Paired reading', 'Paired reading'[SaO2] < 88 && 'Paired reading'[SpO2] >= 88)) + 0
+		formatString: #,0
+
+	column subject_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: subject_id
+
+	column Gender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: gender
+
+	column race_category
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: race_category
+
+	column Race
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Race
+
+	partition Subject = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "mimic_iv_views"]}[Data],
+				    Data = Schema{[Name = "coh_subject"]}[Data],
+				    // MIMIC-IV records race with the CDC race and ethnicity codes.
+				    Race = Table.AddColumn(Data, "Race", each
+				        if [race_category] = "2106-3" then "White"
+				        else if [race_category] = "2054-5" then "Black or African American"
+				        else if [race_category] = "2028-9" then "Asian"
+				        else if [race_category] = "UNK" then "Unknown"
+				        else [race_category], type text)
+				in
+				    Race

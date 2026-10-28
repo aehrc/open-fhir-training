@@ -1,0 +1,147 @@
+table Cohort
+
+	measure Patients = COUNTROWS(Cohort)
+		formatString: #,0
+
+	measure 'Window (days)' = SELECTEDVALUE('Follow-up window'[Follow-up window (days)], 365)
+		formatString: 0
+
+	measure Treated = ```
+			VAR w = [Window (days)]
+			RETURN CALCULATE(DISTINCTCOUNT(Prescription[patient_id]), Prescription[Days to first prescription] <= w)
+			```
+		formatString: #,0
+
+	measure '% treated' = DIVIDE([Treated], [Patients])
+		formatString: 0%
+
+	measure 'Halvorsen et al. (2016)' = DIVIDE(SELECTEDVALUE('Drug class'[Published percent]), 100)
+		formatString: 0%
+
+	measure 'Classes received' = ```
+			VAR w = [Window (days)]
+			RETURN COUNTROWS(FILTER(Prescription, Prescription[Days to first prescription] <= w)) + 0
+			```
+		formatString: 0
+
+	measure 'Patients with this many classes' = ```
+			VAR k = SELECTEDVALUE('Number of classes'[Classes])
+			RETURN COUNTROWS(FILTER(Cohort, CALCULATE([Classes received], REMOVEFILTERS('Number of classes')) = k))
+			```
+		formatString: #,0
+
+	measure 'All four classes %' = DIVIDE(COUNTROWS(FILTER(Cohort, [Classes received] = 4)), [Patients])
+		formatString: 0%
+
+	measure 'Cumulative % prescribed' = ```
+			VAR d = MAX(Day[Days since MI])
+			RETURN DIVIDE(CALCULATE(DISTINCTCOUNT(Prescription[patient_id]), Prescription[Days to first prescription] <= d), [Patients])
+			```
+		formatString: 0%
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Gender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: gender
+
+	column birth_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isHidden
+		summarizeBy: none
+		sourceColumn: birth_date
+
+	column 'Age at MI'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: age_at_index
+
+	column deceased_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isHidden
+		summarizeBy: none
+		sourceColumn: deceased_date
+
+	column 'MI date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: index_date
+
+	column 'MI code'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: index_code
+
+	column 'MI type'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: index_display
+
+	column 'MI year'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: MI year
+
+	column 'Age group order'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: Age group order
+
+	column 'Age group'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Age group
+		sortByColumn: 'Age group order'
+
+	column days_to_antiplatelet
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_antiplatelet
+
+	column days_to_statin
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_statin
+
+	column days_to_beta_blocker
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_beta_blocker
+
+	column days_to_ace_inhibitor_or_arb
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: days_to_ace_inhibitor_or_arb
+
+	partition Cohort = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "synthea_mi_secondary_prevention_views"]}[Data],
+				    Data = Schema{[Name = "mi_secondary_prevention"]}[Data],
+				    Typed = Table.TransformColumnTypes(Data, {{"index_date", type date}, {"birth_date", type date}, {"deceased_date", type date}, {"age_at_index", Int64.Type}}),
+				    Year = Table.AddColumn(Typed, "MI year", each Date.Year([index_date]), Int64.Type),
+				    AgeGroup = Table.AddColumn(Year, "Age group order", each
+				        if [age_at_index] < 55 then 1 else if [age_at_index] < 65 then 2 else if [age_at_index] < 75 then 3
+				        else if [age_at_index] < 85 then 4 else 5, Int64.Type),
+				    AgeLabel = Table.AddColumn(AgeGroup, "Age group", each
+				        {"Under 55", "55 to 64", "65 to 74", "75 to 84", "85 and over"}{[Age group order] - 1}, type text)
+				in
+				    AgeLabel

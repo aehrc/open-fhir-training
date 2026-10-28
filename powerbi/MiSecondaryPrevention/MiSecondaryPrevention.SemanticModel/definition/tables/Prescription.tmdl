@@ -1,0 +1,36 @@
+table Prescription
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column 'Drug class'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: Drug class
+
+	column 'Days to first prescription'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: Days to first prescription
+
+	partition Prescription = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "synthea_mi_secondary_prevention_views"]}[Data],
+				    Data = Schema{[Name = "mi_secondary_prevention"]}[Data],
+				    // One row per patient and drug class with a prescription on or after the index MI.
+				    // Unpivoting drops the classes that were never prescribed (null days).
+				    Selected = Table.SelectColumns(Data, {"patient_id", "days_to_antiplatelet", "days_to_statin", "days_to_beta_blocker", "days_to_ace_inhibitor_or_arb"}),
+				    Renamed = Table.RenameColumns(Selected, {{"days_to_antiplatelet", "Antiplatelet"}, {"days_to_statin", "Statin"}, {"days_to_beta_blocker", "Beta-blocker"}, {"days_to_ace_inhibitor_or_arb", "ACE inhibitor or ARB"}}),
+				    Unpivoted = Table.UnpivotOtherColumns(Renamed, {"patient_id"}, "Drug class", "Days to first prescription"),
+				    Typed = Table.TransformColumnTypes(Unpivoted, {{"Days to first prescription", Int64.Type}})
+				in
+				    Typed

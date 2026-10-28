@@ -1,0 +1,34 @@
+table 'SOFA component'
+
+	column patient_id
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: patient_id
+
+	column Component
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Component
+
+	column Score
+		dataType: int64
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: Score
+
+	partition 'SOFA component' = m
+		mode: import
+		source =
+				let
+				    Source = DatabricksMultiCloud.Catalogs(DatabricksHost, DatabricksHttpPath, [Catalog = null, Database = null, EnableAutomaticProxyDiscovery = null]),
+				    Catalog = Source{[Name = "hive_metastore"]}[Data],
+				    Schema = Catalog{[Name = "mimic_iv_beta_blocker_views"]}[Data],
+				    Data = Schema{[Name = "beta_blocker_septic_shock"]}[Data],
+				    Cohort = Table.SelectRows(Data, each [in_cohort] = true),
+				    Selected = Table.SelectColumns(Cohort, {"patient_id", "sofa_respiration", "sofa_coagulation", "sofa_liver", "sofa_cardiovascular", "sofa_cns", "sofa_renal"}),
+				    Renamed = Table.RenameColumns(Selected, {{"sofa_respiration", "Respiration"}, {"sofa_coagulation", "Coagulation"}, {"sofa_liver", "Liver"}, {"sofa_cardiovascular", "Cardiovascular"}, {"sofa_cns", "Central nervous system"}, {"sofa_renal", "Renal"}}),
+				    Unpivoted = Table.UnpivotOtherColumns(Renamed, {"patient_id"}, "Component", "Score"),
+				    Typed = Table.TransformColumnTypes(Unpivoted, {{"Score", Int64.Type}})
+				in
+				    Typed

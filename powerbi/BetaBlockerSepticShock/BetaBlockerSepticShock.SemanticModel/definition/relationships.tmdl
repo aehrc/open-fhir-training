@@ -1,0 +1,11 @@
+relationship bf8a98b3-f1fc-40d1-4046-75ce901bb0a0
+	fromColumn: Patient.'Treatment group'
+	toColumn: 'Treatment group'.'Treatment group'
+
+relationship 0594eb2b-e3c5-a5a6-d046-d4c1535e0737
+	fromColumn: Contraindication.patient_id
+	toColumn: Patient.patient_id
+
+relationship fcf24787-ac7c-ef8a-036a-bf55b452eba0
+	fromColumn: 'SOFA component'.patient_id
+	toColumn: Patient.patient_id

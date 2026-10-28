@@ -1,0 +1,20 @@
+model Model
+	culture: en-AU
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-AU
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+	annotation __PBI_TimeIntelligenceEnabled = 0
+
+	annotation PBI_QueryOrder = ["DatabricksHost", "DatabricksHttpPath", "Patient", "Cohort step", "Contraindication", "SOFA component", "Treatment group", "Summary query"]
+
+ref table Patient
+ref table 'Cohort step'
+ref table Contraindication
+ref table 'SOFA component'
+ref table 'Treatment group'
+ref table Day
+ref table 'Summary query'

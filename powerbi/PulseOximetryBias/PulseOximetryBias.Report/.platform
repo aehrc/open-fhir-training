@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "PulseOximetryBias"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f484aa69-f7c2-31d0-2ec3-3f2305212495"
+  }
+}

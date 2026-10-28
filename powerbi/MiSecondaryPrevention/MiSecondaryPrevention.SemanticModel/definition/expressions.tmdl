@@ -1,0 +1,18 @@
+expression DatabricksHost = "dbc-2accf367-79ff.cloud.databricks.com" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+expression DatabricksHttpPath = "/sql/1.0/warehouses/f84e5a5896ae03a1" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+expression FollowUpDays = 365 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Number
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
