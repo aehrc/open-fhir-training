@@ -45,6 +45,7 @@ open-fhir-training/
 │       ├── st_reading_*.sql      # Pulse oximetry: clinical measurements
 │       ├── coh_*.sql             # Pulse oximetry: final cohort definitions
 │       └── combine_beta_blocker_septic_shock_views.sql
+└── powerbi/                      # Power BI reports over the views
 ```
 
 ## Getting Started
@@ -316,6 +317,14 @@ you do not need to run the import or view creation steps.
       `sql/synthea/combine_prostate_cancer_views.sql` from the workspace browser
       to view and run it in the SQL editor, or paste its contents into a `%sql`
       notebook cell
+
+## Power BI reports
+
+The [`powerbi`](powerbi/README.md) folder contains a Power BI report for each
+study, which reads the views and summary queries from a Databricks SQL
+warehouse. A fifth report demonstrates DirectQuery. The README in that folder
+explains how to open the reports, connect them to your own workspace, and how
+they read views and run queries.
 
 ## Key Concepts
 
